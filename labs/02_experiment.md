@@ -37,9 +37,10 @@ Running the code via Azure ML, we need to excecute two steps. First, we need to 
 ## Refactor the code to capture run metrics in train.py 
 
 1. Get the run context
-
-    `from azureml.core import Run`
-    `run = Run.get_context()`
+    ```
+    from azureml.core import Run
+    run = Run.get_context()
+    ```
 
 2. Log the metric in the run
 
@@ -61,28 +62,31 @@ Running the code via Azure ML, we need to excecute two steps. First, we need to 
 
 5. Execute the refactored script `code/explore/train.py`
 As an output you should get the following:
-
+```
 Attempted to log scalar metric accuracy:
 0.7834441980783444
 Attempted to track file modelRandom forest.pkl at outputs/modelRandom forest.pkl
-Accuracy  0.783`
+Accuracy  0.783
+```
 
 ## ALter the train_submit.py file
 
 1. Load required Azureml libraries
-
-    `from azureml.core import Workspace, Experiment`
-    `from azureml.train.estimator import Estimator`
+    ```
+    from azureml.core import Workspace, Experiment
+    from azureml.train.estimator import Estimator
+    ```
 
 2. Load Azure ML workspace form config file
-
-    `# load Azure ML workspace`
-    `workspace = Workspace.from_config(auth=AzureCliAuthentication())`
+    ```
+    # load Azure ML workspace
+    workspace = Workspace.from_config(auth=AzureCliAuthentication())
+    ```
 
 3. Create an extimator to define the run configuration
-
-    `# Define Run Configuration`
-    `est = Estimator(
+    ```
+    # Define Run Configuration
+    est = Estimator(
     entry_script='train.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     compute_target='local',
@@ -98,22 +102,26 @@ Accuracy  0.783`
         'utils==0.9.0'
     ],
     use_docker=False
-    )`
+    )
+    ```
 
-    4. Define the ML experiment
-
+4. Define the ML experiment
+    ```
     # Define the ML experiment
     experiment = Experiment(workspace, "newsgroups_train")
+    ```
 
-    5. Submit the experiment
-
+5. Submit the experiment
+    ```
     # Submit experiment run, if compute is idle, this may take some time')
     run = experiment.submit(est)
 
     # wait for run completion of the run, while showing the logs
     run.wait_for_completion(show_output=True)
+    ```
 
 
-5. Go to the portal to inspect the run history
+6. Go to the portal to inspect the run history
 
+Note: the correct code is already available in codeazureml. In here, all ready to use code is available for the entire workshop.
 

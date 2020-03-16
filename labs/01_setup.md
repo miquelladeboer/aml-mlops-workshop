@@ -16,6 +16,9 @@ From a command line window, run  `conda create --name workshopaml` and `conda ac
 * Azure ML SDK
   From a command line window, run the following command to install the python client package for Azure ML: `pip install azureml-sdk`
 
+* Install neede packages
+  From a command line window, run `pip install -r requirements.txt`
+
 * Azure CLI
   From a command line window, run the following command to install the Azure CLI, used for authentication and management tasks: `pip install azure-cli`
 
