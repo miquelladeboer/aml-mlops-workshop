@@ -47,7 +47,8 @@ Running the code via Azure ML, we need to excecute two steps. First, we need to 
 
 3. upload the .pkl file to the output folder
     
-    ```# write model artifact
+    ```
+    # write model artifact
 
     model_name = "model" + str(name) + ".pkl"
     filename = "outputs/" + model_name
