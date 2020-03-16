@@ -13,7 +13,7 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Define Run Configuration
 est = Estimator(
-    entry_script='train.py',
+    entry_script='train15.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     compute_target='local',
     conda_packages=[
@@ -31,7 +31,7 @@ est = Estimator(
 )
 
 # Define the ML experiment
-experiment = Experiment(workspace, "newsgroups_train_randomforest")
+experiment = Experiment(workspace, "newsgroups_train_randomforest15")
 
 # Submit experiment run, if compute is idle, this may take some time')
 run = experiment.submit(est)
