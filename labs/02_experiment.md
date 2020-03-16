@@ -3,7 +3,7 @@
 # Understand the non-azure / open source ml model code #
 We first start with understanding the training script. The training script is an open source ML model code from https://scikit-learn.org/stable/auto_examples/text/plot_document_classification_20newsgroups.html.  The dataset used in this example is the 20 newsgroups dataset. It will be automatically downloaded, then cached. The newsgroup datasets contains text documents that are classified into 20 categories.
 
-1. Open the train.py document to inspect the code.
+Open the train.py document to inspect the code.
 The first step in the code is to load the dataset from the 20 newsgroup dataset. In this example we are only going to use a subset of the categories. Please state the catogories we are going to use:
 
 ...
@@ -46,12 +46,13 @@ Running the code via Azure ML, we need to excecute two steps. First, we need to 
     `run.log("accuracy", float(score))`
 
 3. upload the .pkl file to the output folder
+    
+    ```# write model artifact
 
-    `# write model artifact`
-
-    `model_name = "model" + str(name) + ".pkl"`
-    `filename = "outputs/" + model_name`
-    `run.upload_file(name=model_name, path_or_stream=filename)`
+    model_name = "model" + str(name) + ".pkl"
+    filename = "outputs/" + model_name
+    run.upload_file(name=model_name, path_or_stream=filename)
+    ```
 
 4. close the run
 
@@ -65,22 +66,22 @@ Attempted to log scalar metric accuracy:
 Attempted to track file modelRandom forest.pkl at outputs/modelRandom forest.pkl
 Accuracy  0.783`
 
-1. ALter the train_submit.py file
+## ALter the train_submit.py file
 
-    1. Load required Azureml libraries
+1. Load required Azureml libraries
 
-    from azureml.core import Workspace, Experiment
-    from azureml.train.estimator import Estimator
+    `from azureml.core import Workspace, Experiment`
+    `from azureml.train.estimator import Estimator`
 
-    2. Load Azure ML workspace form config file
+2. Load Azure ML workspace form config file
 
-    # load Azure ML workspace
-    workspace = Workspace.from_config(auth=AzureCliAuthentication())
+    `# load Azure ML workspace`
+    `workspace = Workspace.from_config(auth=AzureCliAuthentication())`
 
-    3. Create an extimator to define the run configuration
+3. Create an extimator to define the run configuration
 
-    # Define Run Configuration
-    est = Estimator(
+    `# Define Run Configuration`
+    `est = Estimator(
     entry_script='train.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     compute_target='local',
@@ -96,7 +97,7 @@ Accuracy  0.783`
         'utils==0.9.0'
     ],
     use_docker=False
-    )
+    )`
 
     4. Define the ML experiment
 
