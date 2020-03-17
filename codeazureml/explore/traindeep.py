@@ -5,7 +5,6 @@ import torch.nn as nn
 from torch.autograd import Variable
 import os
 
-from collections import OrderedDict
 import logging
 import numpy as np
 from optparse import OptionParser

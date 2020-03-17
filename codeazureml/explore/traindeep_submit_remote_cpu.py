@@ -5,16 +5,38 @@ from azureml.core import Workspace, Experiment
 from azureml.train.estimator import Estimator
 import os
 from azureml.train.hyperdrive.parameter_expressions import uniform, choice
+
+
 from azureml.core.authentication import AzureCliAuthentication
+from azureml.core.compute import ComputeTarget, AmlCompute
+from azureml.core.compute_target import ComputeTargetException
+
 
 # load Azure ML workspace
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
+
+# Create compute target if not present
+# Choose a name for your CPU cluster
+cpu_cluster_name = "hypercomputecpu"
+
+# Verify that cluster does not exist already
+try:
+    cpu_cluster = ComputeTarget(workspace=workspace, name=cpu_cluster_name)
+    print('Found existing cluster, use it.')
+except ComputeTargetException:
+    compute_config = AmlCompute.provisioning_configuration(vm_size='STANDARD_D3_V2',
+                                                           max_nodes=4)
+    cpu_cluster = ComputeTarget.create(workspace, cpu_cluster_name,
+                                       compute_config)
+
+cpu_cluster.wait_for_completion(show_output=True)
+
 
 # Define Run Configuration
 estimator = Estimator(
     entry_script='traindeep.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
-    compute_target='local',
+    compute_target=workspace.compute_targets[cpu_cluster_name],
     pip_packages=[
         'numpy==1.15.4',
         'pandas==0.23.4',
@@ -67,7 +89,7 @@ best_model_parameters = best_parameters.copy()
 
 ## Define a final training run with model's best parameters
 #model_est = Estimator(
-#    entry_script='hypertrain.py',
+#    entry_script='traindeep.py',
 #    source_directory=os.path.dirname(os.path.realpath(__file__)),
 #    script_params=best_model_parameters,
 #    compute_target='local',
@@ -87,4 +109,5 @@ best_model_parameters = best_parameters.copy()
 #model_run_status = model_run.wait_for_completion(wait_post_processing=True)
 
 #model = model_run.register_model(model_name='model',
-#                                 model_path=os.path.join('outputs', 'model.pkl'))
+#                                 model_path=os.path.join('outputs', 
+#                                 'model.pkl'))
