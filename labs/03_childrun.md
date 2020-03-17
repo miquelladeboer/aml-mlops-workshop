@@ -203,7 +203,7 @@ Accuracy  0.888
     experiment = Experiment(workspace, "newsgroups_train15")
     ```
 
-3. Submit the experimen
+3. Submit the experiment
 
 4. Go to the portal to inspect the run history
 
