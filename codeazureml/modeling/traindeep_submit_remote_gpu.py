@@ -17,26 +17,26 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Create compute target if not present
 # Choose a name for your CPU cluster
-cpu_cluster_name = "hypercomputecpu"
+gpu_cluster_name = "hypercomputegpu"
 
 # Verify that cluster does not exist already
 try:
-    cpu_cluster = ComputeTarget(workspace=workspace, name=cpu_cluster_name)
+    gpu_cluster = ComputeTarget(workspace=workspace, name=gpu_cluster_name)
     print('Found existing cluster, use it.')
 except ComputeTargetException:
-    compute_config = AmlCompute.provisioning_configuration(vm_size='STANDARD_D3_V2',
+    compute_config = AmlCompute.provisioning_configuration(vm_size='Standard_NC6',
                                                            max_nodes=4)
-    cpu_cluster = ComputeTarget.create(workspace, cpu_cluster_name,
+    gpu_cluster = ComputeTarget.create(workspace, gpu_cluster_name,
                                        compute_config)
 
-cpu_cluster.wait_for_completion(show_output=True)
+gpu_cluster.wait_for_completion(show_output=True)
 
 
 # Define Run Configuration
 estimator = Estimator(
     entry_script='traindeep.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
-    compute_target=workspace.compute_targets[cpu_cluster_name],
+    compute_target=workspace.compute_targets[gpu_cluster_name],
     pip_packages=[
         'numpy==1.15.4',
         'pandas==0.23.4',
@@ -68,7 +68,7 @@ hyperdrive_run_config = HyperDriveConfig(
 )
 
 # Define the ML experiment
-experiment = Experiment(workspace, "newsgroups_train_hypertune")
+experiment = Experiment(workspace, "newsgroups_train_hypertune_gpu")
 
 # Submit the experiment
 hyperdrive_run = experiment.submit(hyperdrive_run_config)
