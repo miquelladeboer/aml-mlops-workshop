@@ -18,6 +18,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import NearestCentroid
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
+from sklearn.externals import joblib
 
 from azureml.core import Run
 
@@ -90,7 +91,8 @@ def benchmark(clf, name=""):
     # write model artifact
     model_name = "model" + str(name) + ".pkl"
     filename = "outputs/" + model_name
-
+    joblib.dump(value=clf, filename=filename)
+    
     # upload model artifact with child run
     child_run.upload_file(
         name=model_name,
@@ -101,7 +103,7 @@ def benchmark(clf, name=""):
     print("Accuracy  %0.3f" % score)
 
     child_run.complete()
-    
+
     return clf_descr, score
 
 

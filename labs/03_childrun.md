@@ -141,9 +141,12 @@ For each algorithm in the loop:
 4. upload the .pkl file to the output folder
     
     ```
+    from sklearn.externals import joblib
+
     # write model artifact
     model_name = "model" + str(name) + ".pkl"
-    filename = "outputs/" + model_name
+    filename = "outputs/" + 
+    joblib.dump(value=clf, filename=filename)
 
     # upload model artifact with child run
     child_run.upload_file(

@@ -9,6 +9,7 @@ from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
+from sklearn.externals import joblib
 
 from azureml.core import Run
 
@@ -80,6 +81,7 @@ def benchmark(clf, name=""):
     # write model artifact to AML
     model_name = "model" + str(name) + ".pkl"
     filename = "outputs/" + model_name
+    joblib.dump(value=clf, filename=filename)
     run.upload_file(name=model_name, path_or_stream=filename)
 
     clf_descr = str(clf).split('(')[0]

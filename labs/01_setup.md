@@ -11,16 +11,26 @@ In this first lab, we'll set up our working environment.
   Download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 
 * Create a new virtual environment
-From a command line window, run  `conda create --name workshopaml` and `conda activate workshopaml` 
+From a command line window, run  `conda create -n myenvworkshop python=3.6 anaconda` 
 
 * Azure ML SDK
   From a command line window, run the following command to install the python client package for Azure ML: `pip install azureml-sdk`
 
-* Install neede packages
+* Install frameworks for deeplearning: Cntk + Keras
+Step 1: download cntk:
+`pip install cntk-gpu`
+
+Step 2: download Keras
+
+`conda install -c anaconda keras`
+`set KERAS_BACKEND=cntk`
+
+* Install needed packages
   From a command line window, run `pip install -r requirements.txt`
 
 * Azure CLI
   From a command line window, run the following command to install the Azure CLI, used for authentication and management tasks: `pip install azure-cli`
+
 
 * A git client to clone the lab content
   For example Git SCM - https://git-scm.com/.

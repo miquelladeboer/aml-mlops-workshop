@@ -49,10 +49,13 @@ Running the code via Azure ML, we need to excecute two steps. First, we need to 
 3. upload the .pkl file to the output folder
     
     ```
+    from sklearn.externals import joblib
+
     # write model artifact
 
     model_name = "model" + str(name) + ".pkl"
     filename = "outputs/" + model_name
+    joblib.dump(value=clf, filename=filename)
     run.upload_file(name=model_name, path_or_stream=filename)
     ```
 
