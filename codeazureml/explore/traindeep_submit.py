@@ -3,7 +3,6 @@ from azureml.train.hyperdrive import (
     HyperDriveConfig, PrimaryMetricGoal)
 from azureml.core import Workspace, Experiment
 from azureml.train.estimator import Estimator
-import pandas as pd
 import os
 from random import choice
 from azureml.core.authentication import AzureCliAuthentication
@@ -11,11 +10,13 @@ from azureml.core.authentication import AzureCliAuthentication
 # load Azure ML workspace
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
+cluster_name = 'hypercomputecpu'
+
 # Define Run Configuration
 estimator = Estimator(
     entry_script='traindeep.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
-    compute_target='local',
+    compute_target=workspace.compute_targets[cluster_name],
     pip_packages=[
         'numpy==1.15.4',
         'pandas==0.23.4',
@@ -23,7 +24,7 @@ estimator = Estimator(
         'scipy==1.0.0',
         'matplotlib==3.0.2',
         'utils==0.9.0',
-        'torch=1.4.0'
+        'torch==1.4.0'
     ]
 )
 
@@ -50,6 +51,7 @@ hyperdrive_run_config = HyperDriveConfig(
 # Define the ML experiment
 experiment = Experiment(workspace, "newsgroups_train_hypertune")
 
+# Submit the experiment
 hyperdrive_run = experiment.submit(hyperdrive_run_config)
 hyperdrive_run.wait_for_completion()
 
@@ -61,13 +63,10 @@ best_run_metrics = best_run.get_metrics()
 hyperdrive_run.log("Accuracy", best_run_metrics['accuracy'])
 parameter_values = best_run.get_details()['runDefinition']['arguments']
 
-# Print best set of parameters found
+# Best set of parameters found
 best_parameters = dict(zip(parameter_values[::2], parameter_values[1::2]))
-pd.Series(best_parameters, name='Value').to_frame()
-
 best_model_parameters = best_parameters.copy()
-pd.Series(best_model_parameters, name='Value').to_frame()
-print(best_model_parameters)
+
 
 # Define a final training run with model's best parameters
 model_est = Estimator(

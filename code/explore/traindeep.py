@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO,
 
 op = OptionParser()
 
-argv = [] 
+argv = []
 sys.argv[1:]
 (opts, args) = op.parse_args(argv)
 

@@ -10,12 +10,9 @@ from azureml.core.authentication import AzureCliAuthentication
 
 # load Azure ML workspace
 
-
 # Define Run Configuration
 
-
 # Define the ML experiment
-
 
 # Submit experiment run, if compute is idle, this may take some time')
 

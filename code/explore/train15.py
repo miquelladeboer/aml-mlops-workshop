@@ -5,7 +5,6 @@ import sys
 
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.feature_selection import SelectFromModel
 from sklearn.linear_model import RidgeClassifier
 from sklearn.pipeline import Pipeline
@@ -25,7 +24,7 @@ logging.basicConfig(level=logging.INFO,
 
 op = OptionParser()
 
-argv = [] 
+argv = []
 sys.argv[1:]
 (opts, args) = op.parse_args(argv)
 
@@ -55,7 +54,7 @@ y_train, y_test = data_train.target, data_test.target
 # Extracting features from the training data using a sparse vectorizer
 
 vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
-                                 stop_words='english')
+                             stop_words='english')
 X_train = vectorizer.fit_transform(data_train.data)
 
 # Extracting features from the test data using the same vectorizer"
@@ -66,6 +65,7 @@ X_test = vectorizer.transform(data_test.data)
 feature_names = vectorizer.get_feature_names()
 feature_names = np.asarray(feature_names)
 
+
 def benchmark(clf, name=""):
     """benchmark classifier performance"""
 
@@ -74,8 +74,8 @@ def benchmark(clf, name=""):
     clf.fit(X_train, y_train)
 
     # evaluate on test set
-    pred = clf.predict(X_test)   
-    score =  metrics.accuracy_score(y_test, pred)
+    pred = clf.predict(X_test)
+    score = metrics.accuracy_score(y_test, pred)
 
     clf_descr = str(clf).split('(')[0]
     print("Accuracy  %0.3f" % score)

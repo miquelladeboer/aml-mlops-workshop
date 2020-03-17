@@ -16,17 +16,8 @@ From a command line window, run  `conda create -n myenvworkshop python=3.6 anaco
 * Azure ML SDK
   From a command line window, run the following command to install the python client package for Azure ML: `pip install azureml-sdk`
 
-* Install frameworks for deeplearning: Cntk + Keras
-Step 1: download cntk:
-`pip install cntk-gpu`
-
-Step 2: download Keras
-
-`conda install -c anaconda keras`
-`set KERAS_BACKEND=cntk`
-
-* Install needed packages
-  From a command line window, run `pip install -r requirements.txt`
+* Install frameworks for deeplearning: Pytorch
+  From a command line window, run `conda install -c pytorch pytorch`
 
 * Azure CLI
   From a command line window, run the following command to install the Azure CLI, used for authentication and management tasks: `pip install azure-cli`
@@ -40,6 +31,11 @@ Step 2: download Keras
 Clone the following git repository: git clone  https://github.com/Azure/aml-mlops-workshop
 
 ## Open the cloned git repository in VS Code or your favorite IDE
+
+## Install the required packahes
+
+* Install needed packages
+  From a command line window, run `pip install -r requirements.txt`
 
 ## Az Login
 From a terminal, login to your subscription on Azure using the azure cli.

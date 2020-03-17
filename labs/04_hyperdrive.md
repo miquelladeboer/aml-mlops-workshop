@@ -84,14 +84,15 @@ batch_size = hyperparameters["batch_size"]
 hidden_size = hyperparameters["hidden_size"]
 ```
 
-7. Execute the refactored script `code/explore/train.py`
+7. Execute the refactored script `code/explore/deeptrain.py`
 As an output you should get the following:
-```
-Attempted to log scalar metric accuracy:
-0.7834441980783444
-Attempted to track file modelRandom forest.pkl at outputs/modelRandom forest.pkl
-Accuracy  0.783
-```
+    ```
+    Loading 20 newsgroups dataset for categories:
+    data loaded
+    Attempted to log scalar metric accuracy:
+    0.7915742793791575
+    Attempted to track file model.pkl at outputs\model.pkl
+    ```
 
 ## ALter the train_submit.py file
 
@@ -128,7 +129,7 @@ Accuracy  0.783
             'scipy==1.0.0',
             'matplotlib==3.0.2',
             'utils==0.9.0',
-            'torch=1.4.0'
+            'torch==1.4.0'
         ]
     )
 
@@ -163,19 +164,31 @@ Accuracy  0.783
 4. Define the ML experiment
     ```
     # Define the ML experiment
-    experiment = Experiment(workspace, "newsgroups_train")
+    experiment = Experiment(workspace, "newsgroups_train_hypertune")
     ```
 
 5. Submit the experiment
     ```
-    # Submit experiment run, if compute is idle, this may take some time')
-    run = experiment.submit(est)
-
-    # wait for run completion of the run, while showing the logs
-    run.wait_for_completion(show_output=True)
+   # Submit the experiment
+    hyperdrive_run = experiment.submit(hyperdrive_run_config)
+    hyperdrive_run.wait_for_completion()
     ```
 
+6. Select the best model and the corresponding parameters
+    ```
+    # Select the best run from all submitted
+    best_run = hyperdrive_run.get_best_run_by_primary_metric()
+    best_run_metrics = best_run.get_metrics()
 
-6. Go to the portal to inspect the run history
+    # Log the best run's performance to the parent run
+    hyperdrive_run.log("Accuracy", best_run_metrics['accuracy'])
+    parameter_values = best_run.get_details()['runDefinition']['arguments']
+
+    # Best set of parameters found
+    best_parameters = dict(zip(parameter_values[::2], parameter_values[1::2]))
+    best_model_parameters = best_parameters.copy()
+    ```
+
+7. Go to the portal to inspect the run history
 
 Note: the correct code is already available in codeazureml. In here, all ready to use code is available for the entire workshop.
