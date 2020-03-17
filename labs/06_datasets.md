@@ -19,6 +19,8 @@ Create an Azure Machine Learning dataset to interact with data in your datastore
 
 Datasets can be created from local files, public urls, Azure Open Datasets, or specific file(s) in your datastores. To create a dataset from an in memory pandas dataframe, write the data to a local file, like a csv, and create your dataset from that file. Datasets aren't copies of your data, but are references that point to the data in your storage service, so no extra storage cost is incurred.
 
+![alt text](https://docs.microsoft.com/en-us/azure/machine-learning/media/concept-data/data-concept-diagram.svg)
+
 ## Ingest data into Datastoren ##
 Before we can make use of Datastores and Datasets, we need to have our data into the Datastores. In this tuturial, we are going to make use of the Public URL, as our data is available there through the 20newsgroups from sklearn.
 
