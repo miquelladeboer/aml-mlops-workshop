@@ -19,4 +19,4 @@ Create an Azure Machine Learning dataset to interact with data in your datastore
 
 Datasets can be created from local files, public urls, Azure Open Datasets, or specific file(s) in your datastores. To create a dataset from an in memory pandas dataframe, write the data to a local file, like a csv, and create your dataset from that file. Datasets aren't copies of your data, but are references that point to the data in your storage service, so no extra storage cost is incurred.
 
-![Getting Started](data-concept-diagram (1).svg)
+![](Images/data-concept-diagram (1).svg)
