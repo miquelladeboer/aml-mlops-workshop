@@ -9,8 +9,7 @@ import numpy as np
 from optparse import OptionParser
 import sys
 from collections import Counter
-import horovod
-from sklearn.datasets import fetch_20newsgroups
+
 from sklearn.externals import joblib
 
 from azureml.core import Run
@@ -38,22 +37,36 @@ argv = []
 sys.argv[1:]
 (opts, args) = op.parse_args(argv)
 
-categories = [
-    'alt.atheism',
-    'talk.religion.misc',
-    'comp.graphics',
-    'sci.space',
-]
+# Retrieve the run and its context (datasets etc.)
+run = Run.get_context()
+
+# Load the input datasets from Azure ML
+dataset_train = run.input_datasets['subset_train'].to_pandas_dataframe()
+dataset_test = run.input_datasets['subset_test'].to_pandas_dataframe()
 
 
-print("Loading 20 newsgroups dataset for categories:")
+# Pre-process df for sklearn
+class data_train(object):
+    def __init__(self, data, target):
+        self.data = []
+        self.target = []
 
-data_train = fetch_20newsgroups(subset='train', categories=categories,
-                                shuffle=True, random_state=42)
 
-data_test = fetch_20newsgroups(subset='test', categories=categories,
-                               shuffle=True, random_state=42)
-print('data loaded')
+class data_test(object):
+    def __init__(self, data, target):
+        self.data = []
+        self.target = []
+
+
+# convert to numpy df
+data_train.data = dataset_train.text.values
+data_test.data = dataset_test.text.values
+
+# convert label to int
+data_train.target = [int(value or 0) for value in dataset_train.target.values]
+data_test.target = [int(value or 0) for value in dataset_test.target.values]
+
+########################
 
 vocab = Counter()
 
@@ -108,8 +121,8 @@ batch_size = hyperparameters["batch_size"]
 hidden_size = hyperparameters["hidden_size"]
 
 input_size = total_words  # Words in vocab
-num_classes = len(np.unique(data_train.target))
-# Categories: graphics, scispace and baseball
+num_classes = num_classes = len(np.unique(data_train.target))
+# Categories: graphics, sci.space and baseball
 
 
 class OurNet(nn.Module):

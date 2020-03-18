@@ -58,7 +58,7 @@ The submit script is a bit diffent from the hyper_submit script. In this script 
     generator = experiment.get_runs(type=None, tags=None, properties=None, include_children=False)
     run = next(generator)
     # Select the last run
-    parent = HyperDriveRun(experiment, run_id=run.id, outputs=None)
+    parent = HyperDriveRun(experiment, run_id=run.id)
 
     # Select the best run from all submitted
     best_run = parent.get_best_run_by_primary_metric()
@@ -73,7 +73,7 @@ The submit script is a bit diffent from the hyper_submit script. In this script 
 7. Define a final training run with model's best parameters
     ```
     model_est = PyTorch(
-        entry_script='hypertrain.py',
+        entry_script='traindeep.py',
         source_directory=os.path.dirname(os.path.realpath(__file__)),
         script_params=best_model_parameters,
         compute_target=workspace.compute_targets[gpu_cluster_name],
