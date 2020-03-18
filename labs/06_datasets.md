@@ -21,6 +21,8 @@ Datasets can be created from local files, public urls, Azure Open Datasets, or s
 
 ![alt text](https://docs.microsoft.com/en-us/azure/machine-learning/media/concept-data/data-concept-diagram.svg)
 
+For more information check: https://docs.microsoft.com/en-us/azure/machine-learning/concept-data?view=azure-ml-py
+
 ## Ingest data into Datastoren ##
 Before we can make use of Datastores and Datasets, we need to have our data into the Datastores. In this tuturial, we are going to make use of the Public URL, as our data is available there through the 20newsgroups from sklearn.
 
@@ -33,17 +35,22 @@ Before we can make use of Datastores and Datasets, we need to have our data into
 
 Now that we have preprocessed our data and have it in readable csv files, we want to upload the files to the Datastore by refactoring the script `ingest_data.py`.
 
-2. Define a Datastore name
+2. Import the requited libraries
+    ```
+    from azureml.core import Workspace, Datastore
+    from azureml.core.authentication import AzureCliAuthentication
+    ```
+3. Define a Datastore name
     `datastore_name = 'workspaceblobstore'`
 workspaceblobstore is a Datastore that is by default already avaiable in the Azure ML workspace.
 
-3. Get existing ML workspace
+4. Get existing ML workspace
     `workspace = Workspace.from_config(auth=AzureCliAuthentication())`
 
-4. Retrieve an existing datastore in the workspace by name
+5. Retrieve an existing datastore in the workspace by name
     `datastore = Datastore.get(workspace, datastore_name)`
 
-5. Upload the csv files to the data store
+6. Upload the csv files to the data store
     ```
     # upload files
     datastore.upload(
@@ -57,9 +64,9 @@ workspaceblobstore is a Datastore that is by default already avaiable in the Azu
     )
     ```
 
-6. Run the script 
+7. Run the script 
 
-7. Go to the Azure Portal to inspect the Datastore
+8. Go to the Azure Portal to inspect the Datastore
     - Go to the Azure Portal
     - Navigate to the resource group azuremlworkshoprgp
     - Navigate to your storage account
@@ -67,4 +74,126 @@ workspaceblobstore is a Datastore that is by default already avaiable in the Azu
     - Navigate to azureml-blobstore- ,<ID>
     - In here we see the two created folders train and test that contain the csv files
 
-Note: the correct code is already available in `codeazureml\Data_Acquisition_and_Understanding\ingest_data.p`. In here, all ready to use code is available for the entire workshop.
+Note: the correct code is already available in `codeazureml\Data_Acquisition_and_Understanding\ingest_data.py`. In here, all ready to use code is available for the entire workshop.
+
+## Define the Dataset ##
+Now that we have out data in the datastore, we want to create datasets. For each version of the train and test data that we have, we want to register it under a new version. This is something that Azure ML does for us. This way we van easily manage data versions and when new data comes in, we know exactly which data is used for training our model. In this way, we can also create different datasets for different puposes of training. In our case, we are using a different data set (a subset) for hyperparamet tuning and only the entire data set for the final model.
+
+1. Open the script `code\Data_Acquisition_and_Understanding\define_dataset.py`
+    In this file, we take 3 steps:
+    - Get the Datastore path
+    - Create a TabularDataset from paths in datastore
+    - Register the defined dataset for later use
+
+Refactor the code in `code\Data_Acquisition_and_Understanding\define_dataset.py` :
+
+2. Defines a tabular dataset on top of an Azure ML datastore
+    ```
+    from azureml.core import Workspace, Datastore, Dataset
+    from azureml.data import DataType
+    from azureml.core.authentication import AzureCliAuthentication
+    ```
+3. Retrieve a datastore from a ML workspace
+    ```
+    ws = Workspace.from_config(auth=AzureCliAuthentication())
+    datastore_name = 'workspaceblobstore'
+    datastore = Datastore.get(ws, datastore_name)
+    ```
+
+4. Define the datsets
+    By adding the following code, we add the steps mentioned in step 1
+    ```
+    # Register dataset and sebset version for each data split
+    for data_split in ['train', 'test']:
+        # Create a TabularDataset from paths in datastore in split folder
+        # Note that wildcards can be used
+        datastore_paths = [
+            (datastore, '{}/*.csv'.format(data_split))
+        ]
+
+        # Create a TabularDataset subset from paths in datastore in split folder
+        # Note that wildcards can be used
+        datastore_paths_subset = [
+            (datastore, '{}/*.csv'.format('subset_' + data_split))
+        ]
+
+        # Create a TabularDataset from paths in datastore
+        dataset = Dataset.Tabular.from_delimited_files(
+            path=datastore_paths,
+            set_column_types={
+                'text': DataType.to_string(),
+                'target': DataType.to_string()
+            },
+            header=True
+        )
+
+        # Create a TabularDataset from paths in datastore
+        dataset_subset = Dataset.Tabular.from_delimited_files(
+            path=datastore_paths_subset,
+            set_column_types={
+                'text': DataType.to_string(),
+                'target': DataType.to_string()
+            },
+            header=True
+        )
+
+        # Register the defined dataset for later use
+            dataset.register(
+            workspace=ws,
+            name='newsgroups_{}'.format('subset_' + data_split),
+            description='newsgroups data',
+            create_new_version=True
+        )
+
+        # Register the defined dataset for later use
+        dataset_subset.register(
+            workspace=ws,
+            name='newsgroups_{}'.format('subset_' + data_split),
+            description='newsgroups data',
+            create_new_version=True
+        )
+        ```
+5. Run the script   
+
+6. Go to the Azure ML Workspace and review youe Datasets
+
+Note: the correct code is already available in `codeazureml\Data_Acquisition_and_Understanding\define_dataset.py`. In here, all ready to use code is available for the entire workshop.
+
+## Refactor train script to work with datasets ##
+We need to refactor the `traindeep.py` file to work with the datasets from Azure ML and we need to alter the `traindeep_submit.py` file to include the Datasets as arguments in the estimator.
+
+## ALter the deeptrain.py file
+
+1. Load the input datasets from Azure ML
+    Load the Tabular datasets from Azure ML and covert them to a Pandas dataframe:
+    ```
+    dataset_train = run.input_datasets['subset_train'].to_pandas_dataframe()
+    dataset_test = run.input_datasets['subset_test'].to_pandas_dataframe()
+    ```
+
+2.  Pre-process
+    ```
+    class data_train(object):
+        def __init__(self, data, target):
+            self.data = []
+            self.target = []
+
+
+    class data_test(object):
+        def __init__(self, data, target):
+            self.data = []
+            self.target = []
+
+    # convert to numpy df
+    data_train.data = dataset_train.text.values
+    data_test.data = dataset_test.text.values
+
+    # convert label to int
+    data_train.target = [int(value or 0) for value in dataset_train.target.values]
+    data_test.target = [int(value or 0) for value in dataset_test.target.values]
+
+## ALter the deeptrain_submit.py file
+
+
+
+

@@ -4,8 +4,6 @@ import pandas as pd
 import time
 import os
 from sklearn.datasets import fetch_20newsgroups
-from azureml.core import Workspace, Datastore
-from azureml.core.authentication import AzureCliAuthentication
 
 # Define newsgroup categories to be downloaded to generate sample dataset
 categories = [
@@ -30,16 +28,15 @@ for data_split in ['train', 'test']:
         'target': newsgroupdata.target
     })
 
-    print('data loaded')
-
     # pre-process:
     # remove line breaks
     # replace target index by newsgroup name
-    target_names = newsgroupdata.target_names
-    df.target = df.target.apply(lambda x: target_names[x])
+    # target_names = newsgroupdata.target_names
+    # df.target = df.target.apply(lambda x: target_names[x])
     df.text = df.text.replace('\n', ' ', regex=True)
 
-    print(df.head(5))
+    # create random subsample to hyper tuning (50% of data)
+    df_subset = df.sample(frac=0.5)
 
     # retrieve path of current dir
     curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -52,6 +49,22 @@ for data_split in ['train', 'test']:
     df.to_csv(
         path_or_buf=os.path.join(
             curr_dir, 'tmp', data_split,
+            '{}.csv'.format(int(time.time()))  # unique file name
+        ),
+        index=False,
+        encoding="utf-8",
+        line_terminator='\n'
+    )
+
+    # create temp folder if not exists
+    if not os.path.exists(os.path.join(curr_dir, 'tmp',
+                          'subset_' + data_split)):
+        os.makedirs(os.path.join(curr_dir, 'tmp', 'subset_' + data_split))
+
+    # write to csv
+    df_subset.to_csv(
+        path_or_buf=os.path.join(
+            curr_dir, 'tmp', 'subset_' + data_split,
             '{}.csv'.format(int(time.time()))  # unique file name
         ),
         index=False,
