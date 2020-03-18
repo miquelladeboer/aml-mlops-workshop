@@ -192,7 +192,42 @@ We need to refactor the `traindeep.py` file to work with the datasets from Azure
     data_train.target = [int(value or 0) for value in dataset_train.target.values]
     data_test.target = [int(value or 0) for value in dataset_test.target.values]
 
-## ALter the deeptrain_submit.py file
+## ALter the deeptrain_hyper_submit.py file
+We are not going to refactor the `deeptrain_hyper_submit.py` file to give arguments to out estimator when we submit the run.
+1. Retrieve datasets used for training
+    ```
+    dataset_train = Dataset.get_by_name(workspace, name='newsgroups_subset_train')
+    dataset_test = Dataset.get_by_name(workspace, name='newsgroups_subset_test')
+    ```
+2. Set the Datasets as arguments
+    In:
+    ```
+    # Define Run Configuration
+    estimator = PyTorch(
+        entry_script='traindeep.py',
+        source_directory=os.path.dirname(os.path.realpath(__file__)),
+        compute_target=workspace.compute_targets[gpu_cluster_name],
+        distributed_training=MpiConfiguration(),
+        framework_version='1.4',
+        use_gpu=True,
+        pip_packages=[
+            'numpy==1.15.4',
+            'pandas==0.23.4',
+            'scikit-learn==0.20.1',
+            'scipy==1.0.0',
+            'matplotlib==3.0.2',
+            'utils==0.9.0'
+        ]
+    )
+    ```
+    Add arguments:
+    ```
+    inputs=[
+        dataset_train.as_named_input('subset_train'),
+        dataset_train.as_named_input('subset_test')
+    ]
+    ```
+
 
 
 

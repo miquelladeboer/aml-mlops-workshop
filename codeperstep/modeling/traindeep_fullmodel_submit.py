@@ -4,6 +4,8 @@ from azureml.core.runconfig import MpiConfiguration
 import os
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.train.dnn import PyTorch
+from azureml.core.compute import ComputeTarget, AmlCompute
+from azureml.core.compute_target import ComputeTargetException
 
 
 # load Azure ML workspace
@@ -11,27 +13,31 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Create compute target if not present
 # Choose a name for your CPU cluster
-gpu_cluster_name = "hypercomputegpu"
+gpu_cluster_name = "fullcomputegpu"
 
 # Verify that cluster does not exist already
 try:
     gpu_cluster = ComputeTarget(workspace=workspace, name=gpu_cluster_name)
     print('Found existing cluster, use it.')
 except ComputeTargetException:
-    compute_config = AmlCompute.provisioning_configuration(vm_size='Standard_NC6',
-                                                           max_nodes=4)
+    compute_config = AmlCompute.provisioning_configuration(vm_size='Standard_NC12',
+                                                           max_nodes=8)
     gpu_cluster = ComputeTarget.create(workspace, gpu_cluster_name,
                                        compute_config)
 
 gpu_cluster.wait_for_completion(show_output=True)
 
 
-#### IN LAB NEED TO BE newsgroups_train_hypertune
 # Define the ML experiment
 experiment = Experiment(workspace, 'newsgroups_train_hypertune_gpu')
 
-generator = experiment.get_runs(type=None, tags=None, properties=None, include_children=False)
+# Get all the runs in the experiment
+generator = experiment.get_runs(type=None,
+                                tags=None,
+                                properties=None,
+                                include_children=False)
 run = next(generator)
+# Select the last run
 parent = HyperDriveRun(experiment, run_id=run.id, outputs=None)
 
 # Select the best run from all submitted
@@ -70,4 +76,3 @@ experiment = Experiment(workspace, "newsgroups_train_fullmodel")
 model_run = experiment.submit(model_est)
 
 model_run_status = model_run.wait_for_completion(wait_post_processing=True)
-

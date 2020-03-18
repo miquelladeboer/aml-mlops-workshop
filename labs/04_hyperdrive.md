@@ -1,6 +1,6 @@
 ## Lab 4: Hyperparamter tuning ##
 In this lab, we are going to see how we can levarge Azure ML to do hyeperparameter tuning. 
-After we have performed hypertuning, we will use the best parameters to train the full model.
+After we have performed hypertuning, remote compute and datasets, we will use the best parameters to train the full model in lab 7.
 
 Efficiently tune hyperparameters for your model using Azure Machine Learning. Hyperparameter tuning includes the following steps:
 
@@ -157,11 +157,13 @@ As an output you should get the following:
         BayesianParameterSampling,
         HyperDriveConfig, PrimaryMetricGoal)
     from azureml.core import Workspace, Experiment
+    from azureml.core.runconfig import MpiConfiguration
     from azureml.train.estimator import Estimator
     import os
     from azureml.train.hyperdrive.parameter_expressions import uniform, choice
     from azureml.core.authentication import AzureCliAuthentication
     from azureml.train.dnn import PyTorch
+
     ```
 
 2. Load Azure ML workspace form config file
@@ -178,6 +180,9 @@ As an output you should get the following:
         entry_script='traindeep.py',
         source_directory=os.path.dirname(os.path.realpath(__file__)),
         compute_target='local',
+        distributed_training=MpiConfiguration(),
+        framework_version='1.4',
+        use_gpu=False,
         pip_packages=[
             'numpy==1.15.4',
             'pandas==0.23.4',
@@ -229,11 +234,7 @@ As an output you should get the following:
 
 6. Run the script `code\explore\deeptrain_submit.py`
 You will get an error message.
-This error message occurs, because we tried to run our script locally. This is not possible for HyperDrive. If we want no run this, we need to use Azure ML compute. In the next tuturial we are goin to create remote compute and how to submit a run on remote compute, but firt we need to create a script for the full model.
+This error message occurs, because we tried to run our script locally. This is not possible for HyperDrive. If we want no run this, we need to use Azure ML compute. In the next tuturial we are goin to create remote compute and how to submit a run on remote compute.
 
 Note: the correct code is already available in codeazureml. In here, all ready to use code is available for the entire workshop.
 
-#  Run the full model via Azure ML #
-We are now going to use the parameters from the best model of the Hyperdrive to submit in the full model. Be awere that we are not able yet, to run the HyperDrive and retrieve the right parameters, but we are going to set up the script already, so we can use it once we have the right compute. We are going to use the same train script `traindeep.py` and only going to create a new submit file, were we pass the best parameter through the script, instead of the hypertune search space.
-
-1. Open the file `traindeep_fullmodel_submit.py`
