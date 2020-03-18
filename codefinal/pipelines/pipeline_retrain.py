@@ -1,36 +1,23 @@
-from azureml.core import Workspace, Experiment
-from azureml.train.estimator import Estimator
-import os
-from azureml.train.hyperdrive.parameter_expressions import uniform, choice
-
-from azureml.pipeline.core import PipelineData
-
+# Required Libraries
+from azureml.core import Workspace, Experiment, Datastore
+from azureml.core.runconfig import MpiConfiguration
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.dataset import Dataset
 
-from azureml.data.data_reference import DataReference
-
-from azureml.pipeline.steps import PythonScriptStep, HyperDriveStep
-from azureml.pipeline.core import Pipeline
-
 from azureml.train.dnn import PyTorch
-
+from azureml.train.hyperdrive.parameter_expressions import uniform, choice
 from azureml.train.hyperdrive import (
     BayesianParameterSampling,
     HyperDriveConfig, PrimaryMetricGoal)
-from azureml.core import Workspace, Experiment
-from azureml.core.runconfig import MpiConfiguration
-from azureml.train.estimator import Estimator
+
+from azureml.pipeline.steps import HyperDriveStep
+from azureml.pipeline.core import Pipeline, PipelineData
 import os
-from azureml.train.hyperdrive.parameter_expressions import uniform, choice
 
-from  azureml.data.dataset_consumption_config import DatasetConsumptionConfig
-
-from azureml.core import Workspace, Datastore, Dataset
-from azureml.data import DataType
 
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
+# Retrieve datastore/datasets
 # retrieve datastore
 datastore_name = 'workspaceblobstore'
 datastore = Datastore.get(workspace, datastore_name)
@@ -41,12 +28,14 @@ subset_dataset_train = Dataset.get_by_name(workspace,
 subset_dataset_test = Dataset.get_by_name(workspace,
                                           name='newsgroups_subset_test')
 
-# retrieve datasets used for training
-dataset_train = Dataset.get_by_name(workspace, name='newsgroups_train')
-dataset_test = Dataset.get_by_name(workspace, name='newsgroups_test')
+# denife output dataset for run metrics JSON file
+metrics_output_name = 'metrics_output'
+metrics_data = PipelineData(name='metrics_data',
+                            datastore=datastore,
+                            pipeline_output_name=metrics_output_name)
 
+# Define the compute target
 compute_target_hyper = workspace.compute_targets["hypercomputegpu"]
-compute_target_fullmodel = workspace.compute_targets["fullcomputegpu"]
 
 # Define Run Configuration
 estimator = PyTorch(
@@ -69,8 +58,8 @@ estimator = PyTorch(
         'utils==0.9.0',
     ],
     inputs=[
-        dataset_train.as_named_input('subset_train'),
-        dataset_train.as_named_input('subset_test')
+        subset_dataset_train.as_named_input('subset_train'),
+        subset_dataset_train.as_named_input('subset_test')
     ]
 )
 
@@ -82,14 +71,7 @@ param_sampling = BayesianParameterSampling({
     "hidden_size": choice(50, 100)
 })
 
-experiment = Experiment(workspace, 're-train')
-
-
-metrics_output_name = 'metrics_output'
-metrics_data = PipelineData(name='metrics_data',
-                            datastore=datastore,
-                            pipeline_output_name=metrics_output_name)
-
+# Define the pipeline step
 hypertrain = HyperDriveStep(
             name='hypertrain',
             hyperdrive_config=HyperDriveConfig(
@@ -103,8 +85,8 @@ hypertrain = HyperDriveStep(
             ),
             estimator_entry_script_arguments=[],
             inputs=[
-                    dataset_train.as_named_input('subset_train'),
-                    dataset_test.as_named_input('subset_test')
+                    subset_dataset_train.as_named_input('subset_train'),
+                    subset_dataset_test.as_named_input('subset_test')
                     ],
             outputs=[],
             metrics_output=metrics_data,
@@ -112,7 +94,12 @@ hypertrain = HyperDriveStep(
             version=None
 )
 
+
 pipeline = Pipeline(workspace=workspace, steps=hypertrain)
 
+# Define the experiment
+experiment = Experiment(workspace, 're-train')
+
+# Run the experiment
 pipeline_run = experiment.submit(pipeline)
 pipeline_run.wait_for_completion()
