@@ -9,6 +9,8 @@ import numpy as np
 from optparse import OptionParser
 import sys
 from collections import Counter
+import pandas as pd
+import json
 
 from sklearn.externals import joblib
 
@@ -40,13 +42,16 @@ sys.argv[1:]
 # Retrieve the run and its context (datasets etc.)
 run = Run.get_context()
 
-print(os.environ)
+if os.environ.get("AZUREML_DATAREFERENCE_metrics_data") is not None:
+    try:
+        with open(os.environ.get("AZUREML_DATAREFERENCE_metrics_data")) as f:
+            metrics_output_result = f.read()
 
-print(os.environ.get("AZUREML_DATAREFERENCE_METRICS_DATA", "not found var"))
-print(os.environ.get("$AZUREML_DATAREFERENCE_METRICS_DATA", "not found $var"))
-
-# with open(os.environ.get("AZUREML_DATAREFERENCE_METRICS_DATA")) as f:
-#     metrics_output_result = f.read()
+        deserialized_metrics_output = json.loads(metrics_output_result)
+        df = pd.DataFrame(deserialized_metrics_output)
+        print(df)
+    except IOError:
+        print("File not accessible")
 
 # Load the input datasets from Azure ML
 dataset_train = run.input_datasets['subset_train'].to_pandas_dataframe()

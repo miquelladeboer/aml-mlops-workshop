@@ -9,7 +9,6 @@ import numpy as np
 from optparse import OptionParser
 import sys
 from collections import Counter
-import horovod
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.externals import joblib
 

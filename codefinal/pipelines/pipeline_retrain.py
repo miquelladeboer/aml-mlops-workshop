@@ -17,8 +17,6 @@ from azureml.pipeline.core import Pipeline, PipelineData
 
 import os
 
-
-
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Retrieve datastore/datasets
@@ -92,7 +90,7 @@ hypertuning = HyperDriveStep(
                 policy=None,
                 primary_metric_name="accuracy",
                 primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
-                max_total_runs=2,
+                max_total_runs=4,
                 max_concurrent_runs=None
             ),
             estimator_entry_script_arguments=[],
@@ -114,13 +112,17 @@ cd = CondaDependencies(
         'conda_dependencies.yml'
     )
 )
+cd.add_channel("pytorch")
+
 
 # Runconfig
 amlcompute_run_config = RunConfiguration(conda_dependencies=cd)
+amlcompute_run_config.environment.docker.enabled = True
 amlcompute_run_config.environment.docker.base_image = "pytorch/pytorch"
 amlcompute_run_config.environment.spark.precache_packages = False
 
 fullmodel = PythonScriptStep(
+    name="fullmodel",
     script_name="train.py",
     arguments=[],
     inputs=[
