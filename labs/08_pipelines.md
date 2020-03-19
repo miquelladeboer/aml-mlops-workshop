@@ -104,4 +104,144 @@ The HyperDriveRun will produce a JSON file with the metrics from the run in it. 
 
 7. Define the pipeline step
     We are now going to define the pipeline step. Azure ML Pipeline steps can be configured together to construct a Pipeline, which represents a shareable and reusable Azure Machine Learning workflow. Each step of a pipeline can be configured to allow reuse of its previous run results if the step contents (scripts and dependencies) as well as inputs and parameters remain unchanged. To make it even more easy, Azure ML had a HyperDriveStep This creates an Azure ML Pipeline step to run hyperparameter tunning for Machine Learning model training. For more info check: https://docs.microsoft.com/en-us/python/api/azureml-pipeline-steps/azureml.pipeline.steps.hyper_drive_step.hyperdrivestep?view=azure-ml-py
+    ```
+    hypertuning = HyperDriveStep(
+                name='hypertrain',
+                hyperdrive_config=HyperDriveConfig(
+                    estimator=estimator,
+                    hyperparameter_sampling=param_sampling,
+                    policy=None,
+                    primary_metric_name="accuracy",
+                    primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
+                    max_total_runs=80,
+                    max_concurrent_runs=None
+                ),
+                estimator_entry_script_arguments=[],
+                inputs=[
+                        subset_dataset_train.as_named_input('subset_train'),
+                        subset_dataset_test.as_named_input('subset_test')
+                        ],
+                outputs=[],
+                metrics_output=metrics_data,
+                allow_reuse=True,
+                version=None
+    )
+    ```
+8. Attach step to the pipeline
+    Every step that we create, we can easily attach to the pipeline. By attaching steps to the pipeline, we can create a logical pipeline that will excecute specific task in a specific order and use outputs of one step as input in the next step.
+    `pipeline = Pipeline(workspace=workspace, steps=hypertuning)`
+
+9. Submit the pipeline
+    Submitting the pipeline is similair as to running an experiment.
+    ```
+    # Define the experiment
+    experiment = Experiment(workspace, 're-train')
+
+    # Run the experiment
+    pipeline_run = experiment.submit(pipeline)
+    pipeline_run.wait_for_completion()
+    ```
+10. Go to the portal and inspect the results.
+
+## Creat Pipelinestep for full model
+We are now going to define the pipeline step. In this step we are going to make use of the PythonScriptStep. This is the stantard step of executing a Python script in a pipeline. We need to take the following steps in this part of the tuturial:
+    - Retrive the entire data from the Datasets
+    - Define the compute target
+    - Define the conda dependencies
+    - Define the Run COnfig
+    - Define the Pipeline step
+    - Add the step to the pipeline
+    - Run the script
+
+1.  Retrieve datastore/datasets
+    ```
+    dataset_train = Dataset.get_by_name(workspace,
+                                        name='newsgroups_train')
+    dataset_test = Dataset.get_by_name(workspace,
+                                        name='newsgroups_test')
+    ```
+
+4. Define the compute target
+    For every step in th pipeline, we can use different compute. As we did it the previous labs, we used two different kinds of compute for hyperparameter tuning and for training the full model. In this pipeline step we are going to use the compute we previously created when submitting the full model train file:
+    `compute_target_fullmodel = workspace.compute_targets["fullcomputegpu"]`
+
+5.  Define Cond adependencies:
+    Next, we need to define our estimator. This is the same estimator we used in the previous labs:
+    ```
+    estimator = PyTorch(
+        entry_script='train.py',
+        source_directory=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            '..',
+            'modeling'
+        ),
+        compute_target=compute_target_hyper,
+        distributed_training=MpiConfiguration(),
+        framework_version='1.4',
+        use_gpu=True,
+        pip_packages=[
+            'numpy==1.15.4',
+            'pandas==0.23.4',
+            'scikit-learn==0.20.1',
+            'scipy==1.0.0',
+            'matplotlib==3.0.2',
+            'utils==0.9.0',
+        ],
+        inputs=[
+            subset_dataset_train.as_named_input('subset_train'),
+            subset_dataset_train.as_named_input('subset_test')
+        ]
+    )
+
+6. Set the parameter search grid
+    Last, we need to specify the search grid. This is again the same grid as that we have used in the previous labs.
+    ```
+    param_sampling = BayesianParameterSampling({
+        "learning_rate": uniform(0.05, 0.1),
+        "num_epochs": choice(5, 10, 15),
+        "batch_size": choice(150, 200),
+        "hidden_size": choice(50, 100)
+    })
+    ```
+
+7. Define the pipeline step
+    We are now going to define the pipeline step. In this step we are going to make use of the PythonScriptStep. This is the stantard step of executing a Python script in a pipeline.
+    ```
+    hypertuning = HyperDriveStep(
+                name='hypertrain',
+                hyperdrive_config=HyperDriveConfig(
+                    estimator=estimator,
+                    hyperparameter_sampling=param_sampling,
+                    policy=None,
+                    primary_metric_name="accuracy",
+                    primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
+                    max_total_runs=80,
+                    max_concurrent_runs=None
+                ),
+                estimator_entry_script_arguments=[],
+                inputs=[
+                        subset_dataset_train.as_named_input('subset_train'),
+                        subset_dataset_test.as_named_input('subset_test')
+                        ],
+                outputs=[],
+                metrics_output=metrics_data,
+                allow_reuse=True,
+                version=None
+    )
+    ```
+8. Attach step to the pipeline
+    Every step that we create, we can easily attach to the pipeline. By attaching steps to the pipeline, we can create a logical pipeline that will excecute specific task in a specific order and use outputs of one step as input in the next step.
+    `pipeline = Pipeline(workspace=workspace, steps=hypertuning)`
+
+9. Submit the pipeline
+    Submitting the pipeline is similair as to running an experiment.
+    ```
+    # Define the experiment
+    experiment = Experiment(workspace, 're-train')
+
+    # Run the experiment
+    pipeline_run = experiment.submit(pipeline)
+    pipeline_run.wait_for_completion()
+    ```
+10. Go to the portal and inspect the results.
 

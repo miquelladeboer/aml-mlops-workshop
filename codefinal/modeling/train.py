@@ -40,6 +40,14 @@ sys.argv[1:]
 # Retrieve the run and its context (datasets etc.)
 run = Run.get_context()
 
+print(os.environ)
+
+print(os.environ.get("AZUREML_DATAREFERENCE_METRICS_DATA", "not found var"))
+print(os.environ.get("$AZUREML_DATAREFERENCE_METRICS_DATA", "not found $var"))
+
+# with open(os.environ.get("AZUREML_DATAREFERENCE_METRICS_DATA")) as f:
+#     metrics_output_result = f.read()
+
 # Load the input datasets from Azure ML
 dataset_train = run.input_datasets['subset_train'].to_pandas_dataframe()
 dataset_test = run.input_datasets['subset_test'].to_pandas_dataframe()

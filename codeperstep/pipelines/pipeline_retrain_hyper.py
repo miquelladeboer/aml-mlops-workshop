@@ -70,7 +70,7 @@ param_sampling = BayesianParameterSampling({
     "hidden_size": choice(50, 100)
 })
 
-hypertrain = HyperDriveStep(
+hypertuning = HyperDriveStep(
             name='hypertrain',
             hyperdrive_config=HyperDriveConfig(
                 estimator=estimator,
@@ -93,7 +93,7 @@ hypertrain = HyperDriveStep(
 )
 
 
-pipeline = Pipeline(workspace=workspace, steps=hypertrain)
+pipeline = Pipeline(workspace=workspace, steps=hypertuning)
 
 # Define the experiment
 experiment = Experiment(workspace, 're-train')

@@ -1,8 +1,10 @@
 # Required Libraries
 from azureml.core import Workspace, Experiment, Datastore
-from azureml.core.runconfig import MpiConfiguration
+from azureml.core.runconfig import MpiConfiguration, RunConfiguration
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.dataset import Dataset
+
+from azureml.core.conda_dependencies import CondaDependencies
 
 from azureml.train.dnn import PyTorch
 from azureml.train.hyperdrive.parameter_expressions import uniform, choice
@@ -10,9 +12,11 @@ from azureml.train.hyperdrive import (
     BayesianParameterSampling,
     HyperDriveConfig, PrimaryMetricGoal)
 
-from azureml.pipeline.steps import HyperDriveStep
+from azureml.pipeline.steps import HyperDriveStep, PythonScriptStep
 from azureml.pipeline.core import Pipeline, PipelineData
+
 import os
+
 
 
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
@@ -22,11 +26,18 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 datastore_name = 'workspaceblobstore'
 datastore = Datastore.get(workspace, datastore_name)
 
-# retrieve datasets used for training
+# retrieve subset datasets used for training
 subset_dataset_train = Dataset.get_by_name(workspace,
                                            name='newsgroups_subset_train')
 subset_dataset_test = Dataset.get_by_name(workspace,
                                           name='newsgroups_subset_test')
+
+# retrieve full datasets used for training full model
+# retrieve subset datasets used for training
+dataset_train = Dataset.get_by_name(workspace,
+                                    name='newsgroups_train')
+dataset_test = Dataset.get_by_name(workspace,
+                                   name='newsgroups_test')
 
 # denife output dataset for run metrics JSON file
 metrics_output_name = 'metrics_output'
@@ -36,6 +47,7 @@ metrics_data = PipelineData(name='metrics_data',
 
 # Define the compute target
 compute_target_hyper = workspace.compute_targets["hypercomputegpu"]
+compute_target_fullmodel = workspace.compute_targets["fullcomputegpu"]
 
 # Define Run Configuration
 estimator = PyTorch(
@@ -72,7 +84,7 @@ param_sampling = BayesianParameterSampling({
 })
 
 # Define the pipeline step
-hypertrain = HyperDriveStep(
+hypertuning = HyperDriveStep(
             name='hypertrain',
             hyperdrive_config=HyperDriveConfig(
                 estimator=estimator,
@@ -80,7 +92,7 @@ hypertrain = HyperDriveStep(
                 policy=None,
                 primary_metric_name="accuracy",
                 primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
-                max_total_runs=80,
+                max_total_runs=2,
                 max_concurrent_runs=None
             ),
             estimator_entry_script_arguments=[],
@@ -94,9 +106,42 @@ hypertrain = HyperDriveStep(
             version=None
 )
 
+# Define the conda dependencies
+cd = CondaDependencies(
+    conda_dependencies_file_path=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../../',
+        'conda_dependencies.yml'
+    )
+)
 
-pipeline = Pipeline(workspace=workspace, steps=hypertrain)
+# Runconfig
+amlcompute_run_config = RunConfiguration(conda_dependencies=cd)
+amlcompute_run_config.environment.docker.base_image = "pytorch/pytorch"
+amlcompute_run_config.environment.spark.precache_packages = False
 
+fullmodel = PythonScriptStep(
+    script_name="train.py",
+    arguments=[],
+    inputs=[
+            subset_dataset_train.as_named_input('subset_train'),
+            subset_dataset_test.as_named_input('subset_test'),
+            metrics_data
+    ],
+    outputs=[],
+    compute_target=compute_target_fullmodel,
+    runconfig=amlcompute_run_config,
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '..',
+        'modeling'
+    )
+)
+
+# Attach step to the pipelines
+pipeline = Pipeline(workspace=workspace, steps=[hypertuning, fullmodel])
+
+# Submit the pipeline
 # Define the experiment
 experiment = Experiment(workspace, 're-train')
 
