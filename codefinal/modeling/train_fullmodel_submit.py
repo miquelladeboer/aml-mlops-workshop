@@ -5,6 +5,7 @@ import os
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.train.dnn import PyTorch
 
+
 # load Azure ML workspace
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 

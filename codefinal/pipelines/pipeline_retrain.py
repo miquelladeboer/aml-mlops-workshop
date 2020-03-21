@@ -31,7 +31,7 @@ subset_dataset_test = Dataset.get_by_name(workspace,
                                           name='newsgroups_subset_test')
 
 # retrieve full datasets used for training full model
-# retrieve subset datasets used for training
+# retrieve subset datasets used for trainingK
 dataset_train = Dataset.get_by_name(workspace,
                                     name='newsgroups_train')
 dataset_test = Dataset.get_by_name(workspace,
@@ -124,7 +124,7 @@ amlcompute_run_config.environment.spark.precache_packages = False
 fullmodel = PythonScriptStep(
     name="fullmodel",
     script_name="train.py",
-    arguments=[],
+    arguments=["--workspace", workspace],
     inputs=[
             subset_dataset_train.as_named_input('subset_train'),
             subset_dataset_test.as_named_input('subset_test'),

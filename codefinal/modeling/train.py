@@ -11,10 +11,15 @@ import sys
 from collections import Counter
 import pandas as pd
 import json
+import pandas
 
 from sklearn.externals import joblib
 
 from azureml.core import Run
+
+from azureml.core.authentication import AzureCliAuthentication
+from azureml.core import Workspace, Experiment
+
 
 OUTPUTSFOLDER = "outputs"
 
@@ -42,16 +47,26 @@ sys.argv[1:]
 # Retrieve the run and its context (datasets etc.)
 run = Run.get_context()
 
-if os.environ.get("AZUREML_DATAREFERENCE_metrics_data") is not None:
-    try:
-        with open(os.environ.get("AZUREML_DATAREFERENCE_metrics_data")) as f:
-            metrics_output_result = f.read()
-
+try:
+    with open(os.environ.get("AZUREML_DATAREFERENCE_metrics_data")) as f:
+        metrics_output_result = f.read()
         deserialized_metrics_output = json.loads(metrics_output_result)
         df = pd.DataFrame(deserialized_metrics_output)
-        print(df)
-    except IOError:
-        print("File not accessible")
+        df = df.T
+        df.accuracy = df.accuracy.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
+        df.learning_rate = df.learning_rate.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
+        df.num_epochs = df.num_epochs.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
+        df.batch_size = df.batch_size.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
+        df.hidden_size = df.hidden_size.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
+        runID = df.accuracy.idxmax()
+        parameters = df.loc[runID]
+        opts.learning_rate = parameters.learning_rate
+        opts.num_epochs = parameters.num_epochs
+        opts.batch_size = parameters.batch_size
+        opts.hidden_size = parameters.hidden_size
+
+except IOError:
+    print("No file present")
 
 # Load the input datasets from Azure ML
 dataset_train = run.input_datasets['subset_train'].to_pandas_dataframe()
@@ -126,6 +141,8 @@ hyperparameters = {
     "batch_size": opts.batch_size,
     "hidden_size": opts.hidden_size,
 }
+
+print(hyperparameters)
 
 # Select the training hyperparameters.
 learning_rate = hyperparameters["learning_rate"]
@@ -212,6 +229,10 @@ accuracy = (correct2 / total)
 # log metrics
 run_logger = Run.get_context()
 run_logger.log("accuracy", float(accuracy))
+run_logger.log("learning_rate", learning_rate)
+run_logger.log("num_epochs", num_epochs)
+run_logger.log("batch_size", batch_size)
+run_logger.log("hidden_size", hidden_size)
 
 # create outputs folder if not exists
 if not os.path.exists(OUTPUTSFOLDER):
