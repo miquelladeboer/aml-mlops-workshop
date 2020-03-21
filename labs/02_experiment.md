@@ -10,7 +10,8 @@ Enhance the model creation process by tracking your experiments and monitoring r
 # Pre-requirements #
 1. Familiarize yourself with the concept of Azure Machine Learning by going though [POWERPOINT]
 2. Familiarize yourself with the concept of experiments by going though [POWERPOINT]
-3. Finished the setup file [01_setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)
+3. Read the documentation on [Azure Machile Learning architecture](https://docs.microsoft.com/en-us/azure/machine-learning/concept-azure-machine-learning-architecture)
+4. Finished the setup file [01_setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)
 
 
 # Understand the non-azure / open source ml model code #
@@ -42,7 +43,7 @@ Just to check, we are now going to train the script locally without using Azure 
 #  Run the code via Azure ML #
 Running the code via Azure ML, we need to excecute two steps. First, we need to refactor the training script. Secondly, we need to create a submit_train file to excecute the train file.
 
-## Refactor the code to capture run metrics in code/explore/train.py
+## Part 1: Refactor the code to capture run metrics in code/explore/train.py
 We can caputure the results from our run and log the result to Azure Machine Learning. This way we can keep track of the performance of our models while we are experimenting with different models, parameters, data transformations or feature selections. We can specify for ourselfves what is important to track and log number, graphs and tables to Azure ML, including confusion matrices from SKlearn. For a full overview check the [avaiable metrics to track](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-track-experiments#available-metrics-to-track)
 
 
@@ -86,57 +87,60 @@ We can caputure the results from our run and log the result to Azure Machine Lea
     `run.complete()`
 
 5. Execute the refactored script `code/explore/train.py`
-As an output you should get the following:
-```
-Attempted to log scalar metric accuracy:
-0.7834441980783444
-Attempted to track file modelRandom forest.pkl at outputs/modelRandom forest.pkl
-Accuracy  0.783
-```
+    As an output you should get the following:
+    ```
+    Attempted to log scalar metric accuracy:
+    0.7834441980783444
+    Attempted to track file modelRandom forest.pkl at outputs/modelRandom forest.pkl
+    Accuracy  0.783
+    ```
+Since we did not submit the run to Azue ML, the log metrics and model file are not logged yet. To log the metrics and model to Azure ML, we need to submit an experiment to the service. We will do this is a seprated python file `code/explore/train.py` in the next part of this lab
 
-## ALter the train_submit.py file
+Note: The completed code can be found [here](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/code_labs/explore/train_lab02.py)
 
+## Part 2: Create the train_submit.py file
+In this part, we are going to create the submit file.
 1. Load required Azureml libraries
     ```
+    import os
     from azureml.core import Workspace, Experiment
     from azureml.train.estimator import Estimator
+    from azureml.core.authentication import AzureCliAuthentication
     ```
 
 2. Load Azure ML workspace form config file
+    In order to submit the experiment to Azure ML, we need to get the workspace in our Azure account where we want to submit our run. You can hard-code your credentials here, but it is advised to use a config file. When we create the workspace by running the `infrastructure\create_mlworkspace.py`, we created a config file in `.azureml/config.json`. By using this file and the Azure Cli authentification, we can easily retrieve the required workspace.
     ```
     # load Azure ML workspace
     workspace = Workspace.from_config(auth=AzureCliAuthentication())
     ```
 
 3. Create an extimator to define the run configuration
+    Before we can sumbit the run, we need to creat the run estimator. The Estimator class wraps run configuration information to help simplify the tasks of specifying how a script is executed. It supports single-node as well as multi-node execution. Running the estimator produces a model in the output directory specified in your training script. As an entry script, we are going to run our `train.py` file. As compute target, we specify 'local'. This means that we are going to execute the script on our local computers. This way, everything stays on you local computur (including data) and only the specified logs will be send to Azure ML. In future labs, we will see how we can use remote compute to execute runs remotely. In de `conda_dependencies.yml`, we specify all conda and pip packages our `train.py ` script in depended on. As we know that locally we have all the packages already installed, we will not use docker at this point. Using dokcer come in handy when we want to excecute our script remotely. We will see this in later labs.
     ```
     # Define Run Configuration
     est = Estimator(
-    entry_script='train.py',
-    source_directory=os.path.dirname(os.path.realpath(__file__)),
-    compute_target='local',
-    conda_packages=[
-        'pip==20.0.2'
-    ],
-    pip_packages=[
-        'numpy==1.15.4',
-        'pandas==0.23.4',
-        'scikit-learn==0.20.1',
-        'scipy==1.0.0',
-        'matplotlib==3.0.2',
-        'utils==0.9.0'
-    ],
-    use_docker=False
+        entry_script='train.py',
+        source_directory=os.path.dirname(os.path.realpath(__file__)),
+        compute_target='local',
+        conda_dependencies_file=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            '../../',
+            'conda_dependencies.yml'
+        ),
+        use_docker=False
     )
     ```
 
 4. Define the ML experiment
+    An Experiment is a class acts as a container of trials that represent multiple model runs. Within an experiment we can easily compare different runs of the same script with, for example, different models,parameters or data.
     ```
     # Define the ML experiment
     experiment = Experiment(workspace, "newsgroups_train")
     ```
 
 5. Submit the experiment
+    We are now ready to submit the experiment:
     ```
     # Submit experiment run, if compute is idle, this may take some time')
     run = experiment.submit(est)
@@ -148,5 +152,5 @@ Accuracy  0.783
 
 6. Go to the portal to inspect the run history
 
-Note: the correct code is already available in codeazureml. In here, all ready to use code is available for the entire workshop.
+Note: The completed code can be found [here](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/code_labs/explore/train_submit_lab02.py)
 

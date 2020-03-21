@@ -3,10 +3,8 @@ Training submitter
 
 Facilitates (remote) training execution through the Azure ML service.
 """
-import os
-from azureml.core import Workspace, Experiment
-from azureml.train.estimator import Estimator
-from azureml.core.authentication import AzureCliAuthentication
+
+# impot required packages
 
 # load Azure ML workspace
 
