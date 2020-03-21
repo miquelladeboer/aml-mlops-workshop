@@ -49,21 +49,25 @@ run = Run.get_context()
 
 try:
     with open(os.environ.get("AZUREML_DATAREFERENCE_metrics_data")) as f:
+    # with open(os.path.join(
+    #    os.path.dirname(os.path.realpath(__file__)),
+    #    '..\pipelines',
+    #    'metrics_data.json')) as f:
         metrics_output_result = f.read()
         deserialized_metrics_output = json.loads(metrics_output_result)
         df = pd.DataFrame(deserialized_metrics_output)
         df = df.T
         df.accuracy = df.accuracy.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
         df.learning_rate = df.learning_rate.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
-        df.num_epochs = df.num_epochs.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
-        df.batch_size = df.batch_size.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
-        df.hidden_size = df.hidden_size.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
+        df.num_epochs = df.num_epochs.astype(str).str.replace("[", "").str.replace("]", "").astype(int)
+        df.batch_size = df.batch_size.astype(str).str.replace("[", "").str.replace("]", "").astype(int)
+        df.hidden_size = df.hidden_size.astype(str).str.replace("[", "").str.replace("]", "").astype(int)
         runID = df.accuracy.idxmax()
         parameters = df.loc[runID]
         opts.learning_rate = parameters.learning_rate
-        opts.num_epochs = parameters.num_epochs
-        opts.batch_size = parameters.batch_size
-        opts.hidden_size = parameters.hidden_size
+        opts.num_epochs = int(parameters.num_epochs)
+        opts.batch_size = int(parameters.batch_size)
+        opts.hidden_size = int(parameters.hidden_size)
 
 except IOError:
     print("No file present")

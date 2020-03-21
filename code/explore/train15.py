@@ -22,12 +22,15 @@ from sklearn import metrics
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
 
+# Optional argument that you want to submit to the script can eb put here
 op = OptionParser()
 
+# Transform parser
 argv = []
 sys.argv[1:]
 (opts, args) = op.parse_args(argv)
 
+# choose categories to extract from the 20newsgroup data from sklearn
 categories = [
     'alt.atheism',
     'talk.religion.misc',
@@ -35,35 +38,23 @@ categories = [
     'sci.space',
 ]
 
-
-print("Loading 20 newsgroups dataset for categories:")
-
+# Load the data from sklearn 20newsgroups
 data_train = fetch_20newsgroups(subset='train', categories=categories,
                                 shuffle=True, random_state=42)
 
 data_test = fetch_20newsgroups(subset='test', categories=categories,
                                shuffle=True, random_state=42)
-print('data loaded')
-
-# order of labels in `target_names` can be different from `categories`
-target_names = data_train.target_names
 
 # split a training set and a test set
 y_train, y_test = data_train.target, data_test.target
 
 # Extracting features from the training data using a sparse vectorizer
-
 vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
                              stop_words='english')
+
+# Extracting features from the train and test data using the same vectorizer"
 X_train = vectorizer.fit_transform(data_train.data)
-
-# Extracting features from the test data using the same vectorizer"
 X_test = vectorizer.transform(data_test.data)
-
-# mapping from integer feature name to original token string
-
-feature_names = vectorizer.get_feature_names()
-feature_names = np.asarray(feature_names)
 
 
 def benchmark(clf, name=""):

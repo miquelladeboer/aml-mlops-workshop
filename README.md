@@ -5,10 +5,10 @@ Full end-to-end solution of text classifciation with Pytorch on Azure Machine Le
 
 ## Content 
 The resportoty contains te foolowing material:
-* Powerpoint slides with theory
-* Follow along labs to practise
-* Code with the in between steps to make following the labs easier.
-* Final code for demo/ example
+* [Powerpoint slides with theory](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/Powerpoints) 
+* [Follow along labs to practise](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/labs)
+* [Code with the in between steps of labs](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/codeperstep)
+* [Final code for demo/ example](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/codefinal)
 
 The labs + final code follow the MLOps guidelines and best practices. For the template, look at: https://github.com/Azure/MLOps-TDSP-Template
 
@@ -21,6 +21,11 @@ In the labs we take 1 dataset and show different capabilities of Azure Machine L
 * Reuse models from previous run in a new run
 * Use Pipelines to combine multiple experiments
 * Use model outputs from one step in the pipeline as input in the next step of the pipeline
+* Model management
+* Model CI/CD
+* Model drift monitoring
+* Automated Pipeline triggers from model drift
+
 
 ## workshop
 In this workshop, you learn about Azure Machine Learning, a cloud-based environment you can use to train, deploy, automate, manage, and track ML models. Azure Machine Learning can be used for any kind of machine learning, from classical ml to deep learning, supervised, and unsupervised learning. Whether you prefer to write Python or R code or zero-code/low-code options such as the designer, you can build, train, and track highly accurate machine learning and deep-learning models in an Azure Machine Learning Workspace.
@@ -53,6 +58,7 @@ Pipelines
 Model Management
 * Artifact Store
 * Model CI/CD
+* Monitoring
  
 Azure ML in the Enterprise
 * Governance

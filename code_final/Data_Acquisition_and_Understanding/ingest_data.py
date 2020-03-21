@@ -32,9 +32,6 @@ for data_split in ['train', 'test']:
 
     # pre-process:
     # remove line breaks
-    # replace target index by newsgroup name
-    # target_names = newsgroupdata.target_names
-    # df.target = df.target.apply(lambda x: target_names[x])
     df.text = df.text.replace('\n', ' ', regex=True)
 
     # create random subsample to hyper tuning (50% of data)
