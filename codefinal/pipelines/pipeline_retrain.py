@@ -124,7 +124,7 @@ amlcompute_run_config.environment.spark.precache_packages = False
 fullmodel = PythonScriptStep(
     name="fullmodel",
     script_name="train.py",
-    arguments=["--workspace", workspace],
+    arguments=[],
     inputs=[
             subset_dataset_train.as_named_input('subset_train'),
             subset_dataset_test.as_named_input('subset_test'),

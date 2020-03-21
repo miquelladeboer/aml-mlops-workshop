@@ -5,21 +5,22 @@ Full end-to-end solution of text classifciation with Pytorch on Azure Machine Le
 
 ## Content 
 The resportoty contains te foolowing material:
-    - Powerpoint slides with theory
-    - Follow along labs to practise
-    - Code with the in between steps to make following the labs easier.
-    - Final code for demo/ example
+* Powerpoint slides with theory
+* Follow along labs to practise
+* Code with the in between steps to make following the labs easier.
+* Final code for demo/ example
+
 The labs + final code follow the MLOps guidelines and best practices. For the template, look at: https://github.com/Azure/MLOps-TDSP-Template
 
 In the labs we take 1 dataset and show different capabilities of Azure Machine Learning. We use the 20newgroup dataset from sklearn and we will show the following things:
-    - Pytorch on Azure Machine Learning
-    - Run Pytorch Experiment with Horovod distributed training
-    - Hyperparamter tuning with HyperDrive
-    - Use GPU's as remote compute to perform distributed training
-    - Use the concepts of Datasets to work with different versions of the data
-    - Reuse models from previous run in a new run
-    - Use Pipelines to combine multiple experiments
-    - Use model outputs from one step in the pipeline as input in the next step of the pipeline
+* Pytorch on Azure Machine Learning
+* Run Pytorch Experiment with Horovod distributed training
+* Hyperparamter tuning with HyperDrive
+* Use GPU's as remote compute to perform distributed training
+* Use the concepts of Datasets to work with different versions of the data
+* Reuse models from previous run in a new run
+* Use Pipelines to combine multiple experiments
+* Use model outputs from one step in the pipeline as input in the next step of the pipeline
 
 ## workshop
 In this workshop, you learn about Azure Machine Learning, a cloud-based environment you can use to train, deploy, automate, manage, and track ML models. Azure Machine Learning can be used for any kind of machine learning, from classical ml to deep learning, supervised, and unsupervised learning. Whether you prefer to write Python or R code or zero-code/low-code options such as the designer, you can build, train, and track highly accurate machine learning and deep-learning models in an Azure Machine Learning Workspace.
