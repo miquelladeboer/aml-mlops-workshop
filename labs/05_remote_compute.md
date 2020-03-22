@@ -1,5 +1,13 @@
 ## Lab 5: Remote Compute ##
-In this lab, we are going to see how we can levarge Azure ML remote compute to submit the HyperDrive run. In this tuturial, we are going to create two different types of compute: CPU and GPU and compare the difference in performance.
+In this lab, we are going to see how we can levarge Azure ML remote compute to submit the HyperDrive run. In this tuturial, we are going to create two different types of compute: CPU and GPU and compare the difference in performance. In this lab we are going to to the following:
+* Excecute a run on remote Azure ML CPU cluster
+* Excecute a run on remote Azure ML GPU cluster
+
+# Pre-requirements #
+1. Completed lab [04_hyperdrive](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/04_hyperdrive.md)
+2. Familiarize yourself with the concept of HyperDrive [POWERPOINT]
+3. Read the documentation on [How to tune hyperparameters](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-tune-hyperparameters)
+4. Read the documentation on [Train Pytorch deep learning models at scale](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-pytorch)
 
 ## Understand remote compute
 
@@ -21,97 +29,82 @@ Azure Machine Learning Compute is a managed-compute infrastructure that allows t
 For more info check: https://docs.microsoft.com/en-us/azure/machine-learning/how-to-set-up-training-targets#amlcompute. 
 
 #  Run the code on remote cpu cluster via Azure ML #
-To run the `traindeep.py` on remote compute, we need to alter the `traindeep_submit.py` file.
+To run the `code/modeling/train.py` on remote compute, we need to alter the `train_hyper_submit.py` file, but first we need to create compute.
 
-1. Add the required libraries from AzureML
-    ```
-    from azureml.core.compute import ComputeTarget, AmlCompute
-    from azureml.core.compute_target import ComputeTargetException
-    ```
-2. Create a compute target
-    First, we are going to create a cpu compute target. In this turutial we choose the `'STANDARD_D3_V2'`, but you can choose the compute target you need for your solution. To see all supported VM sizes, run: `print(AmlCompute.supported_vmsizes(workspace=ws))`
+1. Open the file `infrastructure/create_cpu_compute.py`
+    In this file, we are going to create a cpu cluster. In most organizations, data scientist/ml engineers are not allowed to create their own compute. This is mostly done by the IT-deparment due to governacne and compliance reasons. IT-departments can use different, more efficient methods to set up compute clusters. We will discuss this is a later lab when we are talking about Azure ML in the Enterprise. For now, we are going to create the compute ourselves. This can be done easily via the portal or by running the following script. In this script we are going to create a standard `STANDARD_D3_V2` cluster with 4 nodes, called `hypercomputecpu`
 
-    ```
-    # Create compute target if not present
-    # Choose a name for your CPU cluster
+2. Run the file `infrastructure/create_cpu_compute.py`
     cpu_cluster_name = "hypercomputecpu"
 
-    # Verify that cluster does not exist already
-    try:
-        cpu_cluster = ComputeTarget(workspace=workspace, name=cpu_cluster_name)
-        print('Found existing cluster, use it.')
-    except ComputeTargetException:
-        compute_config = AmlCompute.provisioning_configuration(vm_size='STANDARD_D3_V2',
-                                                           max_nodes=4)
-        cpu_cluster = ComputeTarget.create(workspace, cpu_cluster_name,
-                                       compute_config)
+3. Inspect the compute cluster in the portal
 
-    cpu_cluster.wait_for_completion(show_output=True)
+3. In the Estimator in `code/modeling/train_hyper_submit.py`, change the compute target
+    Now that we have created the compute cluster, we can change out script to run from `local` compute to the newly created `hypercomputecpu`.
+
+    Take the name for your CPU cluster:
+
+    ```python
+    cpu_cluster_name = "hypercomputecpu"
     ```
 
-3. In the Estimator, change the compute target
     Change the `'local'` compute target to:
     `compute_target=workspace.compute_targets[cpu_cluster_name]`
 
 4. Change the experiment name
-    ```
+    So we can keep track of this experiment, we are going to change the experiment name:
+
+    ```python
     # Define the ML experiment
     experiment = Experiment(workspace, "newsgroups_train_hypertune_cpu")
     ```
 
-5. Run the script `traindeep_submit.py`
+5. Run the script `train_hyper_submit.py`
 
 6. Go to the portal to inspect the run history
 
-Note: the correct code is already available in codeazureml in the script `explore\traindeep_submit_remote_cpu.py`. In here, all ready to use code is available for the entire workshop.
+Note: The completed code can be found [here](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/code_labs/modeling/train_hyper_submit_remote_cpu.py)
+
 
 #  Run the code on remote gpu cluster via Azure ML #
-To run the `traindeep.py` on remote compute, we need to alter the `traindeep_submit.py` file.
+To run the `traindeep.py` on remote compute, we need to alter the `train_hyper_submit.py` file. We are going to create a gpu compute target. In this turutial we choose from the NC-series.
 
-1. Add the required libraries from AzureML
-    ```
-    from azureml.core.compute import ComputeTarget, AmlCompute
-    from azureml.core.compute_target import ComputeTargetException
-    ```
-2. Create a compute target
-    We are going to create a gpu compute target. In this turutial we choose from the NC-series.
+NC-series VMs are powered by the NVIDIA Tesla K80 card and the Intel Xeon E5-2690 v3 (Haswell) processor. Users can crunch through data faster by leveraging CUDA for energy exploration applications, crash simulations, ray traced rendering, deep learning, and more. The NC24r configuration provides a low latency, high-throughput network interface optimized for tightly coupled parallel computing workloads.
 
-    NC-series VMs are powered by the NVIDIA Tesla K80 card and the Intel Xeon E5-2690 v3 (Haswell) processor. Users can crunch through data faster by leveraging CUDA for energy exploration applications, crash simulations, ray traced rendering, deep learning, and more. The NC24r configuration provides a low latency, high-throughput network interface optimized for tightly coupled parallel computing workloads.
+We are going to use the `Standard_NC6`
 
-    We are going to use the `Standard_NC6`
+1. Open the file `infrastructure/create_cpu_compute.py`
+    In this file, we are going to create a cpu cluster. In most organizations, data scientist/ml engineers are not allowed to create their own compute. This is mostly done by the IT-deparment due to governacne and compliance reasons. IT-departments can use different, more efficient methods to set up compute clusters. We will discuss this is a later lab when we are talking about Azure ML in the Enterprise. For now, we are going to create the compute ourselves. This can be done easily via the portal or by running the following script. In this script we are going to create a standard `STANDARD_D3_V2` cluster with 4 nodes, called `hypercomputecpu`
 
-    ```
-    # Create compute target if not present
-    # Choose a name for your CPU cluster
-    gpu_cluster_name = "hypercomputecpu"
+2. Run the file `infrastructure/create_gpu_compute_hyper.py`
+    cpu_cluster_name = "hypercomputegpu"
 
-    # Verify that cluster does not exist already
-    try:
-        gpu_cluster = ComputeTarget(workspace=workspace, name=gpu_cluster_name)
-        print('Found existing cluster, use it.')
-    except ComputeTargetException:
-        compute_config = AmlCompute.provisioning_configuration(vm_size='Standard_NC6',
-                                                           max_nodes=4)
-        gpu_cluster = ComputeTarget.create(workspace, gpu_cluster_name,
-                                       compute_config)
+3. Inspect the compute cluster in the portal
 
-    gpu_cluster.wait_for_completion(show_output=True)
+3. In the Estimator in `code/modeling/train_hyper_submit.py`, change the compute target
+    Now that we have created the compute cluster, we can change out script to run from `local` compute to the newly created `hypercomputegpu`.
+
+    Take the name for your GPU cluster:
+
+    ```python
+    gpu_cluster_name = "hypercomputegpu"
     ```
 
-3. In the Estimator, change the compute target
     Change the `'local'` compute target to:
     `compute_target=workspace.compute_targets[gpu_cluster_name]`
 
 4. Change the experiment name
-    ```
+    So we can keep track of this experiment, we are going to change the experiment name:
+
+    ```python
     # Define the ML experiment
     experiment = Experiment(workspace, "newsgroups_train_hypertune_gpu")
     ```
 
-5. Run the script `traindeep_submit.py`
+5. Run the script `train_hyper_submit.py`
 
 6. Go to the portal to inspect the run history
 
-Note: the correct code is already available in codeazureml in the script `explore\traindeep_submit_remote_gpu.py`. In here, all ready to use code is available for the entire workshop.
+Note: The completed code can be found [here](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/code_labs/modeling/train_hyper_submit_remote_gpu.py)
 
 

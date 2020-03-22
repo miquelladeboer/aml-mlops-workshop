@@ -23,7 +23,7 @@ Datasets can be created from local files, public urls, Azure Open Datasets, or s
 
 For more information check: https://docs.microsoft.com/en-us/azure/machine-learning/concept-data?view=azure-ml-py
 
-## Ingest data into Datastoren ##
+## Ingest data into Datastore ##
 Before we can make use of Datastores and Datasets, we need to have our data into the Datastores. In this tuturial, we are going to make use of the Public URL, as our data is available there through the 20newsgroups from sklearn.
 
 1. Open the script `code\Data_Acquisition_and_Understanding\ingest_data.py`

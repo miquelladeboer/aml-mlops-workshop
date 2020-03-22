@@ -12,7 +12,7 @@ Efficiently tune hyperparameters for your model using Azure Machine Learning. Hy
 
 # Pre-requirements #
 1. Completed lab [03_childrun](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/03_childrun.md)
-2. Familiarize yourself with the concept of HyperDrive [POWERPOINT]
+2. Familiarize yourself with the concept of [Deep Learning on Azure ML]
 3. Read the documentation on [How to tune hyperparameters](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-tune-hyperparameters)
 4. Read the documentation on [Train Pytorch deep learning models at scale](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-pytorch)
 

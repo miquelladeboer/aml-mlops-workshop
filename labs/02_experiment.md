@@ -10,8 +10,8 @@ Enhance the model creation process by tracking your experiments and monitoring r
 ![](C:/Users/mideboer.EUROPE/Documents/GitHub/aml-mlops-workshop/Images/02_experiments.PNG)
 
 # Pre-requirements #
-1. Familiarize yourself with the concept of Azure Machine Learning by going though [POWERPOINT]
-2. Familiarize yourself with the concept of experiments by going though [POWERPOINT]
+1. Familiarize yourself with the concept of Azure Machine Learning by going though the [Introduction](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%201%20-%20Introduction.pptx)
+2. Familiarize yourself with the concept of experiments by going though [Experiments](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%202%20-%20Experiments.pptx)
 3. Read the documentation on [Azure Machile Learning architecture](https://docs.microsoft.com/en-us/azure/machine-learning/concept-azure-machine-learning-architecture)
 4. Finished the setup file [01_setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)
 
