@@ -7,7 +7,7 @@ Enhance the model creation process by tracking your experiments and monitoring r
 * Monitor the run
 * Inpect the results in Azure Machine Learning
 
-![](C:\Users\mideboer.EUROPE\Documents\GitHub\aml-mlops-workshop\Images\02_experiments.PNG)
+![](C:/Users/mideboer.EUROPE/Documents/GitHub/aml-mlops-workshop/Images/02_experiments.PNG)
 
 # Pre-requirements #
 1. Familiarize yourself with the concept of Azure Machine Learning by going though [POWERPOINT]
