@@ -1,14 +1,6 @@
-from azureml.train.hyperdrive import (
-    BayesianParameterSampling,
-    HyperDriveConfig, PrimaryMetricGoal)
-from azureml.core import Workspace, Experiment
-from azureml.train.estimator import Estimator
-import os
-from azureml.train.hyperdrive.parameter_expressions import uniform, choice
-from azureml.core.authentication import AzureCliAuthentication
+# Load required packages
 
 # load Azure ML workspace
-workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Define Run Configuration
 

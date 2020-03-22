@@ -13,20 +13,14 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Define Run Configuration
 est = Estimator(
-    entry_script='train.py',
+    entry_script='train_1model.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     compute_target='local',
-    conda_packages=[
-        'pip==20.0.2'
-    ],
-    pip_packages=[
-        'numpy==1.15.4',
-        'pandas==0.23.4',
-        'scikit-learn==0.20.1',
-        'scipy==1.0.0',
-        'matplotlib==3.0.2',
-        'utils==0.9.0'
-    ],
+    conda_dependencies_file=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../../',
+        'conda_dependencies.yml'
+    ),
     use_docker=False
 )
 

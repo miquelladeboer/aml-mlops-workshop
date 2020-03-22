@@ -12,14 +12,14 @@ from collections import Counter
 import pandas as pd
 import json
 import pandas
+import matplotlib.pyplot as plt
 
 from sklearn.externals import joblib
 
 from azureml.core import Run
 
-from azureml.core.authentication import AzureCliAuthentication
-from azureml.core import Workspace, Experiment
-
+# Get run context
+run_logger = Run.get_context()
 
 OUTPUTSFOLDER = "outputs"
 
@@ -49,21 +49,17 @@ run = Run.get_context()
 
 try:
     with open(os.environ.get("AZUREML_DATAREFERENCE_metrics_data")) as f:
-    # with open(os.path.join(
-    #    os.path.dirname(os.path.realpath(__file__)),
-    #    '..\pipelines',
-    #    'metrics_data.json')) as f:
         metrics_output_result = f.read()
         deserialized_metrics_output = json.loads(metrics_output_result)
         df = pd.DataFrame(deserialized_metrics_output)
         df = df.T
-        df.accuracy = df.accuracy.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
-        df.learning_rate = df.learning_rate.astype(str).str.replace("[", "").str.replace("]", "").astype(float)
-        df.num_epochs = df.num_epochs.astype(str).str.replace("[", "").str.replace("]", "").astype(int)
-        df.batch_size = df.batch_size.astype(str).str.replace("[", "").str.replace("]", "").astype(int)
-        df.hidden_size = df.hidden_size.astype(str).str.replace("[", "").str.replace("]", "").astype(int)
+
+        for column in df:
+            df[column] = df[column].astype(str).str.strip("[]").astype(float)
+
         runID = df.accuracy.idxmax()
-        parameters = df.loc[runID]
+
+        parameters = df.loc[runID].iloc[1:]
         opts.learning_rate = parameters.learning_rate
         opts.num_epochs = int(parameters.num_epochs)
         opts.batch_size = int(parameters.batch_size)
@@ -192,9 +188,27 @@ net = OurNet(input_size, hidden_size, num_classes)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
+
+# define accuracy metric
+def binary_accuracy(preds, y):
+    correct = 0
+    total = 0
+    # round predictions to the closest integer
+    _, predicted = torch.max(preds, 1)
+    correct += (predicted == y).sum()
+    correct2 = float(correct)
+    total += y.size(0)
+    acc = (correct2 / total)
+    return acc
+
+
 # Train the Model
+epoch_losses = []
+epoch_accuracy = []
 for epoch in range(num_epochs):
     total_batch = int(len(data_train.data)/batch_size)
+    epoch_loss = 0
+    epoch_acc = 0
     # Loop over all batches
     for i in range(total_batch):
         batch_x, batch_y = get_batch(data_train.data,
@@ -208,8 +222,32 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()  # zero the gradient buffer
         outputs = net(articles)
         loss = criterion(outputs, labels)
+        acc = binary_accuracy(outputs, labels)
         loss.backward()
         optimizer.step()
+
+        # loss and accuracy
+        epoch_loss = loss.item()
+        epoch_acc = acc
+
+    epoch_losses.append(epoch_loss / total_batch)
+    epoch_accuracy.append(epoch_acc)
+
+# plot loss function and log to Azure ML
+plt.plot(np.array(epoch_losses), 'r', label="Loss")
+plt.xticks(np.arange(1, (num_epochs+1), step=1))
+plt.xlabel("Epochs")
+plt.ylabel("Loss Percentage")
+plt.legend(loc='upper left')
+run_logger.log_image("Loss grapgh", plot=plt)
+
+# plot Accuracy and log to Azure ML
+plt.plot(np.array(epoch_accuracy), 'b', label="Accuracy")
+plt.xticks(np.arange(1, (num_epochs+1), step=1))
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy Percentage")
+plt.legend(loc='upper left')
+run_logger.log_image("Loss grapgh", plot=plt)
 
 # Test the Model
 correct = 0
@@ -231,7 +269,6 @@ correct2 = float(correct)
 accuracy = (correct2 / total)
 
 # log metrics
-run_logger = Run.get_context()
 run_logger.log("accuracy", float(accuracy))
 run_logger.log("learning_rate", learning_rate)
 run_logger.log("num_epochs", num_epochs)

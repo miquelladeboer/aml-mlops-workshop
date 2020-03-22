@@ -1,7 +1,7 @@
 import logging
-import numpy as np
 from optparse import OptionParser
 import sys
+import os
 
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -40,35 +40,30 @@ categories = [
     'sci.space',
 ]
 
+# Define ouputs folder
+OUTPUTSFOLDER = "outputs"
 
-print("Loading 20 newsgroups dataset for categories:")
+# create outputs folder if not exists
+if not os.path.exists(OUTPUTSFOLDER):
+    os.makedirs(OUTPUTSFOLDER)
 
 data_train = fetch_20newsgroups(subset='train', categories=categories,
                                 shuffle=True, random_state=42)
 
 data_test = fetch_20newsgroups(subset='test', categories=categories,
                                shuffle=True, random_state=42)
-print('data loaded')
-
-# order of labels in `target_names` can be different from `categories`
-target_names = data_train.target_names
 
 # split a training set and a test set
 y_train, y_test = data_train.target, data_test.target
 
 # Extracting features from the training data using a sparse vectorizer
 
-vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
+vectorizer = TfidfVectorizer(sublinear_tf=True, 
+                             max_df=0.5,
                              stop_words='english')
+
 X_train = vectorizer.fit_transform(data_train.data)
-
-# Extracting features from the test data using the same vectorizer"
 X_test = vectorizer.transform(data_test.data)
-
-# mapping from integer feature name to original token string
-
-feature_names = vectorizer.get_feature_names()
-feature_names = np.asarray(feature_names)
 
 
 def benchmark(clf, name=""):
@@ -90,7 +85,7 @@ def benchmark(clf, name=""):
 
     # write model artifact
     model_name = "model" + str(name) + ".pkl"
-    filename = "outputs/" + model_name
+    filename = os.path.join(OUTPUTSFOLDER, model_name)
     joblib.dump(value=clf, filename=filename)
 
     # upload model artifact with child run

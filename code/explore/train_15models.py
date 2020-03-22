@@ -1,5 +1,4 @@
 import logging
-import numpy as np
 from optparse import OptionParser
 import sys
 
@@ -49,7 +48,8 @@ data_test = fetch_20newsgroups(subset='test', categories=categories,
 y_train, y_test = data_train.target, data_test.target
 
 # Extracting features from the training data using a sparse vectorizer
-vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
+vectorizer = TfidfVectorizer(sublinear_tf=True, 
+                             max_df=0.5,
                              stop_words='english')
 
 # Extracting features from the train and test data using the same vectorizer"

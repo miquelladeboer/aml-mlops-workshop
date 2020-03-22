@@ -12,8 +12,14 @@ from collections import Counter
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.externals import joblib
 
+import matplotlib.pyplot as plt
+
 from azureml.core import Run
 
+# Start logging
+run_logger = Run.get_context()
+
+# Set outputs folder
 OUTPUTSFOLDER = "outputs"
 
 # Display progress logs on stdout
@@ -24,7 +30,7 @@ op = OptionParser()
 op.add_option("--learning_rate",
               type=float, default=0.01)
 op.add_option("--num_epochs",
-              type=int, default=2)
+              type=int, default=4)
 op.add_option("--batch_size",
               type=int,
               default=150)
@@ -44,15 +50,11 @@ categories = [
     'sci.space',
 ]
 
-
-print("Loading 20 newsgroups dataset for categories:")
-
 data_train = fetch_20newsgroups(subset='train', categories=categories,
                                 shuffle=True, random_state=42)
 
 data_test = fetch_20newsgroups(subset='test', categories=categories,
                                shuffle=True, random_state=42)
-print('data loaded')
 
 vocab = Counter()
 
@@ -88,6 +90,7 @@ def get_batch(df_data, df_target, i, batch_size):
         for word in text.split(' '):
             layer[word2index[word.lower()]] += 1
         batches.append(layer)
+
     return np.array(batches), np.array(categories)
 
 
@@ -144,9 +147,27 @@ net = OurNet(input_size, hidden_size, num_classes)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
+
+# define accuracy metric
+def binary_accuracy(preds, y):
+    correct = 0
+    total = 0
+    # round predictions to the closest integer
+    _, predicted = torch.max(preds, 1)
+    correct += (predicted == y).sum()
+    correct2 = float(correct)
+    total += y.size(0)
+    acc = (correct2 / total)
+    return acc
+
+
 # Train the Model
+epoch_losses = []
+epoch_accuracy = []
 for epoch in range(num_epochs):
     total_batch = int(len(data_train.data)/batch_size)
+    epoch_loss = 0
+    epoch_acc = 0
     # Loop over all batches
     for i in range(total_batch):
         batch_x, batch_y = get_batch(data_train.data,
@@ -160,8 +181,33 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()  # zero the gradient buffer
         outputs = net(articles)
         loss = criterion(outputs, labels)
+        acc = binary_accuracy(outputs, labels)
+
         loss.backward()
         optimizer.step()
+
+        # loss and accuracy
+        epoch_loss = loss.item()
+        epoch_acc = acc
+
+    epoch_losses.append(epoch_loss / total_batch)
+    epoch_accuracy.append(epoch_acc)
+
+# plot loss function and log to Azure ML
+plt.plot(np.array(epoch_losses), 'r', label="Loss")
+plt.xticks(np.arange(1, (num_epochs+1), step=1))
+plt.xlabel("Epochs")
+plt.ylabel("Loss Percentage")
+plt.legend(loc='upper left')
+run_logger.log_image("Loss grapgh", plot=plt)
+
+#plot Accuracy and log to Azure ML
+plt.plot(np.array(epoch_accuracy), 'b', label="Accuracy")
+plt.xticks(np.arange(1, (num_epochs+1), step=1))
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy Percentage")
+plt.legend(loc='upper left')
+run_logger.log_image("Loss grapgh", plot=plt)
 
 # Test the Model
 correct = 0
@@ -183,8 +229,11 @@ correct2 = float(correct)
 accuracy = (correct2 / total)
 
 # log metrics
-run_logger = Run.get_context()
 run_logger.log("accuracy", float(accuracy))
+run_logger.log("learning_rate", learning_rate)
+run_logger.log("num_epochs", num_epochs)
+run_logger.log("batch_size", batch_size)
+run_logger.log("hidden_size", hidden_size)
 
 # create outputs folder if not exists
 if not os.path.exists(OUTPUTSFOLDER):
