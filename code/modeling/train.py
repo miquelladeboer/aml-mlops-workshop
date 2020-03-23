@@ -17,17 +17,6 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
 
 op = OptionParser()
-op.add_option("--learning_rate",
-              type=float, default=0.01)
-op.add_option("--num_epochs",
-              type=int, default=4)
-op.add_option("--batch_size",
-              type=int,
-              default=150)
-op.add_option("--hidden_size",
-              type=int,
-              default=100)
-
 
 argv = []
 sys.argv[1:]
@@ -85,19 +74,13 @@ def get_batch(df_data, df_target, i, batch_size):
 
 
 # Select the training hyperparameters.
-# Create a dict of hyperparameters from the input flags.
-hyperparameters = {
-    "learning_rate": opts.learning_rate,
-    "num_epochs": opts.num_epochs,
-    "batch_size": opts.batch_size,
-    "hidden_size": opts.hidden_size,
-}
+# Parameters
+learning_rate = 0.01
+num_epochs = 20
+batch_size = 300
 
-# Select the training hyperparameters.
-learning_rate = hyperparameters["learning_rate"]
-num_epochs = hyperparameters["num_epochs"]
-batch_size = hyperparameters["batch_size"]
-hidden_size = hyperparameters["hidden_size"]
+# Network Parameters
+hidden_size = 100      # 1st layer and 2nd layer number of features
 
 input_size = total_words  # Words in vocab
 num_classes = len(np.unique(data_train.target))

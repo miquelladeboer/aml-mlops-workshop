@@ -24,7 +24,7 @@ op = OptionParser()
 op.add_option("--learning_rate",
               type=float, default=0.01)
 op.add_option("--num_epochs",
-              type=int, default=2)
+              type=int, default=20)
 op.add_option("--batch_size",
               type=int,
               default=150)

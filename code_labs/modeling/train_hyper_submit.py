@@ -14,7 +14,7 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Define Run Configuration
 estimator = PyTorch(
-    entry_script='traindeep.py',
+    entry_script='train.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     compute_target='local',
     distributed_training=MpiConfiguration(),
@@ -29,7 +29,7 @@ estimator = PyTorch(
 
 # Set parameters for search
 param_sampling = BayesianParameterSampling({
-    "learning_rate": uniform(0.05, 0.1),
+    "learning_rate": uniform(0.001, 1),
     "num_epochs": choice(5, 10, 15),
     "batch_size": choice(150, 200),
     "hidden_size": choice(50, 100)

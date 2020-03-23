@@ -15,19 +15,6 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 # Choose a name for your CPU cluster
 gpu_cluster_name = "fullcomputegpu"
 
-# Verify that cluster does not exist already
-try:
-    gpu_cluster = ComputeTarget(workspace=workspace, name=gpu_cluster_name)
-    print('Found existing cluster, use it.')
-except ComputeTargetException:
-    compute_config = AmlCompute.provisioning_configuration(vm_size='Standard_NC12',
-                                                           max_nodes=8)
-    gpu_cluster = ComputeTarget.create(workspace, gpu_cluster_name,
-                                       compute_config)
-
-gpu_cluster.wait_for_completion(show_output=True)
-
-
 # Define the ML experiment
 experiment = Experiment(workspace, 'newsgroups_train_hypertune_gpu')
 
@@ -52,21 +39,18 @@ best_model_parameters = best_parameters.copy()
 
 # Define a final training run with model's best parameters
 model_est = PyTorch(
-    entry_script='traindeep.py',
+    entry_script='train.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     script_params=best_model_parameters,
     compute_target=workspace.compute_targets[gpu_cluster_name],
     distributed_training=MpiConfiguration(),
     framework_version='1.4',
     use_gpu=True,
-    pip_packages=[
-        'numpy==1.15.4',
-        'pandas==0.23.4',
-        'scikit-learn==0.20.1',
-        'scipy==1.0.0',
-        'matplotlib==3.0.2',
-        'utils==0.9.0',
-    ]
+    conda_dependencies_file=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            '../../',
+            'conda_dependencies.yml'
+        )
 )
 
 # Define the ML experiment

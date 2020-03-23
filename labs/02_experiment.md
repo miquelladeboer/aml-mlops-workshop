@@ -19,7 +19,7 @@ Enhance the model creation process by tracking your experiments and monitoring r
 # Understand the non-azure / open source ml model code #
 We first start with understanding the training script. The training script is an open source ML model code from https://scikit-learn.org/stable/auto_examples/text/plot_document_classification_20newsgroups.html.  The dataset used in this example is the 20 newsgroups dataset. It will be automatically downloaded, then cached. The newsgroup datasets contains text documents that are classified into 20 categories.
 
-Open the train.py document to inspect the code.
+Open the train_1model.py document to inspect the code.
     
 The first step in the code is to load the dataset from the 20 newsgroup dataset. In this example we are only going to use a subset of the categories. Please state the catogories we are going to use:
 

@@ -27,35 +27,19 @@ dataset_test = Dataset.get_by_name(workspace, name='newsgroups_subset_test')
 # Choose a name for your CPU cluster
 gpu_cluster_name = "hypercomputegpu"
 
-# Verify that cluster does not exist already
-try:
-    gpu_cluster = ComputeTarget(workspace=workspace, name=gpu_cluster_name)
-    print('Found existing cluster, use it.')
-except ComputeTargetException:
-    compute_config = AmlCompute.provisioning_configuration(vm_size='Standard_NC6',
-                                                           max_nodes=4)
-    gpu_cluster = ComputeTarget.create(workspace, gpu_cluster_name,
-                                       compute_config)
-
-gpu_cluster.wait_for_completion(show_output=True)
-
-
 # Define Run Configuration
 estimator = PyTorch(
-    entry_script='traindeep_datasets.py',
+    entry_script='train_datasets.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     compute_target=workspace.compute_targets[gpu_cluster_name],
     distributed_training=MpiConfiguration(),
     framework_version='1.4',
     use_gpu=True,
-    pip_packages=[
-        'numpy==1.15.4',
-        'pandas==0.23.4',
-        'scikit-learn==0.20.1',
-        'scipy==1.0.0',
-        'matplotlib==3.0.2',
-        'utils==0.9.0',
-    ],
+    conda_dependencies_file=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            '../../',
+            'conda_dependencies.yml'
+        ),
     inputs=[
         dataset_train.as_named_input('subset_train'),
         dataset_train.as_named_input('subset_test')

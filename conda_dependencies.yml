@@ -1,6 +1,6 @@
 name: project_environment
 dependencies:
-- python=3.6.2
+- python=3.6.10
 - pytorch
 - torchvision==0.5.0
 - torchtext==0.5.0
