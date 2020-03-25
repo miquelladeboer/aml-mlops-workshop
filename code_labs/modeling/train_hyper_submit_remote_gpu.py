@@ -4,12 +4,9 @@ from azureml.train.hyperdrive import (
 from azureml.core import Workspace, Experiment
 from azureml.core.runconfig import MpiConfiguration
 import os
+
 from azureml.train.hyperdrive.parameter_expressions import uniform, choice
-
-
 from azureml.core.authentication import AzureCliAuthentication
-from azureml.core.compute import ComputeTarget, AmlCompute
-from azureml.core.compute_target import ComputeTargetException
 from azureml.train.dnn import PyTorch
 
 # load Azure ML workspace
@@ -59,4 +56,6 @@ experiment = Experiment(workspace, "newsgroups_train_hypertune_gpu")
 # Submit the experiment
 hyperdrive_run = experiment.submit(hyperdrive_run_config)
 hyperdrive_run.wait_for_completion()
+
+
 

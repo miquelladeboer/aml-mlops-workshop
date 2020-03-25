@@ -44,7 +44,9 @@ metrics_data = PipelineData(name='metrics_data',
                             pipeline_output_name=metrics_output_name)
 
 # Define the compute target
-compute_target_hyper = workspace.compute_targets["hypercomputegpu"]
+compute_target_hyper = workspace.compute_targets["testcompute"]
+
+# compute_target_hyper = workspace.compute_targets["hypercomputegpu"]
 compute_target_fullmodel = workspace.compute_targets["fullcomputegpu"]
 
 # Define Run Configuration
@@ -72,10 +74,10 @@ estimator = PyTorch(
 
 # Set parameters for search
 param_sampling = BayesianParameterSampling({
-    "learning_rate": uniform(0.05, 0.1),
-    "num_epochs": choice(5, 10, 15),
-    "batch_size": choice(150, 200),
-    "hidden_size": choice(50, 100)
+    "learning_rate": uniform(10e-6, 1e0),
+    "num_epochs": choice(2, 3, 4),
+    "batch_size": choice(150, 300),
+    "hidden_size": choice(100, 200)
 })
 
 # Define the pipeline step
@@ -111,7 +113,6 @@ cd = CondaDependencies(
 )
 cd.add_channel("pytorch")
 
-
 # Runconfig
 amlcompute_run_config = RunConfiguration(conda_dependencies=cd)
 amlcompute_run_config.environment.docker.enabled = True
@@ -121,14 +122,14 @@ amlcompute_run_config.environment.spark.precache_packages = False
 fullmodel = PythonScriptStep(
     name="fullmodel",
     script_name="train.py",
-    arguments=[],
+    arguments=['--fullmodel', 1],
     inputs=[
             subset_dataset_train.as_named_input('subset_train'),
             subset_dataset_test.as_named_input('subset_test'),
             metrics_data
     ],
     outputs=[],
-    compute_target=compute_target_fullmodel,
+    compute_target=compute_target_hyper,   #should be full model
     runconfig=amlcompute_run_config,
     source_directory=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
@@ -146,4 +147,3 @@ experiment = Experiment(workspace, 're-train')
 
 # Run the experiment
 pipeline_run = experiment.submit(pipeline)
-pipeline_run.wait_for_completion()

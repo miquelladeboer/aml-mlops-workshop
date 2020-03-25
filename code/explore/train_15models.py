@@ -48,7 +48,7 @@ data_test = fetch_20newsgroups(subset='test', categories=categories,
 y_train, y_test = data_train.target, data_test.target
 
 # Extracting features from the training data using a sparse vectorizer
-vectorizer = TfidfVectorizer(sublinear_tf=True, 
+vectorizer = TfidfVectorizer(sublinear_tf=True,
                              max_df=0.5,
                              stop_words='english')
 

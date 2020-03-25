@@ -13,14 +13,20 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Define Run Configuration
 est = Estimator(
-    entry_script='train15.py',
+    entry_script='train_15_models.py',
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     compute_target='local',
-    conda_dependencies_file=os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        '../../',
-        'conda_dependencies.yml'
-    ),
+    conda_packages=[
+        'pip==20.0.2'
+    ],
+    pip_packages=[
+        'numpy==1.15.4',   
+        'pandas==0.23.4',
+        'scikit-learn==0.20.1',
+        'scipy==1.0.0',
+        'matplotlib==3.0.2',
+        'utils==0.9.0'
+    ],
     use_docker=False
 )
 
@@ -37,9 +43,9 @@ run.wait_for_completion(show_output=True)
 max_run_id = None
 max_accuracy = None
 
-for run in experiment.get_runs():
-    run_metrics = run.get_metrics()
-    run_details = run.get_details()
+for child in run.get_children():
+    run_metrics = child.get_metrics()
+    run_details = child.get_details()
     # each logged metric becomes a key in this returned dict
     accuracy = run_metrics["accuracy"]
     run_id = run_details["runId"]

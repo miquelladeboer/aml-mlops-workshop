@@ -6,43 +6,44 @@ import os
 
 import logging
 import numpy as np
-from optparse import OptionParser
-import sys
+import argparse
 from collections import Counter
 import pandas as pd
 import json
 import pandas
 import matplotlib.pyplot as plt
 
-from sklearn.externals import joblib
+import onnx
 
 from azureml.core import Run
 
+OUTPUTSFOLDER = "outputs"
+
 # Get run context
 run_logger = Run.get_context()
-
-OUTPUTSFOLDER = "outputs"
 
 # Display progress logs on stdout
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
 
-op = OptionParser()
-op.add_option("--learning_rate",
-              type=float, default=0.01)
-op.add_option("--num_epochs",
-              type=int, default=2)
-op.add_option("--batch_size",
-              type=int,
-              default=150)
-op.add_option("--hidden_size",
-              type=int,
-              default=100)
+parser = argparse.ArgumentParser()
+parser.add_argument("--learning_rate",
+                    type=float,
+                    default=0.1)
+parser.add_argument("--num_epochs",
+                    type=int,
+                    default=4)
+parser.add_argument("--batch_size",
+                    type=int,
+                    default=200)
+parser.add_argument("--hidden_size",
+                    type=int,
+                    default=500)
+parser.add_argument("--fullmodel",
+                    type=int,
+                    default=0)
 
-
-argv = []
-sys.argv[1:]
-(opts, args) = op.parse_args(argv)
+opts = parser.parse_args()
 
 # Retrieve the run and its context (datasets etc.)
 run = Run.get_context()
@@ -142,8 +143,6 @@ hyperparameters = {
     "hidden_size": opts.hidden_size,
 }
 
-print(hyperparameters)
-
 # Select the training hyperparameters.
 learning_rate = hyperparameters["learning_rate"]
 num_epochs = hyperparameters["num_epochs"]
@@ -233,22 +232,6 @@ for epoch in range(num_epochs):
     epoch_losses.append(epoch_loss / total_batch)
     epoch_accuracy.append(epoch_acc)
 
-# plot loss function and log to Azure ML
-plt.plot(np.array(epoch_losses), 'r', label="Loss")
-plt.xticks(np.arange(1, (num_epochs+1), step=1))
-plt.xlabel("Epochs")
-plt.ylabel("Loss Percentage")
-plt.legend(loc='upper left')
-run_logger.log_image("Loss grapgh", plot=plt)
-
-# plot Accuracy and log to Azure ML
-plt.plot(np.array(epoch_accuracy), 'b', label="Accuracy")
-plt.xticks(np.arange(1, (num_epochs+1), step=1))
-plt.xlabel("Epochs")
-plt.ylabel("Accuracy Percentage")
-plt.legend(loc='upper left')
-run_logger.log_image("Loss grapgh", plot=plt)
-
 # Test the Model
 correct = 0
 total = 0
@@ -274,13 +257,41 @@ run_logger.log("learning_rate", learning_rate)
 run_logger.log("num_epochs", num_epochs)
 run_logger.log("batch_size", batch_size)
 run_logger.log("hidden_size", hidden_size)
+run_logger.log("total_words", total_words)
+
+
+# plot loss function and log to Azure ML
+plt.plot(np.array(epoch_losses), 'r', label="Loss")
+plt.xticks(np.arange(1, (num_epochs+1), step=1))
+plt.xlabel("Epochs")
+plt.ylabel("Loss Percentage")
+plt.legend(loc='upper left')
+run_logger.log_image("Loss grapgh"+str(accuracy), plot=plt)
+plt.clf()
+
+# plot Accuracy and log to Azure ML
+plt.plot(np.array(epoch_accuracy), 'b', label="Accuracy")
+plt.xticks(np.arange(1, (num_epochs+1), step=1))
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy Percentage")
+plt.legend(loc='upper left')
+run_logger.log_image("Accuracy graph"+str(accuracy), plot=plt)
 
 # create outputs folder if not exists
 if not os.path.exists(OUTPUTSFOLDER):
     os.makedirs(OUTPUTSFOLDER)
 
-# save .pkl file
-model_name = "model" + ".pkl"
-filename = os.path.join(OUTPUTSFOLDER, model_name)
-joblib.dump(value=outputs, filename=filename)
-run_logger.upload_file(name=model_name, path_or_stream=filename)
+if opts.fullmodel == 1:
+
+    model = OurNet(input_size, hidden_size, num_classes)
+
+    dummy_input = torch.FloatTensor(batch_x_test)
+    model_name = "net.onnx"
+    filename = os.path.join(OUTPUTSFOLDER, model_name)
+
+    # joblib.dump(value=outputs, filename=filename)
+    torch.onnx.export(model, dummy_input, filename)
+    # Load the ONNX model
+    model = onnx.load(filename)
+    model = run_logger.register_model(model_name=model_name,
+                                      model_path=filename)

@@ -2,8 +2,6 @@ name: project_environment
 dependencies:
 - python=3.6.10
 - pytorch
-- torchvision==0.5.0
-- torchtext==0.5.0
 - pip:
   - numpy==1.15.4
   - pandas==0.23.4
@@ -20,3 +18,5 @@ dependencies:
   - flake8
   - flake8_formatter_junit_xml
   - pytest
+  - onnx
+  - onnxruntime

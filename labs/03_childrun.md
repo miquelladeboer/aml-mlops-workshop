@@ -168,6 +168,7 @@ Running the code via Azure ML, we need to excecute two steps. First, we need to 
     # save .pkl file
     model_name = "model" + ".pkl"
     filename = os.path.join(OUTPUTSFOLDER, model_name)
+    joblib.dump(value=clf, filename=filename)
 
     # upload model artifact with child run
     child_run.upload_file(
