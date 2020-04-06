@@ -1,54 +1,75 @@
 # aml-mlops-workshop
-Azure Machine Learning Workshop using MLOPS
+Azure Machine Learning Workshop using MLOPS (WIP)
 
-Full end-to-end solution of text classifciation with Pytorch on Azure Machine Learning using MLOps.
+Full end-to-end solution of text classifciation with Pytorch on Azure Machine Learning using MLOps covering:
 
-## Content 
+* Distibuted Data Engineering usgin Dask on Azure Machine Learning
+* Distributed Hyperparameter tuning using Pytorch on Azure Machine Learning
+* Data Science Code Testing
+* Datastores and Datasets for data governance and management
+* MLOps ARM templates for configuring environment
+* YAML for Run Configurations and ML Pipelines
+* CI/CD pipelines for model deployment
+* Monitoring models using Application Insights
+* Feedback Loop with Active Learning based on Model Drift
+
+# Content 
 The resportoty contains te foolowing material:
 * [Powerpoint slides with theory](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/Powerpoints) 
 * [Follow along labs to practise](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/labs)
-* [Code with the in between steps of labs](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/codeperstep)
-* [Final code for demo/ example](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/codefinal)
+* [Final code for demo/ example](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/code)
+* [Quickstart template](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/template)
+
 
 The labs + final code follow the MLOps guidelines and best practices. For the template, look at: https://github.com/Azure/MLOps-TDSP-Template
 
-In the labs we take 1 dataset and show different capabilities of Azure Machine Learning. We use the 20newgroup dataset from sklearn and we will show the following things:
-* Pytorch on Azure Machine Learning
-* Run Pytorch Experiment with Horovod distributed training
-* Hyperparamter tuning with HyperDrive
-* Use GPU's as remote compute to perform distributed training
-* Use the concepts of Datasets to work with different versions of the data
-* Reuse models from previous run in a new run
-* Use Pipelines to combine multiple experiments
-* Use model outputs from one step in the pipeline as input in the next step of the pipeline
-* Model management
-* Model CI/CD
-* Model drift monitoring
-* Automated Pipeline triggers from model drift
+In the lab we take 1 use-case and show different capabilities of Azure Machine Learning. 
 
 
-## workshop
+# workshop
 In this workshop, you learn about Azure Machine Learning, a cloud-based environment you can use to train, deploy, automate, manage, and track ML models. Azure Machine Learning can be used for any kind of machine learning, from classical ml to deep learning, supervised, and unsupervised learning. Whether you prefer to write Python or R code or zero-code/low-code options such as the designer, you can build, train, and track highly accurate machine learning and deep-learning models in an Azure Machine Learning Workspace.
 
 So what we propose, is a 3-day workshop, covering all the artifact of Azure Machine Learning Service for advanced Data Scientist that want to get to know the Azure Machine Learning Service on a deeply technical level, covering the following subjects:
  
-Introduction
+## Introduction
 * AI Platform
 * Azure Machine Learning conceptually
 * Azure Machine Learning workspaces
 * Azure Machine Learning tools and interfaces
- 
-Experiment
-* Experiment Tracking
-* Managing Compute
-* Unattended Remote Execution 
 
-Dataset Capabilities
-* Event-based Data triggering and ML workflows
-  * Data arrives on blob -> Logic App -> Trigger ML Pipeline
+[PPT Introduction to Azure Machine Learning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%201%20-%20Introduction.pptx) 
+
+[Lab 1: Setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)
+ 
+## Experiment
+* Experiment Tracking
+* Unattended Remote Execution (parallel with child runs)
+
+[PPT Experiments on Azure Machine Learning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%202%20-%20Experiments.pptx) 
+
+[Lab 2: Experiment Tracking](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/02_experiment.md)
+
+[Lab 3: Unattended Remote Execution (parallel)](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/03_childrun.md)
+
+## Hyperparameter Tuning
+* Deep Learning with Pytorch
+* Hyperparameter tuning
+
+[PPT Hyperparameter Tuning on Azure Machine Learning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%203%20-%20Hyperparameter%20tuning.pptx) 
+
+[Lab 4: Hyperparameter Tuning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/04_hyperdrive)
+
+## Remote Compute
+
+[PPT Hyperparameter Tuning on Azure Machine Learning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%203%20-%20Hyperparameter%20tuning.pptx) 
+
+[Lab 4: Hyperparameter Tuning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/04_hyperdrive)
+
+
+## Dataset Capabilities
 * Datastores
 * Datasets
-* Labeling
+
  
 Pipelines
 * Pipelines conceptually

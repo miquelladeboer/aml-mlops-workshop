@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "C:\\Users\\mideboer.EUROPE\\Miniconda3\\envs\\venvworkshop\\python.exe",
+    "python.pythonPath": "C:\\Users\\mideboer.EUROPE\\Miniconda3\\envs\\venvaml\\python.exe",
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true

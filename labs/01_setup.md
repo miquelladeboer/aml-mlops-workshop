@@ -13,11 +13,20 @@ In this first lab, we'll set up our working environment.
 * Create a new virtual environment
 From a command line window, run  `conda create -n myenvworkshop python=3.6 anaconda` 
 
+* Activate the virtual environment
+From a command line window, run  `conda activate myenvworkshop` 
+
 * Azure ML SDK
   From a command line window, run the following command to install the python client package for Azure ML: `pip install azureml-sdk`
 
+* Azure ML SDK for Notebooks
+  From a command line window, run the following command to install the python client package for Azure ML: `pip install azureml-sdk[notebooks]`
+
 * Install frameworks for deeplearning: Pytorch
   From a command line window, run `conda install -c pytorch pytorch`
+
+* Install frameworks for distributed data preperation: Dask
+  From a command line window, run `pip install --upgrade dask distributed`
 
 * Azure CLI
   From a command line window, run the following command to install the Azure CLI, used for authentication and management tasks: `pip install azure-cli`
@@ -28,7 +37,7 @@ From a command line window, run  `conda create -n myenvworkshop python=3.6 anaco
 
 ## Clone the repository
 
-Clone the following git repository: git clone  https://github.com/Azure/aml-mlops-workshop
+Clone the following git repository: git clone  https://github.com/miquelladeboer/workshop-azure-machine-learning
 
 ## Open the cloned git repository in VS Code or your favorite IDE
 
