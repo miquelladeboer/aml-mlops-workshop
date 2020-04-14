@@ -1,24 +1,18 @@
 import logging
 import argparse
 import numpy as np
-from sklearn.externals import joblib
 import os
+from azureml.core import Run
 
-from packages.get_data import (load_data_from_local,
-                               load_data_from_azure)
+from packages.get_data import (load_data)
 from packages.sklearn import (Model_choice,
                               fit_sklearn,
                               pandas_to_numpy,
                               vectorizer)
 from packages.plots import (plot_auc, plot_loss_per_epoch,
                             plot_accuracy_per_epoch)
-from packages.deeplearning import (index_words,
-                                   get_word_2_index,
-                                   get_hyperparameters,
-                                   OurNet, train_model,
-                                   test_model)
 
-from azureml.core import Run
+from sklearn.externals import joblib
 
 # Get run context
 run = Run.get_context()
@@ -28,18 +22,19 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--dataset",
-                    type=str,
-                    default='subset_')
 parser.add_argument("--models",
                     type=str,
-                    default='sklearnmodels')
+                    default='deeplearning')
 parser.add_argument("--fullmodel",
-                    type=bool,
                     default=False)
-parser.add_argument("--data_local",
-                    type=bool,
-                    default=True)
+parser.add_argument('--data_folder_train',
+                    type=str,
+                    dest='data_folder_train',
+                    help='data folder mounting point')
+parser.add_argument('--data_folder_test',
+                    type=str,
+                    dest='data_folder_test',
+                    help='data folder mounting point')
 
 parser.add_argument("--learning_rate",
                     type=float,
@@ -56,19 +51,8 @@ parser.add_argument("--hidden_size",
 
 opts = parser.parse_args()
 
-if opts.models == 'deeplearning':
-    import torch.nn as nn
-    from torch.autograd import Variable
-    import torch
-    import pickle
-    import onnx
-
-if opts.data_local is True:
-    # load data from local path
-    data_train, data_test = load_data_from_local(opts.dataset)
-else:
-    # load data from Azure
-    data_train, data_test = load_data_from_azure(opts.dataset, run)
+# Load data
+data_train, data_test = load_data(opts)
 
 if opts.models != 'deeplearning':
     # get numpy back
@@ -117,6 +101,17 @@ if opts.models != 'deeplearning':
         run.upload_file(name=model_name, path_or_stream=filename)
 
 else:
+    import torch.nn as nn
+    from torch.autograd import Variable
+    import torch
+    import pickle
+    import onnx
+    from packages.deeplearning import (index_words,
+                                       get_word_2_index,
+                                       get_hyperparameters,
+                                       OurNet, train_model,
+                                       test_model)
+
     vocab, total_words = index_words(data_train, data_test)
     word2index = get_word_2_index(vocab)
     (learning_rate, num_epochs,
@@ -186,6 +181,3 @@ else:
         model = onnx.load(filename)
         model = run.register_model(model_name=model_name,
                                    model_path=filename)
-
-
-

@@ -14,12 +14,14 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import NearestCentroid
 from sklearn.ensemble import RandomForestClassifier
 
+import numpy as np
+
 
 def pandas_to_numpy(data_train, data_test):
-    X_train = data_train.text.to_numpy().astype(str)
-    X_test = data_test.text.to_numpy().astype(str)
-    y_train = data_train.target.to_numpy().astype(float)
-    y_test = data_test.target.to_numpy().astype(float)
+    X_train = data_train.text
+    X_test = data_test.text
+    y_train = data_train.target
+    y_test = data_test.target
     return(X_train, X_test, y_train, y_test)
 
 

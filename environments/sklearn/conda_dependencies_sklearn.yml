@@ -4,8 +4,8 @@ dependencies:
 - pip
 
 - pip:
-  - numpy==1.15.4
-  - pandas==0.23.4
+  - numpy==1.18.1
+  - pandas==1.0.3
   - scikit-learn==0.20.1
   - scipy==1.0.0
   - matplotlib==3.0.2

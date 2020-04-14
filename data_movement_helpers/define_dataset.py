@@ -14,17 +14,14 @@ for data_split in ['train', 'test']:
         # Create a TabularDataset from paths in datastore in split folder
         # Note that wildcards can be used
         datastore_paths = [
-            (datastore, '{}/*.csv'.format(set + data_split))
+            (datastore, '{}.csv'.format(set + data_split))
         ]
 
+        print(datastore_paths)
+
         # Create a TabularDataset from paths in datastore
-        dataset = Dataset.Tabular.from_delimited_files(
-            path=datastore_paths,
-            set_column_types={
-                'text': DataType.to_string(),
-                'target': DataType.to_string()
-            },
-            header=True
+        dataset = Dataset.File.from_files(
+            path=datastore_paths
         )
 
         # Register the defined dataset for later use
@@ -34,3 +31,5 @@ for data_split in ['train', 'test']:
             description='newsgroups data',
             create_new_version=True
         )
+
+        dataset.download(target_path='C:/Users/mideboer.EUROPE/Documents/GitHub/aml-mlops-workshop/data_movement_helpers', overwrite=False)

@@ -5,19 +5,19 @@ Facilitates (remote) training execution through the Azure ML service.
 """
 import os
 from azureml.core import Workspace, Experiment, ScriptRunConfig
-from azureml.train.estimator import Estimator
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.dataset import Dataset
-from azureml.core.runconfig import RunConfiguration
+from azureml.core.runconfig import RunConfiguration, MpiConfiguration
 from azureml.train.hyperdrive.parameter_expressions import uniform, choice
 from azureml.train.hyperdrive import (
     BayesianParameterSampling,
     HyperDriveConfig, PrimaryMetricGoal)
-
+from azureml.train.dnn import PyTorch
+from packages.aml_helpers import LocalEstimator, load_data
 
 # Define comfigs
-dataset = ''
-models = 'randomforest'
+subset = False
+models = 'deeplearning'
 data_local = False
 
 # define compute
@@ -35,30 +35,36 @@ param_sampling = BayesianParameterSampling({
 # load Azure ML workspace
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
+if subset is True:
+    # define data set names
+    input_name_train = 'newsgroups_subset_train'
+    input_name_test = 'newsgroups_subset_test'
+else:
+    input_name_train = 'newsgroups_train'
+    input_name_test = 'newsgroups_test'
+
 # define script parameters
 script_params = [
-    '--dataset', "subset_",
     '--models', models,
-    '--data_local', data_local,
-]
+    '--data_folder_train',
+    'DatasetConsumptionConfig:{}'.format(input_name_train),
+    '--data_folder_test',
+    'DatasetConsumptionConfig:{}'.format(input_name_test)
+    ]
 
 # get data stores if from azure
 if data_local is False:
-    dataset_train = Dataset.get_by_name(workspace,
-                                        name='newsgroups_' + dataset + 'train')
-    dataset_test = Dataset.get_by_name(workspace,
-                                       name='newsgroups_' + dataset + 'test')
+    dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
+    dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
+
 
 if models != 'deeplearning':
     if data_local is True:
         # Define Run Configuration
-        est = Estimator(
+        est = LocalEstimator(
             entry_script='train.py',
             script_params=script_params,
             source_directory=os.path.dirname(os.path.realpath(__file__)),
-            compute_target=compute_target,
-            user_managed=True,
-            use_docker=False,
         )
 
     if data_local is False:
@@ -71,12 +77,18 @@ if models != 'deeplearning':
                 )),
             name="sklearn"
         )
-   
+        run_config.target = compute_target
+
+        run_config.data = {input_name_train: load_data(dataset_train,
+                                                       input_name_train),
+                           input_name_test: load_data(dataset_test,
+                                                      input_name_test)}
+
         est = ScriptRunConfig(
             script='train.py',
             source_directory=os.path.dirname(os.path.realpath(__file__)),
-            run_config=run_config,
-            arguments=script_params
+            arguments=script_params,
+            run_config=run_config
         )
 
     # Define the ML experiment
@@ -85,27 +97,33 @@ if models != 'deeplearning':
     run = experiment.submit(est)
 
 if models == 'deeplearning':
-    # Load run Config
-    run_config = RunConfiguration.load(
-        path=os.path.join(os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            "../..",
-            "environments/PyTorch/RunConfig/runconfig_pytorch.yml",
-            )),
-        name="pytorch"
-    )
+    # define script parameters
+    script_params_2 = {
+        '--models': models,
+        '--data_folder_train':
+        dataset_train.as_named_input('train').as_mount(),
+        '--data_folder_test':
+        dataset_test.as_named_input('test').as_mount()
+        }
 
-    # Define Run Configuration
-    estimator = Estimator(
+    estimator = PyTorch(
         entry_script='train.py',
-        script_params=script_params,
+        script_params=script_params_2,
         source_directory=os.path.dirname(os.path.realpath(__file__)),
         compute_target=workspace.compute_targets[compute_target],
-        run_config=run_config,
-        inputs=[
-            dataset_train.as_named_input(dataset + 'train'),
-            dataset_train.as_named_input(dataset + 'test')
-        ]
+        distributed_training=MpiConfiguration(),
+        framework_version='1.4',
+        use_gpu=True,
+        pip_packages=[
+            'numpy==1.15.4',
+            'pandas==0.23.4',
+            'scikit-learn==0.20.1',
+            'scipy==1.0.0',
+            'matplotlib==3.0.2',
+            'utils==0.9.0',
+            'onnxruntime==1.2.0',
+            'onnx==1.6.0'
+            ]
     )
 
     # Define multi-run configuration
@@ -120,9 +138,7 @@ if models == 'deeplearning':
     )
 
     # Define the ML experiment
-    experiment = Experiment(workspace, "newsgroups_train")
+    experiment = Experiment(workspace=workspace, name="newsgroups_train")
 
     # Submit the experiment
     run = experiment.submit(hyperdrive_run_config)
-
-run.wait_for_completion()
