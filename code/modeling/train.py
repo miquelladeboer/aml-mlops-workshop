@@ -50,6 +50,8 @@ parser.add_argument("--hidden_size",
                     default=100)
 
 opts = parser.parse_args()
+print(opts.data_folder_train)
+print(opts.data_folder_test)
 
 # Load data
 data_train, data_test = load_data(opts)

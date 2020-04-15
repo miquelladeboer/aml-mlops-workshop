@@ -80,7 +80,6 @@ def get_hyperparameters(opts):
     return learning_rate, num_epochs, batch_size, hidden_size
 
 
-
 class OurNet(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
         super(OurNet, self).__init__()

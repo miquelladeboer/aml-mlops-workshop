@@ -1,6 +1,7 @@
 name: project_environment
 dependencies:
 - python=3.6.10
+- pytorch
 - pip
 
 - pip:
@@ -10,6 +11,8 @@ dependencies:
   - scipy==1.0.0
   - matplotlib==3.0.2
   - utils==0.9.0
+  - onnxruntime==1.2.0
+  - onnx==1.6.0
   # Required packages for AzureML execution, history, and data preparation.
   - azureml-sdk==1.0.85
   - azureml-defaults==1.0.85

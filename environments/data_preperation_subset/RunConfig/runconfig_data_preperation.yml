@@ -5,86 +5,17 @@ arguments: []
 # The name of the compute target to use for this run.
 target: alwaysoncluster
 # Framework to execute inside. Allowed values are "Python" ,  "PySpark", "CNTK",  "TensorFlow", and "PyTorch".
-framework: PyTorch
+framework: Python
 # Communicator for the given framework. Allowed values are "None" ,  "ParameterServer", "OpenMpi", and "IntelMpi".
-communicator:
-# When using MPI, number of processes per node.
-  processCountPerNode: 1
+communicator: None
 # Maximum allowed duration for the run.
 maxRunDurationSeconds:
 # Number of nodes to use for running job.
 nodeCount: 1
 # Environment details.
-environment:
-# Environment name
-  name:
-# Environment version
-  version:
-# Environment variables set for the run.
-  environmentVariables:
-    EXAMPLE_ENV_VAR: EXAMPLE_VALUE
-# Python details
-  python:
-# user_managed_dependencies=True indicates that the environmentwill be user managed. False indicates that AzureML willmanage the user environment.
-    userManagedDependencies: false
-# The python interpreter path
-    interpreterPath: python
-# Path to the conda dependencies file to use for this run. If a project
-# contains multiple programs with different sets of dependencies, it may be
-# convenient to manage those environments with separate files.
-    condaDependenciesFile: conda_dependencies.yml
-# The base conda environment used for incremental environment creation.
-    baseCondaEnvironment:
-# Docker details
-  docker:
-# Set True to perform this run inside a Docker container.
-    enabled: true
-# Base image used for Docker-based runs. Mutually exclusive with base_dockerfile.
-    baseImage: mcr.microsoft.com/azureml/base:intelmpi2018.3-ubuntu16.04
-# Base Dockerfile used for Docker-based runs. Mutually exclusive with base_image
-    baseDockerfile:
-# Set False if necessary to work around shared volume bugs.
-    sharedVolumes: true
-# Shared memory size for Docker container. Default is 2g.
-    shmSize: 2g
-# Extra arguments to the Docker run command.
-    arguments: []
-# Image registry that contains the base image.
-    baseImageRegistry:
-# DNS name or IP address of azure container registry(ACR)
-      address:
-# The username for ACR
-      username:
-# The password for ACR
-      password:
-# Spark details
-  spark:
-# List of spark repositories.
-    repositories: []
-# The packages to use.
-    packages: []
-# Whether to precache the packages.
-    precachePackages: false
-# Databricks details
-  databricks:
-# List of maven libraries.
-    mavenLibraries: []
-# List of PyPi libraries
-    pypiLibraries: []
-# List of RCran libraries
-    rcranLibraries: []
-# List of JAR libraries
-    jarLibraries: []
-# List of Egg libraries
-    eggLibraries: []
-# R details
-  r:
-# Inferencing stack version
-  inferencingStackVersion:
+environment: environment.yml
 # History details.
 history:
-# Enable history tracking -- this allows status, logs, metrics, and outputs
-# to be collected for a run.
 # Enable history tracking -- this allows status, logs, metrics, and outputs
 # to be collected for a run.
   outputCollection: true
@@ -102,11 +33,9 @@ spark:
 # HDI details.
 hdi:
 # Yarn deploy mode. Options are cluster and client.
-# Yarn deploy mode. Options are cluster and client.
   yarnDeployMode: cluster
 # Tensorflow details.
 tensorflow:
-# The number of worker tasks.
 # The number of worker tasks.
   workerCount: 1
 # The number of parameter server tasks.
@@ -114,19 +43,18 @@ tensorflow:
 # Mpi details.
 mpi:
 # When using MPI, number of processes per node.
-# When using MPI, number of processes per node.
   processCountPerNode: 1
 # data reference configuration details
 dataReferences: {}
 # The configuration details for data.
 data:
-  newsgroups_train:
+  newsgroups_subset_train:
 # Data Location
     dataLocation:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: dbcc289f-e68b-427a-a4ba-6e8ea0b98cbb
+        id: 7673d2a5-d0d2-4094-bf5b-fb01235279cf
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.
@@ -134,18 +62,18 @@ data:
 # The mode to handle
     mechanism: mount
 # Point where the data is download or mount or upload.
-    environmentVariableName: newsgroups_train
+    environmentVariableName: newsgroups_subset_train
 # relative path where the data is download or mount or upload.
     pathOnCompute:
 # Whether to overwrite the data if existing.
     overwrite: true
-  newsgroups_test:
+  newsgroups_subset_test:
 # Data Location
     dataLocation:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: 661e8f8a-5931-4c88-9ad5-39321fce39d8
+        id: 5dccca8b-336c-4fe6-a47d-2904029fb930
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.
@@ -153,7 +81,7 @@ data:
 # The mode to handle
     mechanism: mount
 # Point where the data is download or mount or upload.
-    environmentVariableName: newsgroups_test
+    environmentVariableName: newsgroups_subset_test
 # relative path where the data is download or mount or upload.
     pathOnCompute:
 # Whether to overwrite the data if existing.
@@ -162,7 +90,6 @@ data:
 sourceDirectoryDataStore:
 # AmlCompute details.
 amlcompute:
-# VM size of the Cluster to be created.Allowed values are Azure vm sizes.The list of vm sizes is available in 'https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-sizes-specs
 # VM size of the Cluster to be created.Allowed values are Azure vm sizes.The list of vm sizes is available in 'https://docs.microsoft.com/en-us/azure/cloud-services/cloud-services-sizes-specs
   vmSize:
 # VM priority of the Cluster to be created. Allowed values are:"dedicated" , "lowpriority".

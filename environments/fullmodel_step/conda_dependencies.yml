@@ -1,6 +1,7 @@
 name: project_environment
 dependencies:
 - python=3.6.10
+- pytorch
 - pip
 
 - pip:

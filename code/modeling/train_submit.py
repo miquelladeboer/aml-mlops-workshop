@@ -5,6 +5,7 @@ Facilitates (remote) training execution through the Azure ML service.
 """
 import os
 from azureml.core import Workspace, Experiment, ScriptRunConfig
+from azureml.train.estimator import Estimator
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.dataset import Dataset
 from azureml.core.runconfig import RunConfiguration, MpiConfiguration
@@ -13,11 +14,10 @@ from azureml.train.hyperdrive import (
     BayesianParameterSampling,
     HyperDriveConfig, PrimaryMetricGoal)
 from azureml.train.dnn import PyTorch
-from packages.aml_helpers import LocalEstimator, load_data
 
 # Define comfigs
 subset = False
-models = 'deeplearning'
+models = 'randomforest'
 data_local = False
 
 # define compute
@@ -39,18 +39,31 @@ if subset is True:
     # define data set names
     input_name_train = 'newsgroups_subset_train'
     input_name_test = 'newsgroups_subset_test'
+    dataset = "subset_"
+    filepath = "environments/sklearn_subset_1cpu/RunConfig/runconfig_subset.yml"
 else:
     input_name_train = 'newsgroups_train'
     input_name_test = 'newsgroups_test'
+    dataset = ""
+    filepath = "environments/sklearn_full_20cpu/RunConfig/runconfig_fullmodel.yml"
 
 # define script parameters
-script_params = [
-    '--models', models,
-    '--data_folder_train',
-    'DatasetConsumptionConfig:{}'.format(input_name_train),
-    '--data_folder_test',
-    'DatasetConsumptionConfig:{}'.format(input_name_test)
-    ]
+script_params = {
+    '--models': models,
+    '--data_folder_train':
+    os.path.join(os.path.join(
+                os.path.dirname(os.path.realpath(__file__)),
+                "../..",
+                "outputs/prepared_data/", dataset + "train.csv",
+                )),
+    '--data_folder_test':
+    os.path.join(os.path.join(
+                os.path.dirname(os.path.realpath(__file__)),
+                "../..",
+                "outputs/prepared_data/", dataset + "test.csv",
+                )),
+    }
+
 
 # get data stores if from azure
 if data_local is False:
@@ -61,10 +74,13 @@ if data_local is False:
 if models != 'deeplearning':
     if data_local is True:
         # Define Run Configuration
-        est = LocalEstimator(
+        est = Estimator(
             entry_script='train.py',
             script_params=script_params,
             source_directory=os.path.dirname(os.path.realpath(__file__)),
+            compute_target='local',
+            user_managed=True,
+            use_docker=False
         )
 
     if data_local is False:
@@ -73,21 +89,20 @@ if models != 'deeplearning':
             path=os.path.join(os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "../..",
-                "environments/sklearn/RunConfig/runconfig_sklearn.yml",
+                filepath,
                 )),
             name="sklearn"
         )
-        run_config.target = compute_target
-
-        run_config.data = {input_name_train: load_data(dataset_train,
-                                                       input_name_train),
-                           input_name_test: load_data(dataset_test,
-                                                      input_name_test)}
 
         est = ScriptRunConfig(
-            script='train.py',
             source_directory=os.path.dirname(os.path.realpath(__file__)),
-            arguments=script_params,
+            arguments=[
+                "--models", models,
+                '--data_folder_train',
+                'DatasetConsumptionConfig:{}'.format(input_name_train),
+                '--data_folder_test',
+                'DatasetConsumptionConfig:{}'.format(input_name_test)
+            ],
             run_config=run_config
         )
 
@@ -98,7 +113,7 @@ if models != 'deeplearning':
 
 if models == 'deeplearning':
     # define script parameters
-    script_params_2 = {
+    script_params_3 = {
         '--models': models,
         '--data_folder_train':
         dataset_train.as_named_input('train').as_mount(),
@@ -108,7 +123,7 @@ if models == 'deeplearning':
 
     estimator = PyTorch(
         entry_script='train.py',
-        script_params=script_params_2,
+        script_params=script_params_3,
         source_directory=os.path.dirname(os.path.realpath(__file__)),
         compute_target=workspace.compute_targets[compute_target],
         distributed_training=MpiConfiguration(),
