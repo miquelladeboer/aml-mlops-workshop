@@ -42,13 +42,6 @@ for data_split in ['train', 'test']:
     df_subset = df.sample(frac=0.5)
 
     # write to csv
-    df.to_csv(
-        path_or_buf=os.path.join(
-            OUTPUTSFOLDER, 'raw_' + data_split +
-            '.csv')
-    )
-
-    # write to csv
     df_subset.to_csv(
         path_or_buf=os.path.join(
             OUTPUTSFOLDER, 'raw_subset_' + data_split +

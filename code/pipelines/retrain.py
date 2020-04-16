@@ -13,6 +13,14 @@ from azureml.core.runconfig import RunConfiguration
 
 import os
 
+# Set parameters for search
+param_sampling = BayesianParameterSampling({
+    "learning_rate": uniform(10e-6, 1e0),
+    "num_epochs": choice(1, 2),
+    "batch_size": choice(10, 20, 50, 100, 200, 300, 500, 1000),
+    "hidden_size": choice(300, 400)
+})
+
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Retrieve datastore/datasets
@@ -42,11 +50,6 @@ metrics_data = PipelineData(name='metrics_data',
                             datastore=datastore,
                             pipeline_output_name=metrics_output_name)
 
-# Define the compute target
-compute_target_hyper = "alwaysoncluster"
-compute_target_fullmodel = "alwaysoncluster"
-
-
 script_params = [
     '--models', 'deeplearning',
     '--data_folder_train',
@@ -64,14 +67,6 @@ script_params_2 = [
     dataset_test.as_named_input('test').as_mount()
 ]
 
-# Set parameters for search
-param_sampling = BayesianParameterSampling({
-    "learning_rate": uniform(10e-6, 1e0),
-    "num_epochs": choice(1, 2),
-    "batch_size": choice(10, 20, 50, 100, 200, 300, 500, 1000),
-    "hidden_size": choice(300, 400)
-})
-
 # Define Run Configuration
 estimator = PyTorch(
     entry_script='train.py',
@@ -80,7 +75,7 @@ estimator = PyTorch(
         '../',
         'modeling'
     ),
-    compute_target=compute_target_hyper,
+    compute_target="alwaysoncluster",
     distributed_training=MpiConfiguration(),
     framework_version='1.4',
     use_gpu=True,

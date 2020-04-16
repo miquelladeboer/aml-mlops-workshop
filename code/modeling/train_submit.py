@@ -17,11 +17,8 @@ from azureml.train.dnn import PyTorch
 
 # Define comfigs
 subset = False
-models = 'randomforest'
+models = 'sklearnmodels'
 data_local = False
-
-# define compute
-compute_target = 'alwaysoncluster'
 
 # If deep learning define hyperparameters
 # Set parameters for search
@@ -39,40 +36,32 @@ if subset is True:
     # define data set names
     input_name_train = 'newsgroups_subset_train'
     input_name_test = 'newsgroups_subset_test'
-    dataset = "subset_"
-    filepath = "environments/sklearn_subset_1cpu/RunConfig/runconfig_subset.yml"
+    filepath = "environments/sklearn_subset/RunConfig/runconfig_subset.yml"
 else:
     input_name_train = 'newsgroups_train'
     input_name_test = 'newsgroups_test'
-    dataset = ""
-    filepath = "environments/sklearn_full_20cpu/RunConfig/runconfig_fullmodel.yml"
-
-# define script parameters
-script_params = {
-    '--models': models,
-    '--data_folder_train':
-    os.path.join(os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "../..",
-                "outputs/prepared_data/", dataset + "train.csv",
-                )),
-    '--data_folder_test':
-    os.path.join(os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "../..",
-                "outputs/prepared_data/", dataset + "test.csv",
-                )),
-    }
-
-
-# get data stores if from azure
-if data_local is False:
-    dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
-    dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
+    filepath = "environments/sklearn_full/RunConfig/runconfig_full.yml"
 
 
 if models != 'deeplearning':
     if data_local is True:
+        # define script parameters
+        script_params = {
+            '--models': models,
+            '--data_folder_train':
+            os.path.join(os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "../..",
+                    "outputs/prepared_data/subset_train.csv",
+                    )),
+            '--data_folder_test':
+            os.path.join(os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "../..",
+                    "outputs/prepared_data/subset_test.csv",
+                    )),
+            }
+
         # Define Run Configuration
         est = Estimator(
             entry_script='train.py',
@@ -84,6 +73,9 @@ if models != 'deeplearning':
         )
 
     if data_local is False:
+        dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
+        dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
+        
         # Load run Config
         run_config = RunConfiguration.load(
             path=os.path.join(os.path.join(
@@ -112,6 +104,9 @@ if models != 'deeplearning':
     run = experiment.submit(est)
 
 if models == 'deeplearning':
+    dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
+    dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
+
     # define script parameters
     script_params_3 = {
         '--models': models,
@@ -125,7 +120,7 @@ if models == 'deeplearning':
         entry_script='train.py',
         script_params=script_params_3,
         source_directory=os.path.dirname(os.path.realpath(__file__)),
-        compute_target=workspace.compute_targets[compute_target],
+        compute_target=workspace.compute_targets["hypercompute"],
         distributed_training=MpiConfiguration(),
         framework_version='1.4',
         use_gpu=True,
@@ -153,7 +148,7 @@ if models == 'deeplearning':
     )
 
     # Define the ML experiment
-    experiment = Experiment(workspace=workspace, name="newsgroups_train")
+    experiment = Experiment(workspace=workspace, name="hyperdrive")
 
     # Submit the experiment
     run = experiment.submit(hyperdrive_run_config)

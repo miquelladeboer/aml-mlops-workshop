@@ -54,7 +54,7 @@ run_config_sub = RunConfiguration.load(
  path=os.path.join(os.path.join(
   os.path.dirname(os.path.realpath(__file__)),
   "../..",
-  "environments/data_preperation_subset/RunConfig/runconfig_data_preperation.yml",
+  "environments/data_preperation_subset/RunConfig/runconfig_data.yml",
   )),
  name="dataprep_subset"
 )
@@ -64,7 +64,7 @@ run_config = RunConfiguration.load(
  path=os.path.join(os.path.join(
   os.path.dirname(os.path.realpath(__file__)),
   "../..",
-  "environments/data_preperation_full/RunConfig/runconfig_data_preperation.yml",
+  "environments/data_preperation/RunConfig/runconfig_data.yml",
   )),
  name="dataprep_full"
 )
