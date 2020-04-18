@@ -2,3 +2,4 @@ outputs/
 .azureml/
 .ssh/
 .vscode/
+*.pyc

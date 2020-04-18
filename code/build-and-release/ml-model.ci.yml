@@ -56,10 +56,8 @@ stages:
         azureSubscription: "my-service-connection"
         scriptLocation: inlineScript
         inlineScript: |
-          echo $(az account list)
           subscription=$(az account list --query "[?isDefault].id | [0]" --output tsv)
-          echo $subscription
-          echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > ./azureml/config.json
+          echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > .azureml/config.json
 
     - task: AzureCLI@2
       displayName: Run Training Pipeline
@@ -70,16 +68,6 @@ stages:
         inlineScript: |
           source activate agentenv
           python $(amlPipelineRunner)
-
-    # - task: AzureCLI@2
-    #   displayName: Download Model for Testing
-    #   inputs:
-    #     azureSubscription: "my-service-connection"
-    #     scriptType: bash
-    #     scriptLocation: inlineScript
-    #     inlineScript: |
-    #       source activate agentenv
-    #       python code/build-and-release/scripts/download_model.py
 
     # @TODO Integration tests on scorer app
     # @TODO Model validation tests
