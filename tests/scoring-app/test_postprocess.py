@@ -3,7 +3,6 @@
 
 def test_postprocess_datasamplea():
     """@TODO"""
-    preprocess({})
     return True
 
 
