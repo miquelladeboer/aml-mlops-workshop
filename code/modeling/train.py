@@ -3,6 +3,8 @@ import argparse
 import numpy as np
 import os
 from azureml.core import Run
+import json
+import pandas as pd
 
 from packages.get_data import (load_data)
 from packages.sklearn import (Model_choice,
@@ -10,7 +12,9 @@ from packages.sklearn import (Model_choice,
                               pandas_to_numpy,
                               vectorizer)
 from packages.plots import (plot_auc, plot_loss_per_epoch,
-                            plot_accuracy_per_epoch)
+                            plot_accuracy_per_epoch,
+                            plot_confusion_matrix,
+                            plot_confusion_matrix_abs)
 
 from sklearn.externals import joblib
 
@@ -24,9 +28,10 @@ logging.basicConfig(level=logging.INFO,
 parser = argparse.ArgumentParser()
 parser.add_argument("--models",
                     type=str,
-                    default='deeplearning')
+                    default='sklearnmodels')
 parser.add_argument("--fullmodel",
-                    default=False)
+                    type=str,
+                    default='no')
 parser.add_argument('--data_folder_train',
                     type=str,
                     dest='data_folder_train',
@@ -35,6 +40,9 @@ parser.add_argument('--data_folder_test',
                     type=str,
                     dest='data_folder_test',
                     help='data folder mounting point')
+parser.add_argument('--pipeline',
+                    type=str,
+                    default='no')
 
 parser.add_argument("--learning_rate",
                     type=float,
@@ -50,11 +58,18 @@ parser.add_argument("--hidden_size",
                     default=100)
 
 opts = parser.parse_args()
-print(opts.data_folder_train)
-print(opts.data_folder_test)
 
-# Load data
+#test = os.environ.get("AZUREML_DATAREFERENCE_newsgroups_subset_train")
+#test2 = test + ".csv"
+#opts.data_folder_train = test2
+
+#test = os.environ.get("AZUREML_DATAREFERENCE_newsgroups_subset_test")
+#test2 = test + ".csv"
+#opts.data_folder_test = test2
+
 data_train, data_test = load_data(opts)
+#data_train = data_train1[data_train1['text'].notnull()]
+#data_test = data_test1[data_test1['text'].notnull()]
 
 if opts.models != 'deeplearning':
     # get numpy back
@@ -69,11 +84,9 @@ if opts.models != 'deeplearning':
         clf, name = models.select_model(i)
 
         (clf_descr, accuracy, balanced_accuracy,
-         precision, recall, f1, fpr, tpr, roc_auc) = fit_sklearn(
+         precision, recall, f1, fpr, tpr, roc_auc,
+         disp, cm, classes) = fit_sklearn(
             clf, X_train, X_test, y_train, y_test)
-
-        # plot auc
-        plt = plot_auc(fpr, tpr, roc_auc)
 
         # child runs
         if opts.models == 'sklearnmodels':
@@ -84,8 +97,16 @@ if opts.models != 'deeplearning':
             child_run.log("F1 score", float(f1))
             child_run.log("precision", float(precision))
             child_run.log("recall", float(recall))
-            child_run.log_image("AUC"+name, plot=plt)
-
+            plot3 = plot_auc(fpr, tpr, roc_auc)
+            child_run.log_image("AUC  "+name, plot=plot3)
+            child_run.log_confusion_matrix(name="confusion matrix " + name,
+                                           value=disp)
+            plot = plot_confusion_matrix(cm, target_names=classes)
+            child_run.log_image("normalized confusion matrix " + name,
+                                plot=plot)
+            plot1 = plot_confusion_matrix_abs(cm, target_names=classes)
+            child_run.log_image("absolute confusion matrix " + name,
+                                plot=plot1)
             child_run.complete()
 
         # log score to AML
@@ -94,7 +115,14 @@ if opts.models != 'deeplearning':
         run.log("F1 score", float(f1))
         run.log("precision", float(precision))
         run.log("recall", float(recall))
-        run.log_image("AUC"+name, plot=plt)
+        plot3 = plot_auc(fpr, tpr, roc_auc)
+        run.log_image("AUC "+name, plot=plot3)
+        run.log_confusion_matrix(name="confusion matrix " + name,
+                                 value=disp)
+        plot = plot_confusion_matrix(cm, target_names=classes)
+        run.log_image("normalzied confusion matrix " + name, plot=plot)
+        plot1 = plot_confusion_matrix_abs(cm, target_names=classes)
+        run.log_image("absolute confusion matrix " + name, plot=plot1)
 
         # write model artifact to AML
         model_name = "model" + str(name) + ".pkl"
@@ -113,6 +141,29 @@ else:
                                        get_hyperparameters,
                                        OurNet, train_model,
                                        test_model)
+
+    try:
+        with open(os.environ.get("AZUREML_DATAREFERENCE_metrics_data")) as f:
+            metrics_output_result = f.read()
+            deserialized_metrics_output = json.loads(metrics_output_result)
+            df = pd.DataFrame(deserialized_metrics_output)
+            df = df.T
+
+            for column in df:
+                df[column] = df[column].astype(str).str.strip("[]").astype(float)
+
+            runID = df.accuracy.idxmax()
+
+            parameters = df.loc[runID].iloc[1:]
+            opts.learning_rate = parameters.learning_rate
+            opts.num_epochs = int(parameters.num_epochs)
+            opts.batch_size = int(parameters.batch_size)
+            opts.hidden_size = int(parameters.hidden_size)
+
+    except IOError:
+        print("No file present")
+    except TypeError:
+        print("No file present")
 
     vocab, total_words = index_words(data_train, data_test)
     word2index = get_word_2_index(vocab)
@@ -149,7 +200,9 @@ else:
     accuracy = test_model(data_test, net, total_words, word2index)
 
     plt_loss = plot_loss_per_epoch(epoch_losses, num_epochs)
+    run.log_image("Loss grapgh "+str(accuracy), plot=plt_loss)
     plt_acc = plot_accuracy_per_epoch(epoch_accuracy, num_epochs)
+    run.log_image("Accuracy graph "+str(accuracy), plot=plt_acc)
 
     # log metrics
     run.log("accuracy", float(accuracy))
@@ -158,15 +211,13 @@ else:
     run.log("batch_size", batch_size)
     run.log("hidden_size", hidden_size)
     run.log("total_words", total_words)
-    run.log_image("Loss grapgh "+str(accuracy), plot=plt_loss)
-    run.log_image("Accuracy graph "+str(accuracy), plot=plt_acc)
 
     # create outputs folder if not exists
     OUTPUTSFOLDER = "outputs/models"
     if not os.path.exists(OUTPUTSFOLDER):
         os.makedirs(OUTPUTSFOLDER)
 
-    if opts.fullmodel is True:
+    if opts.fullmodel == 'yes':
         # preproces data example
         y = np.empty([1, 148005])
         dummy_input = Variable(torch.FloatTensor(y))
