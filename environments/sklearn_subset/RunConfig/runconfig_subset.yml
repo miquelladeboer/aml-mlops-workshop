@@ -1,13 +1,9 @@
 # The script to run.
 script: train.py
 # The arguments to the script file.
-arguments:
-- --data_folder_train
-- DatasetConsumptionConfig:newsgroups_subset_train
-- --data_folder_test
-- DatasetConsumptionConfig:newsgroups_subset_test
+arguments: []
 # The name of the compute target to use for this run.
-target: 1cpucluster
+target: alwaysoncluster
 # Framework to execute inside. Allowed values are "Python" ,  "PySpark", "CNTK",  "TensorFlow", and "PyTorch".
 framework: Python
 # Communicator for the given framework. Allowed values are "None" ,  "ParameterServer", "OpenMpi", and "IntelMpi".
@@ -58,7 +54,7 @@ data:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: 7673d2a5-d0d2-4094-bf5b-fb01235279cf
+        id: 58d44049-12fa-401f-bf1c-837af626aed7
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.
@@ -77,7 +73,7 @@ data:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: 5dccca8b-336c-4fe6-a47d-2904029fb930
+        id: c7664a99-b716-489d-aac1-d5ef29533ccc
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.

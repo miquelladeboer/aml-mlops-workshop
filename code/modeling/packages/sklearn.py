@@ -13,8 +13,7 @@ from sklearn.naive_bayes import BernoulliNB, ComplementNB, MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import NearestCentroid
 from sklearn.ensemble import RandomForestClassifier
-
-import numpy as np
+from sklearn.metrics import confusion_matrix
 
 
 def pandas_to_numpy(data_train, data_test):
@@ -49,7 +48,16 @@ def fit_sklearn(clf, X_train, X_test, y_train, y_test):
     f1 = f1_score(y_test, pred, average='weighted')
     precision = precision_score(y_test, pred, average='weighted')
     recall = recall_score(y_test, pred, average='weighted')
-
+    cm = confusion_matrix(y_test, pred, labels=clf.classes_)
+    classes = clf.classes_
+    disp = {
+       "schema_type": "confusion_matrix",
+       "schema_version": "v1",
+       "data": {
+           "class_labels": clf.classes_.tolist(),
+           "matrix": cm.tolist()
+        }
+    }
     n_classes = 4
     fpr = dict()
     tpr = dict()
@@ -61,7 +69,7 @@ def fit_sklearn(clf, X_train, X_test, y_train, y_test):
     clf_descr = str(clf).split('(')[0]
     print("Accuracy  %0.3f" % accuracy)
     return (clf_descr, accuracy, balanced_accuracy,
-            precision, recall, f1, fpr, tpr, roc_auc)
+            precision, recall, f1, fpr, tpr, roc_auc, disp, cm, classes)
 
 
 class Model_choice:

@@ -1,5 +1,5 @@
 # The script to run.
-script: train.py
+script: data_engineering.py
 # The arguments to the script file.
 arguments: []
 # The name of the compute target to use for this run.
@@ -54,7 +54,7 @@ data:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: 8ebbc530-9598-4503-9f23-160a33dc88e4
+        id: becd5fa4-d057-4412-970d-8da90f1b51c6
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.
@@ -73,7 +73,7 @@ data:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: fb5e3f6b-8e2c-4505-8a40-79e6ea4fdd45
+        id: 31bf730e-99d2-4bf5-b966-d2867cb99c19
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.

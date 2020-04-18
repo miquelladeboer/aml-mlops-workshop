@@ -16,9 +16,10 @@ from azureml.train.hyperdrive import (
 from azureml.train.dnn import PyTorch
 
 # Define comfigs
-subset = False
-models = 'sklearnmodels'
+subset = True
+models = 'deeplearning'
 data_local = False
+hyperdrive = True
 
 # If deep learning define hyperparameters
 # Set parameters for search
@@ -75,7 +76,7 @@ if models != 'deeplearning':
     if data_local is False:
         dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
         dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
-        
+    
         # Load run Config
         run_config = RunConfiguration.load(
             path=os.path.join(os.path.join(
@@ -99,7 +100,7 @@ if models != 'deeplearning':
         )
 
     # Define the ML experiment
-    experiment = Experiment(workspace, "explore_sklearn_models")
+    experiment = Experiment(workspace, "explore_" + models)
     # Submit experiment run, if compute is idle, this may take some time')
     run = experiment.submit(est)
 
@@ -120,7 +121,7 @@ if models == 'deeplearning':
         entry_script='train.py',
         script_params=script_params_3,
         source_directory=os.path.dirname(os.path.realpath(__file__)),
-        compute_target=workspace.compute_targets["hypercompute"],
+        compute_target=workspace.compute_targets["alwaysoncluster"],
         distributed_training=MpiConfiguration(),
         framework_version='1.4',
         use_gpu=True,
@@ -136,19 +137,22 @@ if models == 'deeplearning':
             ]
     )
 
-    # Define multi-run configuration
-    hyperdrive_run_config = HyperDriveConfig(
-        estimator=estimator,
-        hyperparameter_sampling=param_sampling,
-        policy=None,
-        primary_metric_name="accuracy",
-        primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
-        max_total_runs=10,
-        max_concurrent_runs=None
-    )
+    experiment = Experiment(workspace=workspace, name="deeplearning")
+    run = experiment.submit(estimator)
 
-    # Define the ML experiment
-    experiment = Experiment(workspace=workspace, name="hyperdrive")
+    if hyperdrive is True:
+        # Define multi-run configuration
+        hyperdrive_run_config = HyperDriveConfig(
+            estimator=estimator,
+            hyperparameter_sampling=param_sampling,
+            policy=None,
+            primary_metric_name="accuracy",
+            primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
+            max_total_runs=10,
+            max_concurrent_runs=None
+        )
 
-    # Submit the experiment
-    run = experiment.submit(hyperdrive_run_config)
+        # Define the ML experiment
+        experiment = Experiment(workspace=workspace, name="hyperdrive")
+        # Submit the experiment
+        run = experiment.submit(hyperdrive_run_config)

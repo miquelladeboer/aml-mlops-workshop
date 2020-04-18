@@ -15,9 +15,11 @@ dependencies:
   - bokeh
   - dask
   - distributed
+  - python-snappy
   - notebook
   - matplotlib
   - Pillow
+  - pyarrow
   - pandas
   - pandas-datareader
   - pytables
