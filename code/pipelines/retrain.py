@@ -1,3 +1,5 @@
+import os
+import argparse
 from azureml.core import Workspace, Experiment, Datastore
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.dataset import Dataset
@@ -11,7 +13,14 @@ from azureml.pipeline.steps import HyperDriveStep, PythonScriptStep
 from azureml.pipeline.core import Pipeline, PipelineData
 from azureml.core.runconfig import RunConfiguration
 
-import os
+parser = argparse.ArgumentParser()
+parser.add_argument("--await_completion",
+                    type=bool,
+                    default=False)
+parser.add_argument("--download_outputs",
+                    type=bool,
+                    default=False)
+args = parser.parse_args()
 
 # Set parameters for search
 param_sampling = BayesianParameterSampling({
@@ -138,11 +147,24 @@ fullmodel = PythonScriptStep(
 )
 
 # Attach step to the pipelines
-pipeline = Pipeline(workspace=workspace, steps=[hypertuning, fullmodel])
+pipeline = Pipeline(
+    workspace=workspace, 
+    steps=[hypertuning, fullmodel]
+)
 
 # Submit the pipeline
 # Define the experiment
-experiment = Experiment(workspace, 'pipelinere-train')
+experiment = Experiment(
+    workspace,
+    'pipeline-train'
+)
 
 # Run the experiment
 pipeline_run = experiment.submit(pipeline)
+
+print("Pipeline children")
+print(pipeline_run.get_children())
+
+# Wait for completion if arg provided e.g. for CI scenarios
+if args.await_completion is True:
+    pipeline_run.wait_for_completion()

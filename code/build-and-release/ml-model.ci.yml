@@ -67,7 +67,7 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           source activate agentenv
-          python $(amlPipelineRunner)
+          python $(amlPipelineRunner) --await_completion True
 
     # @TODO Integration tests on scorer app
     # @TODO Model validation tests
