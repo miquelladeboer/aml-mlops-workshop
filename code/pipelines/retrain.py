@@ -25,7 +25,7 @@ args = parser.parse_args()
 # Set parameters for search
 param_sampling = BayesianParameterSampling({
     "learning_rate": uniform(10e-6, 1e0),
-    "num_epochs": choice(1, 2),
+    "num_epochs": choice(10, 20),
     "batch_size": choice(10, 20, 50, 100, 200, 300, 500, 1000),
     "hidden_size": choice(300, 400)
 })
@@ -59,7 +59,7 @@ metrics_data = PipelineData(name='metrics_data',
                             datastore=datastore,
                             pipeline_output_name=metrics_output_name)
 
-script_params = [
+script_params_1 = [
     '--models', 'deeplearning',
     '--data_folder_train',
     dataset_train_sub.as_named_input('train').as_mount(),
@@ -69,7 +69,7 @@ script_params = [
 
 script_params_2 = [
     '--models', 'deeplearning',
-    '--fullmodel', True,
+    '--fullmodel', "yes",
     '--data_folder_train',
     dataset_train.as_named_input('train').as_mount(),
     '--data_folder_test',
@@ -112,7 +112,7 @@ hypertuning = HyperDriveStep(
                 max_total_runs=2,
                 max_concurrent_runs=None
             ),
-            estimator_entry_script_arguments=script_params,
+            estimator_entry_script_arguments=script_params_1,
             outputs=[],
             metrics_output=metrics_data,
             allow_reuse=True,
@@ -138,7 +138,7 @@ fullmodel = PythonScriptStep(
             metrics_data
     ],
     outputs=[],
-    runconfig=run_config,
+    runconfig=run_config_full,
     source_directory=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
         '..',

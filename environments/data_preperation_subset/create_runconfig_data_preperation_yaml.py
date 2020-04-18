@@ -44,7 +44,8 @@ dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
 dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
 
 # Runconfig
-amlcompute_run_config = RunConfiguration( conda_dependencies=cd)
+amlcompute_run_config = RunConfiguration(conda_dependencies=cd,
+                                         script="data_engineering.py")
     
 amlcompute_run_config.environment.docker.enabled = True
 amlcompute_run_config.environment.spark.precache_packages = False

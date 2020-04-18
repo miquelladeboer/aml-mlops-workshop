@@ -59,6 +59,13 @@ parser.add_argument("--hidden_size",
 
 opts = parser.parse_args()
 
+
+tes = opts.data_folder_train
+opts.data_folder_train = tes + '/subset_train.csv'
+print(opts.data_folder_train)
+
+tes = opts.data_folder_test
+opts.data_folder_test = tes + '/subset_test.csv'
 #test = os.environ.get("AZUREML_DATAREFERENCE_newsgroups_subset_train")
 #test2 = test + ".csv"
 #opts.data_folder_train = test2

@@ -33,7 +33,7 @@ cd = CondaDependencies(
 )
 
 # define compute
-compute_target = '1cpucluster'
+compute_target = 'alwaysoncluster'
 
 # define data set names
 input_name_train = 'newsgroups_subset_train'
