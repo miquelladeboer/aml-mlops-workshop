@@ -1,0 +1,38 @@
+# Azure Pipeline Definition for Code Health Continuous Integration
+#
+# Trigger on changes in the code folder and for each feature branch                
+#
+trigger:
+  branches:
+    include:
+    - master
+    - feature/*
+
+  paths:
+    include:
+    - code/*
+    - tests/*
+
+stages:
+# ML Build Stage
+- stage: CodeHealth
+  displayName: 'Check Code Health'
+  jobs:
+  - job: ML_Build
+    displayName: ML Build
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+    # Prepare the build environment
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n agentenv --file code/build-and-release/agent-environment.yml
+      displayName: Create Agent Anaconda environment
+
+    - template: ado-templates/codequality.ci.yml
+      parameters:
+        workingDirectory: "tests/"
+  

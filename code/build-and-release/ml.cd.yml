@@ -1,0 +1,44 @@
+# Release Stages
+- stage: ReleaseDEV
+  displayName: 'Release to DEV'
+  jobs:
+  - job: Deploy_ML_Pipeline
+    displayName: Deploy ML Pipeline
+    pool:
+      vmImage: 'ubuntu-16.04'
+    variables:
+    - name: resourceGroupName
+      value: aml-mlops-workshop-dev
+    - name: resourceGroupLocation
+      value: westeurope
+    - name: amlWorkspaceName
+      value: aml-mlops-workspace-dev
+
+    steps:
+    - download: current
+      artifact: MLBuildArtifacts
+  
+    - task: AzureCLI@2
+      displayName: Generate AML Workspace Config File
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az extension add -n azure-cli-ml
+          az ml folder attach -w $(amlWorkspaceName) -g $(resourceGroupName)
+  
+    - task: AzureCLI@2
+      displayName: Publish ML Pipeline
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          python code/build-and-release/scripts/publish_pipeline_from_yml.py --definition $(aml_ci_pipeline_definition)
+
+    # @TODO+optional Run published pipeline
+    # - task: MLPublishedPipelineRestAPITask@0
+    #   inputs:
+    #     PipelineParameters: '"key1": "value2"'
+    #   displayName: Run Published ML Pipeline

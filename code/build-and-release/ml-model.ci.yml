@@ -1,0 +1,95 @@
+# Azure Pipeline Definition for Model CI/CD
+
+# Trigger on changes in the modeling folder and on the master branch                      
+trigger:
+  branches:
+    include:
+    - master
+
+  paths:
+    include:
+    - code/*
+
+variables:
+- name: aml_ci_pipeline_definition
+  value: code/pipelines/train_pipeline.yml
+
+stages:
+# ML Build Stage
+- stage: Build
+  displayName: 'Model Build (code/model validation and training)'
+  jobs:
+  - job: ML_Build
+    displayName: ML Build
+    pool:
+      vmImage: 'ubuntu-16.04'
+    variables:
+    - name: resourceGroupName
+      value: aml-mlops-workshop-dev
+    - name: resourceGroupLocation
+      value: westeurope
+    - name: amlWorkspaceName
+      value: aml-mlops-workspace-dev
+
+    steps:
+    # Prepare the build environment
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n agentenv --file code/build-and-release/agent-environment.yml
+      displayName: Create Agent Anaconda environment
+
+    - template: ado-templates/codequality.ci.yml
+      parameters:
+        workingDirectory: "tests/"
+
+    # ML Pipeline Experiment (before-publish)
+    #   For long execution times, one can first run a training pipeline on a data sample to validate all
+    #   pipeline steps complete; then run the pipeline on the full data set.
+    - task: AzureCLI@2
+      displayName: Generate AML Workspace Config File
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az extension add -n azure-cli-ml
+          az ml folder attach -w $(amlWorkspaceName) -g $(resourceGroupName)
+
+    - task: AzureCLI@2
+      displayName: Run Training Pipeline
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate agentenv
+          python code/build-and-release/scripts/run_pipeline_from_yml.py --definition $(aml_ci_pipeline_definition)
+
+    - task: CopyFiles@2
+      displayName: 'Copy ML pipeline definition on success'
+      inputs:
+        contents: '$(aml_ci_pipeline_definition)'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    # - task: AzureCLI@2
+    #   displayName: Download Model for Testing
+    #   inputs:
+    #     azureSubscription: "my-service-connection"
+    #     scriptType: bash
+    #     scriptLocation: inlineScript
+    #     inlineScript: |
+    #       source activate agentenv
+    #       python code/build-and-release/scripts/download_model.py
+
+    # @TODO Integration tests on scorer app
+    # @TODO Model validation tests
+    # @TODO Integration tests
+
+    # Publish model artifacts for release
+    - task: PublishBuildArtifacts@1
+      displayName: Publish ML Build Artifacts
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: MLBuildArtifacts

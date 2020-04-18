@@ -1,0 +1,23 @@
+parameters:
+- name: workingDirectory
+  type: string
+
+steps:
+# Unit Tests
+#   Executes all the unit tests organized under the tests folder
+#   Publishes tests result in JUnit xmnl format for consumption in ADO.
+- script: |
+    source activate agentenv
+    pytest --junitxml=reports/test_report_unittests.xml
+  workingDirectory: ${{ parameters.workingDirectory }}
+  displayName: 'Model Unit Tests'
+
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results'
+  inputs:
+    testResultsFiles: 'tests/reports/test_report_unittests.xml'
+    testRunTitle: '$(projectname): Unit Test Results'
+    failTaskOnFailedTests: true # unifies failure across different types of tests
+  condition: succeededOrFailed()
+
+# @TODO Check Code Quality
