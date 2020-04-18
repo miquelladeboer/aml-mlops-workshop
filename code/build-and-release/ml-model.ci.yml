@@ -48,15 +48,14 @@ stages:
     # ML Pipeline Experiment (before-publish)
     #   For long execution times, one can first run a training pipeline on a data sample to validate all
     #   pipeline steps complete; then run the pipeline on the full data set.
-    - task: AzureCLI@2
-      displayName: Generate AML Workspace Config File
+    - task: AzureCLI@1
+      displayName: 'Generate AML Workspace Config File'
       inputs:
         azureSubscription: "my-service-connection"
-        scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          az extension add -n azure-cli-ml
-          az ml folder attach -w $(amlWorkspaceName) -g $(resourceGroupName)
+          subscription=$(az account list --query "[?isDefault].id | [0]" --output tsv)
+          echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resource_group_name)\", \"workspace_name\":\"$(workspaceName)-$(environment)\", \"acr\":\"$(containerRegistryInstance)$(environment)\"} > ./aml_ws_config.json
 
     - task: AzureCLI@2
       displayName: Run Training Pipeline
