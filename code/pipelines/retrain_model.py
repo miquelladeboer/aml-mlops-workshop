@@ -5,6 +5,7 @@ from azureml.pipeline.steps import PythonScriptStep
 from azureml.pipeline.core import Pipeline
 from azureml.core.runconfig import RunConfiguration
 import os
+import argparse
 from azureml.train.hyperdrive.parameter_expressions import uniform, choice
 from azureml.train.hyperdrive import (
     BayesianParameterSampling,
@@ -13,6 +14,15 @@ from azureml.train.dnn import PyTorch
 from azureml.core.runconfig import MpiConfiguration
 from azureml.pipeline.steps import HyperDriveStep
 from azureml.pipeline.core import PipelineData
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--await_completion",
+                    type=bool,
+                    default=False)
+parser.add_argument("--download_outputs",
+                    type=bool,
+                    default=False)
+args = parser.parse_args()
 
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
@@ -231,3 +241,10 @@ experiment = Experiment(workspace, 'pipeline-retrain-model')
 
 # Run the experiment
 pipeline_run = experiment.submit(pipeline)
+
+step_run = pipeline_run.find_step_run("fullmodel")[0]
+print("outputs: {}".format(step_run.get_outputs()))
+
+# Wait for completion if arg provided e.g. for CI scenarios
+if args.await_completion is True:
+    pipeline_run.wait_for_completion()

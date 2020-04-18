@@ -10,10 +10,6 @@ trigger:
     include:
     - code/*
 
-variables:
-- name: aml_ci_pipeline_definition
-  value: code/pipelines/train_pipeline.yml
-
 stages:
 # ML Build Stage
 - stage: Build
@@ -31,7 +27,7 @@ stages:
     - name: amlWorkspaceName
       value: mlworkspacedevdeeikele
     - name: amlPipelineRunner
-      value: code/pipelines/retrain.py
+      value: code/pipelines/retrain_model.py
 
     steps:
     # Prepare the build environment
