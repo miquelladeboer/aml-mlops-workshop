@@ -32,7 +32,7 @@ stages:
         conda env create -n agentenv --file code/build-and-release/agent-environment.yml
       displayName: Create Agent Anaconda environment
 
-    - template: ado-templates/codequality.ci.yml
+    - template: ado-templates/codehealth.template.yml
       parameters:
         workingDirectory: "tests/"
   
