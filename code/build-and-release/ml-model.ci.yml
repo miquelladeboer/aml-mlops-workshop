@@ -58,6 +58,7 @@ stages:
         inlineScript: |
           echo $(az account list)
           subscription=$(az account list --query "[?isDefault].id | [0]" --output tsv)
+          echo $subscription
           echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > ./aml_ws_config.json
 
     - task: AzureCLI@2
