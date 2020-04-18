@@ -92,14 +92,16 @@ script_params = [
 script_params_1 = [
     '--models', 'deeplearning',
     '--pipeline', 'yes',
-    '--data_folder_train', subset_train,
-    '--data_folder_test', subset_test
+    '--output_train', subset_train,
+    '--output_test', subset_test
 ]
 
 script_params_2 = [
     '--models', 'deeplearning',
     '--fullmodel', "yes",
     '--pipeline', 'yes',
+    '--output_train', train,
+    '--output_test', test
 ]
 
 # Load run Config
@@ -208,7 +210,8 @@ fullmodel = PythonScriptStep(
     arguments=script_params_2,
     inputs=[
             metrics_data,
-            train, test
+            train,
+            test
     ],
     outputs=[],
     runconfig=run_config_full,
@@ -220,10 +223,15 @@ fullmodel = PythonScriptStep(
 )
 
 # Attach step to the pipelines
-pipeline = Pipeline(workspace=workspace, steps=[dataprep_subset,
-                                                dataprep_fulldata,
-                                                hypertuning,
-                                                fullmodel])
+pipeline = Pipeline(
+    workspace=workspace,
+    steps=[
+        dataprep_subset,
+        dataprep_fulldata,
+        hypertuning,
+        fullmodel
+    ]
+)
 
 # Submit the pipeline
 # Define the experiment
