@@ -56,7 +56,8 @@ stages:
         azureSubscription: "my-service-connection"
         scriptLocation: inlineScript
         inlineScript: |
-          subscription=$(az account list --query "[?isDefault].id | [0]" --output tsv)
+          subscription=$(az account list --query "[?isDefault].id" --output tsv)
+          echo $subscription
           echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > ./aml_ws_config.json
 
     - task: AzureCLI@2
