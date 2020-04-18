@@ -91,7 +91,7 @@ script_params = [
 
 script_params_1 = [
     '--models', 'deeplearning',
-    '--pipeline', 'yes'
+    '--pipeline', 'yes',
     '--data_folder_train', subset_train,
     '--data_folder_test', subset_test
 ]

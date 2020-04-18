@@ -112,7 +112,7 @@ if opts.local == "no":
 
     if not (opts.output_train is None):
         os.makedirs(opts.output_train, exist_ok=True)
-        path = opts.output_train + "/" + dataset + 'test.csv'
+        path = opts.output_train + "/" + dataset + 'train.csv'
         write_df = data_train.to_csv(path)
 
     if not (opts.output_test is None):
