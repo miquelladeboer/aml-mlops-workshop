@@ -30,6 +30,8 @@ stages:
       value: westeurope
     - name: amlWorkspaceName
       value: mlworkspacedevdeeikele
+    - name: amlPipelineRunner
+      value: code/pipelines/retrain.py
 
     steps:
     # Prepare the build environment
@@ -65,7 +67,7 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           source activate agentenv
-          python code/build-and-release/scripts/run_pipeline_from_yml.py --definition $(aml_ci_pipeline_definition)
+          python $(amlPipelineRunner)
 
     - task: CopyFiles@2
       displayName: 'Copy ML pipeline definition on success'

@@ -1,6 +1,6 @@
 import os
 import argparse
-from azureml.core import Workspace, Datastore
+from azureml.core import Workspace
 from azureml.pipeline.core import Pipeline
 from azureml.core.authentication import AzureCliAuthentication
 
@@ -18,7 +18,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Load Pipeline from YML
-pipeline_definition_path=os.path.join(
+pipeline_definition_path = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     '../../pipelines',
     args.definition
