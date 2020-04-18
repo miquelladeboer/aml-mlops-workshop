@@ -59,7 +59,7 @@ stages:
           echo $(az account list)
           subscription=$(az account list --query "[?isDefault].id | [0]" --output tsv)
           echo $subscription
-          echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > ./aml_ws_config.json
+          echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > ./azureml/config.json
 
     - task: AzureCLI@2
       displayName: Run Training Pipeline
@@ -70,12 +70,6 @@ stages:
         inlineScript: |
           source activate agentenv
           python $(amlPipelineRunner)
-
-    - task: CopyFiles@2
-      displayName: 'Copy ML pipeline definition on success'
-      inputs:
-        contents: '$(aml_ci_pipeline_definition)'
-        targetFolder: $(Build.ArtifactStagingDirectory)
 
     # - task: AzureCLI@2
     #   displayName: Download Model for Testing
