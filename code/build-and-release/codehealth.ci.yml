@@ -18,8 +18,8 @@ stages:
 - stage: CodeHealth
   displayName: 'Check Code Health'
   jobs:
-  - job: ML_Build
-    displayName: ML Build
+  - job: Tests
+    displayName: Tests
     pool:
       vmImage: 'ubuntu-16.04'
 
@@ -35,4 +35,3 @@ stages:
     - template: ado-templates/codehealth.template.yml
       parameters:
         workingDirectory: "tests/"
-  
