@@ -56,7 +56,7 @@ stages:
           echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > .azureml/config.json
 
     - task: AzureCLI@2
-      displayName: Run Training Pipeline
+      displayName: Run Training Pipeline (sample)
       inputs:
         azureSubscription: "my-service-connection"
         scriptType: bash
@@ -65,11 +65,15 @@ stages:
           source activate agentenv
           python $(amlPipelineRunner) --await_completion True
 
-    
-
-    # @TODO Integration tests on scorer app
-    # @TODO Model validation tests
-    # @TODO Integration tests
+    - task: AzureCLI@2
+      displayName: Run Training Pipeline (a-sync)
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate agentenv
+          python $(amlPipelineRunner) --await_completion True
 
     # Publish model artifacts for release
     - task: PublishBuildArtifacts@1

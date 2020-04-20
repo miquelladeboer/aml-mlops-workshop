@@ -1,4 +1,64 @@
 # Release Stages
+- stage: ModelValidation
+  displayName: 'Model Validation'
+  jobs:
+  - job: Deploy_ML_Pipeline
+    displayName: Deploy ML Pipeline
+    pool:
+      vmImage: 'ubuntu-16.04'
+    variables:
+    - name: resourceGroupName
+      value: aml-mlops-workshop-dev
+    - name: resourceGroupLocation
+      value: westeurope
+    - name: amlWorkspaceName
+      value: aml-mlops-workspace-dev
+
+    steps:
+    - download: current
+      artifact: MLBuildArtifacts
+
+    # Model Validation Tests
+    - script: |
+        source activate agentenv
+        pytest --junitxml=reports/test_report_modelvalidation.xml
+      workingDirectory: tests/model-validation
+      displayName: 'Model Validation Tests'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFiles: 'tests/reports/test_report_modelvalidation.xml'
+        testRunTitle: '$(projectname): Model Validation Test Results'
+        failTaskOnFailedTests: true # unifies failure across different types of tests
+      condition: succeededOrFailed()
+      
+- stage: IntegrationTestScoringApp
+  displayName: 'Integration Tests Scoring App'
+  jobs: []
+  # @TODO Integration tests on scorer app
+
+  
+# Integration Tests Batch Scoring Pipeline
+- stage: IntegrationTestScoringApp
+  displayName: 'Integration Tests Scoring App'
+  jobs: []
+  # @TODO Integration tests on scorer app
+
+- stage: DeployScoringApp
+  displayName: 'Deploy the Scoring App'
+  jobs: []
+
+- stage: DeployScoringApp
+  displayName: 'System Integration'
+  # Deploy to system integration environment
+  jobs: []
+
+- stage: LoadTesting
+  displayName: 'Load Test Scoring App'
+  # Deploy scoring app and system integrate
+  jobs: []
+
 - stage: ReleaseDEV
   displayName: 'Release to DEV'
   jobs:
@@ -28,6 +88,10 @@
           az extension add -n azure-cli-ml
           az ml folder attach -w $(amlWorkspaceName) -g $(resourceGroupName)
   
+    # @TODO Integration tests on scorer app
+    # @TODO Model validation tests
+    # @TODO Integration tests
+
     - task: AzureCLI@2
       displayName: Publish ML Pipeline
       inputs:
