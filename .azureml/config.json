@@ -1,1 +1,5 @@
-{"Id": null, "Scope": "/subscriptions/e0eeddf8-2d02-4a01-9786-92bb0e0cb692/resourceGroups/amlmlopsrgp/providers/Microsoft.MachineLearningServices/workspaces/amlmlopsws"}
+{
+    "subscription_id": "cf4e1704-b4bc-4554-bcd7-309394f2ee56",
+    "resource_group": "devopsforaidev",
+    "workspace_name": "mlworkspacedevdeeikele"
+}

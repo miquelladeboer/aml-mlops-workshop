@@ -21,3 +21,14 @@ steps:
   condition: succeededOrFailed()
 
 # @TODO Check Code Quality
+# Flake 8
+
+# @TODO Publish Code Quality report to ADO
+# 
+
+# @TODO Code Coverage
+# 
+
+# @TODO Publish Code Coverage report to ADO
+# 
+

@@ -165,6 +165,7 @@ pipeline_run = experiment.submit(pipeline)
 step_run = pipeline_run.find_step_run("fullmodel")[0]
 print("outputs: {}".format(step_run.get_outputs()))
 
+
 # Wait for completion if arg provided e.g. for CI scenarios
 if args.await_completion is True:
     pipeline_run.wait_for_completion()
