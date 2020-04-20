@@ -43,6 +43,10 @@ parser.add_argument('--data_folder_test',
 parser.add_argument('--pipeline',
                     type=str,
                     default='no')
+parser.add_argument("--output_train",
+                    type=str)
+parser.add_argument("--output_test",
+                    type=str)
 
 parser.add_argument("--learning_rate",
                     type=float,
@@ -59,24 +63,12 @@ parser.add_argument("--hidden_size",
 
 opts = parser.parse_args()
 
-
-tes = opts.data_folder_train
-opts.data_folder_train = tes + '/subset_train.csv'
-print(opts.data_folder_train)
-
-tes = opts.data_folder_test
-opts.data_folder_test = tes + '/subset_test.csv'
-#test = os.environ.get("AZUREML_DATAREFERENCE_newsgroups_subset_train")
-#test2 = test + ".csv"
-#opts.data_folder_train = test2
-
-#test = os.environ.get("AZUREML_DATAREFERENCE_newsgroups_subset_test")
-#test2 = test + ".csv"
-#opts.data_folder_test = test2
+if not (opts.output_train is None):
+    print(opts.output_train)
+    opts.data_folder_train = opts.output_train + '/train.csv'
+    opts.data_folder_test = opts.output_test + '/test.csv'
 
 data_train, data_test = load_data(opts)
-#data_train = data_train1[data_train1['text'].notnull()]
-#data_test = data_test1[data_test1['text'].notnull()]
 
 if opts.models != 'deeplearning':
     # get numpy back
@@ -157,7 +149,13 @@ else:
             df = df.T
 
             for column in df:
-                df[column] = df[column].astype(str).str.strip("[]").astype(float)
+                df[column] = (
+                    df[column]
+                    .astype(str)
+                    .str
+                    .strip("[]")
+                    .astype(float)
+                )
 
             runID = df.accuracy.idxmax()
 
@@ -226,7 +224,7 @@ else:
 
     if opts.fullmodel == 'yes':
         # preproces data example
-        y = np.empty([1, 148005])
+        y = np.empty([1, total_words])
         dummy_input = Variable(torch.FloatTensor(y))
         model_name = "net.onnx"
         pickle_name = "word2index"

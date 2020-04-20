@@ -10,7 +10,7 @@ from azureml.core.runconfig import RunConfiguration
 
 # Define comfigs
 data_local = "no"
-subset = "no"
+subset = "yes"
 
 # define compute
 compute_target = 'alwaysoncluster'
