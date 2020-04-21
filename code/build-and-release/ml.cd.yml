@@ -52,18 +52,6 @@ stages:
     - download: current
       artifact: ModelCIBuildArtifacts
 
-# Integration Tests Batch Scoring Pipeline
-- stage: IntegrationTestScoringApp
-  displayName: 'Integration Tests Scoring App'
-  jobs:
-  - job: Validate_Model
-    pool:
-      vmImage: 'ubuntu-16.04'
-
-    steps:
-    - download: current
-      artifact: ModelCIBuildArtifacts
-
 - stage: DeployScoringApp
   displayName: 'Deploy the Scoring App'
   jobs:
@@ -75,7 +63,7 @@ stages:
     - download: current
       artifact: ModelCIBuildArtifacts
 
-- stage: DeployScoringApp
+- stage: SystemIntegrationTests
   displayName: 'System Integration Tests'
   jobs:
   - job: Validate_Model
