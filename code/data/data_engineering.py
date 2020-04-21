@@ -4,6 +4,7 @@ import os
 import argparse
 from azureml.core import Run
 from azureml.core import Datastore
+import uuid
 
 from packages.get_data import load_data
 
@@ -112,10 +113,10 @@ if opts.local == "no":
 
     if not (opts.output_train is None):
         os.makedirs(opts.output_train, exist_ok=True)
-        path = opts.output_train + "/" + 'train.csv'
+        path = opts.output_train + "/" + 'train ' + str(uuid.uuid1()) + '.csv'
         write_df = data_train.to_csv(path)
 
     if not (opts.output_test is None):
         os.makedirs(opts.output_test, exist_ok=True)
-        path = opts.output_test + "/" + 'test.csv'
+        path = opts.output_test + "/" + 'test' + str(uuid.uuid1()) + '.csv'
         write_df = data_test.to_csv(path)

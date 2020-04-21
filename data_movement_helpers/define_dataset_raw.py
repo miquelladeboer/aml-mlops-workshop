@@ -14,7 +14,7 @@ for data_split in ['train', 'test']:
         # Create a TabularDataset from paths in datastore in split folder
         # Note that wildcards can be used
         datastore_paths = [
-            (datastore, '{}.csv'.format('raw_' + set + data_split))
+            (datastore,  '{}/*.csv'.format('raw_' + set + data_split))
         ]
 
         # Create a TabularDataset from paths in datastore
@@ -25,7 +25,7 @@ for data_split in ['train', 'test']:
         # Register the defined dataset for later use
         dataset.register(
             workspace=ws,
-            name=('newsgroups_' + 'raw_' + set + data_split),
+            name=('test_' + 'raw_' + set + data_split),
             description='newsgroups data',
             create_new_version=True
         )

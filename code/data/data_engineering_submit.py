@@ -12,23 +12,25 @@ from azureml.core.runconfig import RunConfiguration
 data_local = "no"
 subset = "yes"
 
-# define compute
+# Define compute target for data engineering from AML
 compute_target = 'alwaysoncluster'
 
 # load Azure ML workspace
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
-# define data set names
+# Define datasets names
 if subset == "no":
+    # Get environment from config yml for data engineering for full dataset
     filepath = "environments/data_preperation/RunConfig/runconfig_data.yml"
     input_name_train = 'newsgroups_raw_train'
     input_name_test = 'newsgroups_raw_test'
 else:
+    # Get environment from config yml for data engineering for full dataset
     filepath = "environments/data_preperation_subset/RunConfig/runconfig_data.yml"
     input_name_train = 'newsgroups_raw_subset_train'
     input_name_test = 'newsgroups_raw_subset_test'
 
-# Load run Config
+# Load run Config file for data prep
 run_config = RunConfiguration.load(
     path=os.path.join(os.path.join(
         os.path.dirname(os.path.realpath(__file__)),

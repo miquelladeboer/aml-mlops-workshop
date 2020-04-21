@@ -39,3 +39,5 @@ dependencies:
     - mpi4py
     - gym
     - adlfs
+    - langdetect
+    - textblob
