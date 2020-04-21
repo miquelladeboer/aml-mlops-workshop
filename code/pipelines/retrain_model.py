@@ -255,6 +255,8 @@ if args.await_completion is True:
     pipeline_run.wait_for_completion()
 
     if args.download_outputs is True:
+        step_runs = pipeline_run.find_step_run("fullmodel")
+        print(step_runs)
         step_run = pipeline_run.find_step_run("fullmodel")[0]
         print("outputs: {}".format(step_run.get_outputs()))
 
