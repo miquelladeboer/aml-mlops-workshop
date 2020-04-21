@@ -20,15 +20,17 @@ steps:
     failTaskOnFailedTests: true # unifies failure across different types of tests
   condition: succeededOrFailed()
 
-# @TODO Check Code Quality
-# Flake 8
+# Code Linting
+- script: |
+   source activate agentenv
+   flake8 --format junit-xml --output-file $(Build.BinariesDirectory)/flake8_report.xml --exit-zero --ignore E111
+  displayName: 'Check code quality'
 
-# @TODO Publish Code Quality report to ADO
-# 
-
-# @TODO Code Coverage
-# 
-
-# @TODO Publish Code Coverage report to ADO
-# 
-
+# Publish Linting report to ADO
+- task: PublishTestResults@2
+  displayName: 'Publish Linting Results'
+  inputs:
+    testResultsFiles: 'tests/reports/test_report_linting.xml'
+    testRunTitle: 'Linting Results'
+    failTaskOnFailedTests: true # unifies failure across different types of tests
+  condition: succeededOrFailed()

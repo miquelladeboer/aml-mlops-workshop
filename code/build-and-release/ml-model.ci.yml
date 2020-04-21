@@ -65,15 +65,22 @@ stages:
           source activate agentenv
           python $(amlPipelineRunner) --await_completion True
 
-    - task: AzureCLI@2
-      displayName: Run Training Pipeline (a-sync)
+    - task: CopyFiles@2
+      displayName: Copy Model Metadata (name and version)
       inputs:
-        azureSubscription: "my-service-connection"
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          source activate agentenv
-          python $(amlPipelineRunner) --await_completion True
+        contents: 'outputs/models/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    # Optional for long training workflows
+    # - task: AzureCLI@2
+    #   displayName: Run Training Pipeline (a-sync)
+    #   inputs:
+    #     azureSubscription: "my-service-connection"
+    #     scriptType: bash
+    #     scriptLocation: inlineScript
+    #     inlineScript: |
+    #       source activate agentenv
+    #       python $(amlPipelineRunner) --await_completion True
 
     # Publish model artifacts for release
     - task: PublishBuildArtifacts@1
