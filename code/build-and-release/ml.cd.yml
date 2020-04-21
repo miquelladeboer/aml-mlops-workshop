@@ -11,6 +11,12 @@ resources:
       - releases/*
       - master
 
+# parameters:
+# - name: model_name
+#   type: string
+# - name: model_version
+#   type: string
+
 # @TODO add pipeline parameters
 # @TODO model registry event to trigger this pipeline
 
