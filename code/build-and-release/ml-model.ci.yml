@@ -1,4 +1,4 @@
-# Azure Pipeline Definition for Model CI/CD
+# Azure Pipeline Definition for Model CI
 
 # Trigger on changes in the modeling folder and on the master branch                      
 trigger:
@@ -63,7 +63,7 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           source activate agentenv
-          python $(amlPipelineRunner) --await_completion True
+          python $(amlPipelineRunner) --await_completion True --download_outputs True
 
     - task: CopyFiles@2
       displayName: Copy Model Metadata (name and version)
@@ -87,4 +87,4 @@ stages:
       displayName: Publish ML Build Artifacts
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
-        artifactName: MLBuildArtifacts
+        artifactName: ModelCIBuildArtifacts

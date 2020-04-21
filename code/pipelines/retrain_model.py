@@ -258,9 +258,9 @@ if args.await_completion is True:
         step_run = pipeline_run.find_step_run("fullmodel")[0]
         print("outputs: {}".format(step_run.get_outputs()))
 
-    port_data_reference = step_run.get_output_data("models")
-    port_data_reference.download(local_path=os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        '../../',
-        'outputs/models/'
-    ))
+        port_data_reference = step_run.get_output_data("models")
+        port_data_reference.download(local_path=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            '../../',
+            'outputs/models/'
+        ))
