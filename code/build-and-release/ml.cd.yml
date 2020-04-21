@@ -1,6 +1,6 @@
-# Azure Pipeline Definition for Model CI/CD
+# Azure Pipeline Definition for ML CD
 
-# Trigger on changes in the modeling folder and on the master branch                      
+# Trigger on changes in the Model CI pipeline                 
 resources:
   pipelines:
   - pipeline: modelci   # Name of the pipeline resource
@@ -10,6 +10,9 @@ resources:
       - feature/modelcicd ## for testing
       - releases/*
       - master
+
+# @TODO add pipeline parameters
+# @TODO model registry event to trigger this pipeline
 
 stages:
 # Release Stages
@@ -38,30 +41,62 @@ stages:
         failTaskOnFailedTests: true # unifies failure across different types of tests
       condition: succeededOrFailed()
       
-# - stage: IntegrationTestScoringApp
-#   displayName: 'Integration Tests Scoring App'
-#   jobs: []
-#   # @TODO Integration tests on scorer app
+- stage: IntegrationTestScoringApp
+  displayName: 'Integration Tests Scoring App'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+    - download: current
+      artifact: ModelCIBuildArtifacts
 
 # Integration Tests Batch Scoring Pipeline
-# - stage: IntegrationTestScoringApp
-#   displayName: 'Integration Tests Scoring App'
-#   jobs: []
-#   # @TODO Integration tests on scorer app
+- stage: IntegrationTestScoringApp
+  displayName: 'Integration Tests Scoring App'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
 
-# - stage: DeployScoringApp
-#   displayName: 'Deploy the Scoring App'
-#   jobs: []
+    steps:
+    - download: current
+      artifact: ModelCIBuildArtifacts
 
-# - stage: DeployScoringApp
-#   displayName: 'System Integration'
-#   # Deploy to system integration environment
-#   jobs: []
+- stage: DeployScoringApp
+  displayName: 'Deploy the Scoring App'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
 
-# - stage: LoadTesting
-#   displayName: 'Load Test Scoring App'
-#   # Deploy scoring app and system integrate
-#   jobs: []
+    steps:
+    - download: current
+      artifact: ModelCIBuildArtifacts
+
+- stage: DeployScoringApp
+  displayName: 'System Integration Tests'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+    - download: current
+      artifact: ModelCIBuildArtifacts
+
+- stage: LoadTesting
+  displayName: 'Load Test Scoring App'
+  # Deploy scoring app and system integrate
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+    - download: current
+      artifact: ModelCIBuildArtifacts
 
 # - stage: ReleaseDEV
 #   displayName: 'Release to DEV'

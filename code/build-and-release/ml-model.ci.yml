@@ -56,7 +56,7 @@ stages:
           echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > .azureml/config.json
 
     - task: AzureCLI@2
-      displayName: Run Training Pipeline (sample)
+      displayName: Run Training Pipeline
       inputs:
         azureSubscription: "my-service-connection"
         scriptType: bash
@@ -71,7 +71,18 @@ stages:
         contents: 'outputs/models/**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
-    # Optional for long training workflows
+    # Publish model artifacts for release
+    - task: PublishBuildArtifacts@1
+      displayName: Publish ML Build Artifacts
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: ModelCIBuildArtifacts
+
+    # Optional for long training workflows. With this step, one could decide
+    # to run the first training step on a data sample (to get fast feedback on the training process/pipeline). Whereas
+    # the second pipeline step is used to asynchronously start training on the full dataset.
+    # Continuous deployment would in this way trigger upon a model registry event and a rest call instead of pipeline completion.
+
     # - task: AzureCLI@2
     #   displayName: Run Training Pipeline (a-sync)
     #   inputs:
@@ -81,10 +92,3 @@ stages:
     #     inlineScript: |
     #       source activate agentenv
     #       python $(amlPipelineRunner) --await_completion True
-
-    # Publish model artifacts for release
-    - task: PublishBuildArtifacts@1
-      displayName: Publish ML Build Artifacts
-      inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
-        artifactName: ModelCIBuildArtifacts
