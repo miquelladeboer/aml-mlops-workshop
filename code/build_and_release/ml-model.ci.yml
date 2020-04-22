@@ -41,7 +41,7 @@ stages:
     # Run Code Health Check
     - template: ado-templates/codehealth.template.yml
       parameters:
-        workingDirectory: "tests/"
+        workingDirectory: "code/tests/"
 
     # ML Pipeline Experiment (before-publish)
     #   For long execution times, one could first run a training pipeline on a data sample to validate all
