@@ -1,8 +1,9 @@
-# from code.deployment.score import preprocess
+from modeling.score import postprocess
 
 
 def test_postprocess_datasamplea():
     """@TODO"""
+    postprocess(1)
     return True
 
 

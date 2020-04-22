@@ -196,22 +196,22 @@ dataprep_fulldata = PythonScriptStep(
 
 # Define the pipeline step
 hypertuning = HyperDriveStep(
-            name='hypertrain',
-            hyperdrive_config=HyperDriveConfig(
-                estimator=estimator,
-                hyperparameter_sampling=param_sampling,
-                policy=None,
-                primary_metric_name="accuracy",
-                primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
-                max_total_runs=2,
-                max_concurrent_runs=None
-            ),
-            estimator_entry_script_arguments=script_params_1,
-            inputs=[subset_train, subset_test],
-            outputs=[],
-            metrics_output=metrics_data,
-            allow_reuse=True,
-            version=None
+    name='hypertrain',
+    hyperdrive_config=HyperDriveConfig(
+        estimator=estimator,
+        hyperparameter_sampling=param_sampling,
+        policy=None,
+        primary_metric_name="accuracy",
+        primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
+        max_total_runs=2,
+        max_concurrent_runs=None
+    ),
+    estimator_entry_script_arguments=script_params_1,
+    inputs=[subset_train, subset_test],
+    outputs=[],
+    metrics_output=metrics_data,
+    allow_reuse=True,
+    version=None
 )
 
 fullmodel = PythonScriptStep(
@@ -219,9 +219,9 @@ fullmodel = PythonScriptStep(
     script_name="train.py",
     arguments=script_params_2,
     inputs=[
-            metrics_data,
-            train,
-            test
+        metrics_data,
+        train,
+        test
     ],
     outputs=[],
     runconfig=run_config_full,

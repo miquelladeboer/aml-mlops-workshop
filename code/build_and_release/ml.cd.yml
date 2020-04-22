@@ -31,7 +31,7 @@ stages:
 
     steps:
     - download: current
-      artifact: ModelCIBuildArtifacts
+      artifact: MLBuildArtifacts
     # Model Validation Tests
     - script: |
         source activate agentenv
@@ -56,7 +56,7 @@ stages:
 
     steps:
     - download: current
-      artifact: ModelCIBuildArtifacts
+      artifact: MLBuildArtifacts
 
 - stage: DeployScoringApp
   displayName: 'Deploy the Scoring App'
@@ -67,7 +67,7 @@ stages:
 
     steps:
     - download: current
-      artifact: ModelCIBuildArtifacts
+      artifact: MLBuildArtifacts
 
 - stage: SystemIntegrationTests
   displayName: 'System Integration Tests'
@@ -78,7 +78,7 @@ stages:
 
     steps:
     - download: current
-      artifact: ModelCIBuildArtifacts
+      artifact: MLBuildArtifacts
 
 - stage: LoadTesting
   displayName: 'Load Test Scoring App'
@@ -90,7 +90,7 @@ stages:
 
     steps:
     - download: current
-      artifact: ModelCIBuildArtifacts
+      artifact: MLBuildArtifacts
 
 # - stage: ReleaseDEV
 #   displayName: 'Release to DEV'
