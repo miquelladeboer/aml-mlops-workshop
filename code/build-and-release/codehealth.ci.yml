@@ -49,8 +49,8 @@ stages:
 
     # Code Linting
     - script: |
-      source activate trainenv
-      flake8 --format junit-xml --output-file $(Build.BinariesDirectory)/flake8_report.xml --exit-zero --ignore E111
+        source activate trainenv
+        flake8 --format junit-xml --output-file $(Build.BinariesDirectory)/flake8_report.xml --exit-zero --ignore E111
       displayName: 'Check code quality'
 
     # Publish Linting report to ADO
