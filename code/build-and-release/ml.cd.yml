@@ -7,7 +7,6 @@ resources:
     source: "ML Model CI" # Name of the triggering pipeline
     trigger: 
       branches:
-      - feature/modelcicd ## for testing
       - releases/*
       - master
 
@@ -108,8 +107,8 @@ stages:
     - download: current
       artifact: MLBuildArtifacts
 
-- stage: DeployPRD
-  displayName: 'Deploy the Scoring App'
+- stage: DeployPROD
+  displayName: 'Deploy PROD'
   jobs:
   - job: Validate_Model
     pool:

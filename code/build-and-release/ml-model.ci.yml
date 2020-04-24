@@ -40,15 +40,15 @@ stages:
 
     - script: |
         source activate trainenv
-        pytest --junitxml=reports/test_report_unittests.xml
-      workingDirectory: ${{ parameters.workingDirectory }}
+        pytest --junitxml=$(Build.ArtifactStagingDirectory)/testreports/test_report_unittests.xml
+      workingDirectory: 'code/tests/modeling/'
       displayName: 'Model Unit Tests'
 
     - task: PublishTestResults@2
       displayName: 'Publish Test Results'
       inputs:
-        testResultsFiles: 'tests/reports/test_report_unittests.xml'
-        testRunTitle: '$(projectname): Unit Test Results'
+        testResultsFiles: '$(Build.ArtifactStagingDirectory)/testreports/test_report_unittests.xml'
+        testRunTitle: 'Modeling: Unit Test Results'
         failTaskOnFailedTests: true # unifies failure across different types of tests
       condition: succeededOrFailed()
 
