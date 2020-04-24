@@ -35,14 +35,37 @@ stages:
       displayName: Add Conda to PATH
 
     - script: |
-        conda env create -n agentenv --file code/build-and-release/agent-environment.yml
-        conda env create -n scoringapp --file environments/scoring_app/conda_dependencies.yml
+        conda env create -n trainenv --file code/environments/fullmodel_step/conda_dependencies.yml
       displayName: Create Agent Anaconda environment
 
-    # Run Code Health Check
-    - template: ado-templates/codehealth.template.yml
-      parameters:
-        workingDirectory: "code/tests/modeling/"
+    - script: |
+        source activate trainenv
+        pytest --junitxml=reports/test_report_unittests.xml
+      workingDirectory: ${{ parameters.workingDirectory }}
+      displayName: 'Model Unit Tests'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFiles: 'tests/reports/test_report_unittests.xml'
+        testRunTitle: '$(projectname): Unit Test Results'
+        failTaskOnFailedTests: true # unifies failure across different types of tests
+      condition: succeededOrFailed()
+
+    # Code Linting
+    - script: |
+      source activate trainenv
+      flake8 --format junit-xml --output-file $(Build.BinariesDirectory)/flake8_report.xml --exit-zero --ignore E111
+      displayName: 'Check code quality'
+
+    # Publish Linting report to ADO
+    - task: PublishTestResults@2
+      displayName: 'Publish Linting Results'
+      inputs:
+        testResultsFiles: 'tests/reports/test_report_linting.xml'
+        testRunTitle: 'Linting Results'
+        failTaskOnFailedTests: true # unifies failure across different types of tests
+      condition: succeededOrFailed()
 
     # ML Pipeline Experiment (before-publish)
     #   For long execution times, one could first run a training pipeline on a data sample to validate all

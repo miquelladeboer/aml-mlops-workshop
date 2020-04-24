@@ -4,7 +4,7 @@
 resources:
   pipelines:
   - pipeline: modelci   # Name of the pipeline resource
-    source: ML Model CI # Name of the triggering pipeline
+    source: "ML Model CI" # Name of the triggering pipeline
     trigger: 
       branches:
       - feature/modelcicd ## for testing
