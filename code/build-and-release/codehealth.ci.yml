@@ -29,7 +29,7 @@ stages:
 
     - script: |
         conda env create -n trainenv \
-        --file code/environments/fullmodel_step/conda_dependencies.yml
+        --file environments/fullmodel_step/conda_dependencies.yml
       displayName: Create Agent Anaconda environment
 
     - script: |

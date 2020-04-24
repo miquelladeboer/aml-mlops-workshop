@@ -35,7 +35,7 @@ stages:
       displayName: Add Conda to PATH
 
     - script: |
-        conda env create -n trainenv --file code/environments/fullmodel_step/conda_dependencies.yml
+        conda env create -n trainenv --file environments/fullmodel_step/conda_dependencies.yml
       displayName: Create Agent Anaconda environment
 
     - script: |
