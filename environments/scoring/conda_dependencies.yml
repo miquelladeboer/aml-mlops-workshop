@@ -1,0 +1,24 @@
+name: scoring_environment
+dependencies:
+- python=3.6.10
+- pytorch
+- pip
+
+- pip:
+  - numpy==1.15.4
+  - pandas==1.0.3
+  - scikit-learn==0.20.1
+  - scipy==1.0.0
+  - matplotlib==3.0.2
+  - utils==0.9.0
+  - onnxruntime==1.2.0
+  - onnx==1.6.0
+  # Required packages for AzureML execution, history, and data preparation.
+  - azureml-sdk==1.0.85
+  - azureml-defaults==1.0.85
+  - azure-cli==2.0.58
+  # Dev Tools
+  - setuptools
+  - flake8
+  - flake8_formatter_junit_xml
+  - pytest

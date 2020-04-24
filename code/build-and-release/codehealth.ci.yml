@@ -33,4 +33,4 @@ stages:
 
     - template: ado-templates/codehealth.template.yml
       parameters:
-        workingDirectory: "code/tests/"
+        workingDirectory: "code/tests/modeling/"

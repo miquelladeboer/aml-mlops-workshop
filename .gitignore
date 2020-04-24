@@ -3,3 +3,4 @@ outputs/
 .ssh/
 .vscode/
 *.pyc
+*.pyo

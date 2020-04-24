@@ -21,7 +21,6 @@ resources:
 # @TODO model registry event to trigger this pipeline
 
 stages:
-# Release Stages
 - stage: ModelValidation
   displayName: 'Model Validation'
   jobs:
@@ -32,17 +31,26 @@ stages:
     steps:
     - download: current
       artifact: MLBuildArtifacts
+    
+    # Load Scoring Environment
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n scoringenv --file code/environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
+
     # Model Validation Tests
     - script: |
-        source activate agentenv
-        pytest --junitxml=reports/test_report_modelvalidation.xml
-      workingDirectory: tests/model-validation
+        source activate scoringenv
+        pytest --junitxml=test_report_modelvalidation.xml
+      workingDirectory: code/tests/model_validation
       displayName: 'Model Validation Tests'
 
     - task: PublishTestResults@2
       displayName: 'Publish Test Results'
       inputs:
-        testResultsFiles: 'tests/reports/test_report_modelvalidation.xml'
+        testResultsFiles: 'code/tests/model_validation/test_report_modelvalidation.xml'
         testRunTitle: '$(projectname): Model Validation Test Results'
         failTaskOnFailedTests: true # unifies failure across different types of tests
       condition: succeededOrFailed()
@@ -57,6 +65,14 @@ stages:
     steps:
     - download: current
       artifact: MLBuildArtifacts
+    
+    # Load Scoring Environment
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n scoringenv --file code/environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
 
 - stage: DeployScoringApp
   displayName: 'Deploy the Scoring App'
@@ -83,6 +99,17 @@ stages:
 - stage: LoadTesting
   displayName: 'Load Test Scoring App'
   # Deploy scoring app and system integrate
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+    - download: current
+      artifact: MLBuildArtifacts
+
+- stage: DeployPRD
+  displayName: 'Deploy the Scoring App'
   jobs:
   - job: Validate_Model
     pool:

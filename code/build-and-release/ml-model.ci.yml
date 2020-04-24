@@ -36,12 +36,13 @@ stages:
 
     - script: |
         conda env create -n agentenv --file code/build-and-release/agent-environment.yml
+        conda env create -n scoringapp --file environments/scoring_app/conda_dependencies.yml
       displayName: Create Agent Anaconda environment
 
     # Run Code Health Check
     - template: ado-templates/codehealth.template.yml
       parameters:
-        workingDirectory: "code/tests/"
+        workingDirectory: "code/tests/modeling/"
 
     # ML Pipeline Experiment (before-publish)
     #   For long execution times, one could first run a training pipeline on a data sample to validate all

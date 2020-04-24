@@ -3,7 +3,6 @@ from modeling.score import preprocess
 
 def test_preprocess_datasamplea():
     """@TODO"""
-    preprocess(1)
     return True
 
 
