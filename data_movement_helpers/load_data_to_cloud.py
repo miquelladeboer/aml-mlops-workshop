@@ -3,12 +3,16 @@ from azureml.core import Workspace, Datastore
 from azureml.core.authentication import AzureCliAuthentication
 import pandas as pd
 from sklearn.datasets import fetch_20newsgroups
-import uuid 
+import uuid
+from datetime import date
 
-OUTPUTSFOLDERtrain = "outputs/cloud_data_train"
-OUTPUTSFOLDERtest = "outputs/cloud_data_test"
-OUTPUTSFOLDERtrainsubset = "outputs/cloud_data_train_subset"
-OUTPUTSFOLDERtestsubset = "outputs/cloud_data_test_subset"
+weekNumber = str(date.today().isocalendar()[1])
+
+OUTPUTSFOLDERtrain = "outputs/cloud_data_train/" + weekNumber
+OUTPUTSFOLDERtest = "outputs/cloud_data_test/" + weekNumber
+OUTPUTSFOLDERtrainsubset = "outputs/cloud_data_train_subset/" + weekNumber
+OUTPUTSFOLDERtestsubset = "outputs/cloud_data_test_subset/" + weekNumber
+
 
 datastore_name = 'workspaceblobstore'
 
@@ -20,16 +24,16 @@ datastore = Datastore.get(workspace, datastore_name)
 
 # create outputs folder if not exists
 if not os.path.exists(OUTPUTSFOLDERtrain):
-        os.makedirs(OUTPUTSFOLDERtrain)
+    os.makedirs(OUTPUTSFOLDERtrain)
 
 if not os.path.exists(OUTPUTSFOLDERtest):
-        os.makedirs(OUTPUTSFOLDERtest)
+    os.makedirs(OUTPUTSFOLDERtest)
 
 if not os.path.exists(OUTPUTSFOLDERtrainsubset):
-        os.makedirs(OUTPUTSFOLDERtrainsubset)
+    os.makedirs(OUTPUTSFOLDERtrainsubset)
 
 if not os.path.exists(OUTPUTSFOLDERtestsubset):
-        os.makedirs(OUTPUTSFOLDERtestsubset)
+    os.makedirs(OUTPUTSFOLDERtestsubset)
 
 
 # Define newsgroup categories to be downloaded to generate sample dataset
@@ -41,8 +45,8 @@ categories = [
 ]
 
 for data_split in ['train', 'test']:
-    if data_split ==  'train':
-        OUTPUTSFOLDER =  OUTPUTSFOLDERtrain
+    if data_split == 'train':
+        OUTPUTSFOLDER = OUTPUTSFOLDERtrain
         OUTPUTSFOLDERSUBSET = OUTPUTSFOLDERtrainsubset
     else:
         OUTPUTSFOLDER = OUTPUTSFOLDERtest
@@ -91,7 +95,7 @@ for data_split in ['train', 'test']:
             '../',
             OUTPUTSFOLDER
         ),
-        target_path="/" + 'raw_' + data_split,
+        target_path="/" + 'raw_' + data_split + '/' + weekNumber,
         overwrite=True,
         show_progress=True
     )
@@ -103,7 +107,7 @@ for data_split in ['train', 'test']:
             '../',
             OUTPUTSFOLDERSUBSET
         ),
-        target_path="/" + 'raw_subset_' + data_split,
+        target_path="/" + 'raw_subset_' + data_split + '/' + weekNumber,
         overwrite=True,
         show_progress=True
     )

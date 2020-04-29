@@ -12,9 +12,6 @@ dependencies:
 - h5py
 - scipy
 - toolz
-- bokeh
-- dask
-- distributed
 - python-snappy
 - notebook
 - matplotlib
@@ -30,8 +27,6 @@ dependencies:
 - graphviz
 - pip
 - s3fs
-- fastparquet
-- dask-ml
 - pip:
   - graphviz
   - cachey

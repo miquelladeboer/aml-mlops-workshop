@@ -1,11 +1,10 @@
-
 import string
 import os
 import argparse
 from azureml.core import Run
 from azureml.core import Datastore
 import uuid
-
+from datetime import date
 from packages.get_data import load_data
 
 parser = argparse.ArgumentParser()
@@ -53,6 +52,7 @@ if opts.subset == "yes":
 else:
     dataset = ""
 
+weekNumber = str(date.today().isocalendar()[1]+ 1)
 
 # make every thing lower case
 data_train.text = data_train.text.apply(lambda x: x.lower())
@@ -75,22 +75,40 @@ if opts.local == 'yes':
     OUTPUTSFOLDER = "C:/Users/mideboer.EUROPE/Documents/GitHub/aml-mlops-workshop/outputs/prepared_data"
 # Save to local file
 else:
-    OUTPUTSFOLDER = "outputs/prepared_data"
+    OUTPUTSFOLDERtrain = "outputs/cloud_data_train/" + weekNumber
+    OUTPUTSFOLDERtest = "outputs/cloud_data_test/" + weekNumber
+    OUTPUTSFOLDERtrainsubset = "outputs/cloud_data_train_subset/" + weekNumber
+    OUTPUTSFOLDERtestsubset = "outputs/cloud_data_test_subset/" + weekNumber
 
 # create outputs folder if not exists
-if not os.path.exists(OUTPUTSFOLDER):
-    os.makedirs(OUTPUTSFOLDER)
+if not os.path.exists(OUTPUTSFOLDERtrain):
+    os.makedirs(OUTPUTSFOLDERtrain)
 
+if not os.path.exists(OUTPUTSFOLDERtest):
+    os.makedirs(OUTPUTSFOLDERtest)
+
+if not os.path.exists(OUTPUTSFOLDERtrainsubset):
+    os.makedirs(OUTPUTSFOLDERtrainsubset)
+
+if not os.path.exists(OUTPUTSFOLDERtestsubset):
+    os.makedirs(OUTPUTSFOLDERtestsubset)
+
+if opts.subset == "yes":
+    OUTPUTSFOLDERtr = OUTPUTSFOLDERtrainsubset
+    OUTPUTSFOLDERte = OUTPUTSFOLDERtestsubset
+if opts.subset == 'no':
+    OUTPUTSFOLDERtr = OUTPUTSFOLDERtrain
+    OUTPUTSFOLDERte = OUTPUTSFOLDERtest
 # write to csv
 data_train.to_csv(
     path_or_buf=os.path.join(
-        OUTPUTSFOLDER, dataset + 'train.csv')
+        OUTPUTSFOLDERtr, dataset + 'train_' + str(uuid.uuid1()) + '.csv')
 )
 
 # write to csv
 data_test.to_csv(
     path_or_buf=os.path.join(
-        OUTPUTSFOLDER, dataset + 'test.csv')
+        OUTPUTSFOLDERte, dataset + 'test_' + str(uuid.uuid1()) + '.csv')
 )
 
 if opts.local == "no":
@@ -104,19 +122,29 @@ if opts.local == "no":
     # upload files
     datastore.upload(
         src_dir=os.path.join(
-            OUTPUTSFOLDER
+            OUTPUTSFOLDERtr
         ),
-        target_path=None,
+        target_path="/" + dataset + 'train' + '/' + weekNumber,
+        overwrite=True,
+        show_progress=True
+    )
+
+    # upload files
+    datastore.upload(
+        src_dir=os.path.join(
+            OUTPUTSFOLDERte
+        ),
+        target_path="/" + dataset + 'test' +'/' + weekNumber,
         overwrite=True,
         show_progress=True
     )
 
     if not (opts.output_train is None):
         os.makedirs(opts.output_train, exist_ok=True)
-        path = opts.output_train + "/" + 'train ' + str(uuid.uuid1()) + '.csv'
+        path = opts.output_train + "/" + 'train-' + str(uuid.uuid1()) + '.csv'
         write_df = data_train.to_csv(path)
 
     if not (opts.output_test is None):
         os.makedirs(opts.output_test, exist_ok=True)
-        path = opts.output_test + "/" + 'test' + str(uuid.uuid1()) + '.csv'
+        path = opts.output_test + "/" + 'test-' + str(uuid.uuid1()) + '.csv'
         write_df = data_test.to_csv(path)

@@ -25,8 +25,8 @@ def plot_auc(fpr, tpr, roc_auc):
     colors = cycle(['aqua', 'darkorange', 'cornflowerblue', 'red'])
     for i, color in zip(range(n_classes), colors):
         plt2.plot(fpr[i], tpr[i], color=color, lw=2,
-                 label='ROC curve of class {0} (area = {1:0.2f})'
-                 ''.format(i, roc_auc[i]))
+                  label='ROC curve of class {0} (area = {1:0.2f})'
+                  ''.format(i, roc_auc[i]))
 
     plt2.plot([0, 1], [0, 1], 'k--', lw=2)
     plt2.xlim([0.0, 1.0])

@@ -17,9 +17,9 @@ from azureml.train.dnn import PyTorch
 
 # Define comfigs
 subset = True
-models = 'deeplearning'
+models = 'sklearnmodels'
 data_local = False
-hyperdrive = True
+hyperdrive = False
 
 # If deep learning define hyperparameters
 # Set parameters for search

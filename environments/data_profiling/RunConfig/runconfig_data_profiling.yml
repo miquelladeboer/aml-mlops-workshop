@@ -1,5 +1,5 @@
 # The script to run.
-script: train.py
+script: create_historic_profile.py
 # The arguments to the script file.
 arguments: []
 # The name of the compute target to use for this run.
@@ -45,16 +45,27 @@ mpi:
 # When using MPI, number of processes per node.
   processCountPerNode: 1
 # data reference configuration details
-dataReferences: {}
+dataReferences:
+  historic_profile:
+# Name of the datastore.
+    dataStoreName: workspaceblobstore
+# relative path on the datastore.
+    pathOnDataStore: historic_profile
+# operation on the datastore, mount, download, upload
+    mode: download
+# whether to overwrite the data if existing
+    overwrite: false
+# the path on the compute target.
+    pathOnCompute:
 # The configuration details for data.
 data:
-  newsgroups_subset_train:
+  newsgroups_raw_subset_train:
 # Data Location
     dataLocation:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: caf31fc8-d3da-414e-bf30-f37cda439872
+        id: 4d4bf3e7-e80a-47a7-b423-ffa1e2407421
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.
@@ -62,26 +73,7 @@ data:
 # The mode to handle
     mechanism: mount
 # Point where the data is download or mount or upload.
-    environmentVariableName: newsgroups_subset_train
-# relative path where the data is download or mount or upload.
-    pathOnCompute:
-# Whether to overwrite the data if existing.
-    overwrite: true
-  newsgroups_subset_test:
-# Data Location
-    dataLocation:
-# the Dataset used for this run.
-      dataset:
-# Id of the dataset.
-        id: ca31dfe3-fedb-451c-b387-8b1c047a8db2
-# the DataPath used for this run.
-      datapath:
-# Whether to create new folder.
-    createOutputDirectories: false
-# The mode to handle
-    mechanism: mount
-# Point where the data is download or mount or upload.
-    environmentVariableName: newsgroups_subset_test
+    environmentVariableName: newsgroups_raw_subset_train
 # relative path where the data is download or mount or upload.
     pathOnCompute:
 # Whether to overwrite the data if existing.

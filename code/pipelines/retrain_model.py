@@ -64,6 +64,10 @@ train = PipelineData(name='newsgroups_train',
 test = PipelineData(name='newsgroups_test',
                     datastore=datastore,
                     pipeline_output_name='newsgroups_test')
+modelpath_name = 'modelpath'
+modelpath = PipelineData(name='modelpath',
+                         datastore=datastore,
+                         pipeline_output_name=modelpath_name)
 
 # define script parameters
 script_params_sub = [
@@ -101,7 +105,8 @@ script_params_2 = [
     '--fullmodel', "yes",
     '--pipeline', 'yes',
     '--output_train', train,
-    '--output_test', test
+    '--output_test', test,
+    '--savemodel',  modelpath
 ]
 
 # Load run Config
@@ -213,7 +218,9 @@ fullmodel = PythonScriptStep(
             train,
             test
     ],
-    outputs=[],
+    outputs=[
+             modelpath
+    ],
     runconfig=run_config_full,
     source_directory=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),

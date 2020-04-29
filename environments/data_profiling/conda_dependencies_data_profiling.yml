@@ -12,12 +12,11 @@ dependencies:
   - h5py
   - scipy
   - toolz
-  - bokeh
-  - dask
-  - distributed
+  - python-snappy
   - notebook
   - matplotlib
   - Pillow
+  - pyarrow
   - pandas
   - pandas-datareader
   - pytables
@@ -28,8 +27,6 @@ dependencies:
   - graphviz
   - pip
   - s3fs
-  - fastparquet
-  - dask-ml
   - pip:
     - graphviz 
     - cachey
@@ -37,3 +34,5 @@ dependencies:
     - mpi4py
     - gym
     - adlfs
+    - langdetect
+    - textblob

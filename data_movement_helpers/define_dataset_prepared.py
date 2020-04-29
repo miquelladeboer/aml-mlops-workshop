@@ -1,7 +1,11 @@
 # Defines a tabular dataset on top of an Azure ML datastore
 from azureml.core import Workspace, Datastore, Dataset
-from azureml.data import DataType
+from datetime import date
 from azureml.core.authentication import AzureCliAuthentication
+
+startWeek = 17
+weekNumber = date.today().isocalendar()[1]
+
 
 # Retrieve a datastore from a ML workspace
 ws = Workspace.from_config(auth=AzureCliAuthentication())
@@ -13,9 +17,13 @@ for data_split in ['train', 'test']:
     for set in ['', 'subset_']:
         # Create a TabularDataset from paths in datastore in split folder
         # Note that wildcards can be used
-        datastore_paths = [
-            (datastore, '{}.csv'.format(set + data_split))
-        ]
+        datastore_paths = []
+        for i in range(startWeek, (weekNumber+1)):
+            datastore_path = (
+                datastore,
+                '{}/*.csv'.format(set + data_split + '/' + str(i))
+            )
+            datastore_paths.insert(0, datastore_path)
 
         # Create a TabularDataset from paths in datastore
         dataset = Dataset.File.from_files(
@@ -29,4 +37,3 @@ for data_split in ['train', 'test']:
             description='newsgroups data',
             create_new_version=True
         )
-
