@@ -134,7 +134,7 @@ if opts.local == "no":
         src_dir=os.path.join(
             OUTPUTSFOLDERte
         ),
-        target_path="/" + dataset + 'test' +'/' + weekNumber,
+        target_path="/" + dataset + 'test' + '/' + weekNumber,
         overwrite=True,
         show_progress=True
     )

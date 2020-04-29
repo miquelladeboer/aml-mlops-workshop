@@ -154,6 +154,7 @@ lst = []
 lst1 = []
 # creat df for profiling for 1st time:
 if opts.new_profile == 'yes':
+    print("creating new profile")
     values = {
         'date': [today],
         'mean of classes':  [data_mean],
@@ -282,8 +283,6 @@ if opts.local == 'no':
 
 # plot profile
 mean_classes = plots.plot_mean_of_classes(profile)
-mean_classes.show()
 run.log_image("Mean of classes over time ", plot=mean_classes)
 std_classes = plots.plot_std_of_classes(profile)
 run.log_image("Standard deviation over time ", plot=std_classes)
-std_classes.show()

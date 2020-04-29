@@ -89,6 +89,8 @@ if not (opts.output_train is None):
     opts.data_folder_test = opts.output_test + '/' + sub
 
 data_train, data_test = load_data(opts)
+print(data_train.columns.values)
+print(data_train)
 data_train.columns.values[-1] = 'target'
 data_test.columns.values[-1] = 'target'
 
@@ -261,7 +263,7 @@ else:
         model = onnx.load(filename)
         model = run.register_model(model_name=model_name,
                                    model_path=filename)
-       
+     
         if not (opts.savemodel is None):
             os.makedirs(opts.savemodel, exist_ok=True)
             path = opts.savemodel + "/" + pickle_name
@@ -271,4 +273,4 @@ else:
             outfile.close()
             model = onnx.load(filename)
             joblib.dump(value=model, filename=path2)
-            
+

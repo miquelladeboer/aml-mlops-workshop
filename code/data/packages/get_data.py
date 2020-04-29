@@ -1,7 +1,8 @@
 import pandas as pd
 import os
 
-
+# we only want to perform data engineering and 
+# profile check on the new data that comes in
 def load_data(opts):
     subsubpath = opts.data_folder_train + '/workspaceblobstore'
     dir_list_1 = os.listdir(subsubpath)

@@ -1,0 +1,29 @@
+{
+    "script": "code/data/data_validation.py",
+    "framework": "Python",
+    "communicator": "None",
+    "target": "local",
+    "environment": {
+        "python": {
+            "userManagedDependencies": true,
+            "interpreterPath": "C:\\Users\\mideboer.EUROPE\\Miniconda3\\envs\\venvaml\\python.exe"
+        },
+        "environmentVariables": {},
+        "docker": {
+            "baseImage": "mcr.microsoft.com/azureml/base:0.2.4",
+            "enabled": false,
+            "baseImageRegistry": {
+                "address": null,
+                "username": null,
+                "password": null
+            }
+        }
+    },
+    "history": {
+        "outputCollection": true,
+        "snapshotProject": false,
+        "directoriesToWatch": [
+            "logs"
+        ]
+    }
+}

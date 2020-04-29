@@ -76,7 +76,7 @@ if models != 'deeplearning':
     if data_local is False:
         dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
         dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
-    
+
         # Load run Config
         run_config = RunConfiguration.load(
             path=os.path.join(os.path.join(
