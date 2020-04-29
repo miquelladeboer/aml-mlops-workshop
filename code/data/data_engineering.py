@@ -71,7 +71,7 @@ data_test.text = data_test.text.apply(
     lambda x: x.translate(string.digits))
 
 if opts.local == 'yes':
-    OUTPUTSFOLDER = "C:/Users/mideboer.EUROPE/Documents/GitHub/aml-mlops-workshop/outputs/prepared_data"
+    OUTPUTSFOLDER = "C:/Users/deeikele/Documents/Repos/aml-workshop-2/aml-mlops-workshop/outputs/prepared_data"
 # Save to local file
 else:
     OUTPUTSFOLDER = "outputs/prepared_data"
@@ -83,13 +83,15 @@ if not os.path.exists(OUTPUTSFOLDER):
 # write to csv
 data_train.to_csv(
     path_or_buf=os.path.join(
-        OUTPUTSFOLDER, dataset + 'train.csv')
+        OUTPUTSFOLDER, dataset + 'train.csv'),
+    index=False
 )
 
 # write to csv
 data_test.to_csv(
     path_or_buf=os.path.join(
-        OUTPUTSFOLDER, dataset + 'test.csv')
+        OUTPUTSFOLDER, dataset + 'test.csv'),
+    index=False
 )
 
 if opts.local == "no":
@@ -113,9 +115,9 @@ if opts.local == "no":
     if not (opts.output_train is None):
         os.makedirs(opts.output_train, exist_ok=True)
         path = opts.output_train + "/" + 'train.csv'
-        write_df = data_train.to_csv(path)
+        write_df = data_train.to_csv(path, index=False)
 
     if not (opts.output_test is None):
         os.makedirs(opts.output_test, exist_ok=True)
         path = opts.output_test + "/" + 'test.csv'
-        write_df = data_test.to_csv(path)
+        write_df = data_test.to_csv(path, index=False)

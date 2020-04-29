@@ -9,8 +9,8 @@ from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.runconfig import RunConfiguration
 
 # Define comfigs
-data_local = "no"
-subset = "no"
+data_local = "yes"
+subset = "yes"
 
 # define compute
 compute_target = 'alwaysoncluster'

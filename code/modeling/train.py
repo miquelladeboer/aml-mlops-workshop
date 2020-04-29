@@ -35,11 +35,23 @@ parser.add_argument("--fullmodel",
 parser.add_argument('--data_folder_train',
                     type=str,
                     dest='data_folder_train',
-                    help='data folder mounting point')
+                    help='data folder mounting point',
+                    default=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "../..",
+                        "outputs/prepared_data/subset_train.csv",
+                        )
+                    )
 parser.add_argument('--data_folder_test',
                     type=str,
                     dest='data_folder_test',
-                    help='data folder mounting point')
+                    help='data folder mounting point',
+                    default=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "../..",
+                        "outputs/prepared_data/subset_test.csv",
+                        )
+                    )
 parser.add_argument('--pipeline',
                     type=str,
                     default='no')
@@ -69,6 +81,8 @@ if not (opts.output_train is None):
     opts.data_folder_test = opts.output_test + '/test.csv'
 
 data_train, data_test = load_data(opts)
+data_train.columns.values[-1] = "target"
+data_test.columns.values[-1] = "target"
 
 if opts.models != 'deeplearning':
     # get numpy back

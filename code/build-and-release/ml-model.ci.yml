@@ -86,7 +86,7 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          source activate agentenv
+          source activate trainenv
           python $(amlPipelineRunner) --await_completion True --download_outputs True
 
     - task: CopyFiles@2
@@ -114,5 +114,5 @@ stages:
     #     scriptType: bash
     #     scriptLocation: inlineScript
     #     inlineScript: |
-    #       source activate agentenv
+    #       source activate trainenv
     #       python $(amlPipelineRunner) --await_completion True
