@@ -15,7 +15,7 @@ def setup_function():
     ),
     WORD2INDEX_PKL = "word2index"
 
-    # @TODO create mock word2index
+    # @TODO create mock word2index - write from here?
 
 
 def test_preprocess_datasamplea():
