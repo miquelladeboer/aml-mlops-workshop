@@ -37,21 +37,22 @@ parser.add_argument('--data_folder_train',
                     dest='data_folder_train',
                     help='data folder mounting point',
                     default=os.path.join(
-                        os.path.dirname(os.path.realpath(__file__)),
-                        "../..",
-                        "outputs/prepared_data/subset_train.csv",
-                        )
+                     os.path.dirname(os.path.realpath(__file__)),
+                     "../..",
+                     "outputs/prepared_data/subset_train.csv",
+                    )
                     )
 parser.add_argument('--data_folder_test',
                     type=str,
                     dest='data_folder_test',
                     help='data folder mounting point',
                     default=os.path.join(
-                        os.path.dirname(os.path.realpath(__file__)),
-                        "../..",
-                        "outputs/prepared_data/subset_test.csv",
-                        )
-                    )
+                     os.path.dirname(os.path.realpath(__file__)),
+                     "../..",
+                     "outputs/prepared_data/subset_test.csv",
+                    ))
+parser.add_argument('--savemodel',
+                    type=str)
 parser.add_argument('--pipeline',
                     type=str,
                     default='no')
@@ -76,13 +77,20 @@ parser.add_argument("--hidden_size",
 opts = parser.parse_args()
 
 if not (opts.output_train is None):
-    print(opts.output_train)
-    opts.data_folder_train = opts.output_train + '/train.csv'
-    opts.data_folder_test = opts.output_test + '/test.csv'
+    sub_train = os.listdir(opts.output_train)
+    sub = ""
+    for ele in sub_train:
+        sub += ele
+    opts.data_folder_train = opts.output_train + '/' + sub
+    sub_test = os.listdir(opts.output_test)
+    sub = ""
+    for ele in sub_test:
+        sub += ele
+    opts.data_folder_test = opts.output_test + '/' + sub
 
 data_train, data_test = load_data(opts)
-data_train.columns.values[-1] = "target"
-data_test.columns.values[-1] = "target"
+data_train.columns.values[-1] = 'target'
+data_test.columns.values[-1] = 'target'
 
 if opts.models != 'deeplearning':
     # get numpy back
@@ -253,3 +261,14 @@ else:
         model = onnx.load(filename)
         model = run.register_model(model_name=model_name,
                                    model_path=filename)
+       
+        if not (opts.savemodel is None):
+            os.makedirs(opts.savemodel, exist_ok=True)
+            path = opts.savemodel + "/" + pickle_name
+            path2 = opts.savemodel + "/" + model_name
+            outfile = open(path, 'wb')
+            pickle.dump(word2index, outfile)
+            outfile.close()
+            model = onnx.load(filename)
+            joblib.dump(value=model, filename=path2)
+            

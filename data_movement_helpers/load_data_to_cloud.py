@@ -3,12 +3,37 @@ from azureml.core import Workspace, Datastore
 from azureml.core.authentication import AzureCliAuthentication
 import pandas as pd
 from sklearn.datasets import fetch_20newsgroups
+import uuid
+from datetime import date
 
-OUTPUTSFOLDER = "outputs/cloud_data"
+weekNumber = str(date.today().isocalendar()[1])
+
+OUTPUTSFOLDERtrain = "outputs/cloud_data_train/" + weekNumber
+OUTPUTSFOLDERtest = "outputs/cloud_data_test/" + weekNumber
+OUTPUTSFOLDERtrainsubset = "outputs/cloud_data_train_subset/" + weekNumber
+OUTPUTSFOLDERtestsubset = "outputs/cloud_data_test_subset/" + weekNumber
+
+
+datastore_name = 'workspaceblobstore'
+
+# get existing ML workspace
+workspace = Workspace.from_config(auth=AzureCliAuthentication())
+
+# retrieve an existing datastore in the workspace by name
+datastore = Datastore.get(workspace, datastore_name)
 
 # create outputs folder if not exists
-if not os.path.exists(OUTPUTSFOLDER):
-        os.makedirs(OUTPUTSFOLDER)
+if not os.path.exists(OUTPUTSFOLDERtrain):
+    os.makedirs(OUTPUTSFOLDERtrain)
+
+if not os.path.exists(OUTPUTSFOLDERtest):
+    os.makedirs(OUTPUTSFOLDERtest)
+
+if not os.path.exists(OUTPUTSFOLDERtrainsubset):
+    os.makedirs(OUTPUTSFOLDERtrainsubset)
+
+if not os.path.exists(OUTPUTSFOLDERtestsubset):
+    os.makedirs(OUTPUTSFOLDERtestsubset)
 
 
 # Define newsgroup categories to be downloaded to generate sample dataset
@@ -20,6 +45,13 @@ categories = [
 ]
 
 for data_split in ['train', 'test']:
+    if data_split == 'train':
+        OUTPUTSFOLDER = OUTPUTSFOLDERtrain
+        OUTPUTSFOLDERSUBSET = OUTPUTSFOLDERtrainsubset
+    else:
+        OUTPUTSFOLDER = OUTPUTSFOLDERtest
+        OUTPUTSFOLDERSUBSET = OUTPUTSFOLDERtestsubset
+
     # retrieve newsgroup data
     newsgroupdata = fetch_20newsgroups(
         subset=data_split,
@@ -44,33 +76,38 @@ for data_split in ['train', 'test']:
     # write to csv
     df_subset.to_csv(
         path_or_buf=os.path.join(
-            OUTPUTSFOLDER, 'raw_subset_' + data_split +
+            OUTPUTSFOLDERSUBSET, 'raw_subset_' + data_split + '_' + str(uuid.uuid1()) +
             '.csv')
     )
 
     # write to csv
     df.to_csv(
         path_or_buf=os.path.join(
-            OUTPUTSFOLDER, 'raw_' + data_split +
+            OUTPUTSFOLDER, 'raw_' + data_split + '_' + str(uuid.uuid1()) +
             '.csv')
     )
 
-datastore_name = 'workspaceblobstore'
 
-# get existing ML workspace
-workspace = Workspace.from_config(auth=AzureCliAuthentication())
+    # upload files
+    datastore.upload(
+        src_dir=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            '../',
+            OUTPUTSFOLDER
+        ),
+        target_path="/" + 'raw_' + data_split + '/' + weekNumber,
+        overwrite=True,
+        show_progress=True
+    )
 
-# retrieve an existing datastore in the workspace by name
-datastore = Datastore.get(workspace, datastore_name)
-
-# upload files
-datastore.upload(
-    src_dir=os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        '../',
-        OUTPUTSFOLDER
-    ),
-    target_path=None,
-    overwrite=True,
-    show_progress=True
-)
+     # upload files
+    datastore.upload(
+        src_dir=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            '../',
+            OUTPUTSFOLDERSUBSET
+        ),
+        target_path="/" + 'raw_subset_' + data_split + '/' + weekNumber,
+        overwrite=True,
+        show_progress=True
+    )

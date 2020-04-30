@@ -9,8 +9,7 @@ from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.runconfig import RunConfiguration
 
 # Define comfigs
-data_local = "yes"
-subset = "yes"
+data_local = "no"
 
 # Define compute target for data engineering from AML
 compute_target = 'alwaysoncluster'
@@ -19,16 +18,9 @@ compute_target = 'alwaysoncluster'
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Define datasets names
-if subset == "no":
-    # Get environment from config yml for data engineering for full dataset
-    filepath = "environments/data_preperation/RunConfig/runconfig_data.yml"
-    input_name_train = 'newsgroups_raw_train'
-    input_name_test = 'newsgroups_raw_test'
-else:
-    # Get environment from config yml for data engineering for full dataset
-    filepath = "environments/data_preperation_subset/RunConfig/runconfig_data.yml"
-    input_name_train = 'newsgroups_raw_subset_train'
-    input_name_test = 'newsgroups_raw_subset_test'
+# Get environment from config yml for data engineering for full dataset
+filepath = "environments/data_profiling/RunConfig/runconfig_data_profiling.yml"
+input_name_train = 'newsgroups_raw_subset_train'
 
 # Load run Config file for data prep
 run_config = RunConfiguration.load(
@@ -37,23 +29,20 @@ run_config = RunConfiguration.load(
         "../..",
         filepath,
         )),
-    name="dataprep"
+    name="dataprofiling"
 )
 
 est = ScriptRunConfig(
     source_directory=os.path.dirname(os.path.realpath(__file__)),
     run_config=run_config,
     arguments=[
-        '--data_folder_train',
+        '--data_folder',
         'DatasetConsumptionConfig:{}'.format(input_name_train),
-        '--data_folder_test',
-        'DatasetConsumptionConfig:{}'.format(input_name_test),
-        '--subset', subset,
         '--local', 'no'
     ],
 )
 
 # Define the ML experiment
-experiment = Experiment(workspace, "data-engineering")
+experiment = Experiment(workspace, "historic-profile")
 # Submit experiment run, if compute is idle, this may take some time')
 run = experiment.submit(est)
