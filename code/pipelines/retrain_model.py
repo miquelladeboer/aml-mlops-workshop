@@ -1,11 +1,10 @@
+import os
 from azureml.core import Workspace, Experiment, Datastore
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.dataset import Dataset
 from azureml.pipeline.steps import PythonScriptStep
 from azureml.pipeline.core import Pipeline
 from azureml.core.runconfig import RunConfiguration
-import os
-import argparse
 from azureml.train.hyperdrive.parameter_expressions import uniform, choice
 from azureml.train.hyperdrive import (
     BayesianParameterSampling,
@@ -74,6 +73,10 @@ train = PipelineData(name='newsgroups_train',
 test = PipelineData(name='newsgroups_test',
                     datastore=datastore,
                     pipeline_output_name='newsgroups_test')
+modelpath_name = 'modelpath'
+modelpath = PipelineData(name='modelpath',
+                         datastore=datastore,
+                         pipeline_output_name=modelpath_name)
 
 # define script parameters
 script_params_sub = [
@@ -111,7 +114,8 @@ script_params_2 = [
     '--fullmodel', "yes",
     '--pipeline', 'yes',
     '--output_train', train,
-    '--output_test', test
+    '--output_test', test,
+    '--savemodel',  modelpath
 ]
 
 # Load run Config
@@ -196,22 +200,22 @@ dataprep_fulldata = PythonScriptStep(
 
 # Define the pipeline step
 hypertuning = HyperDriveStep(
-    name='hypertrain',
-    hyperdrive_config=HyperDriveConfig(
-        estimator=estimator,
-        hyperparameter_sampling=param_sampling,
-        policy=None,
-        primary_metric_name="accuracy",
-        primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
-        max_total_runs=2,
-        max_concurrent_runs=None
-    ),
-    estimator_entry_script_arguments=script_params_1,
-    inputs=[subset_train, subset_test],
-    outputs=[],
-    metrics_output=metrics_data,
-    allow_reuse=True,
-    version=None
+            name='hypertrain',
+            hyperdrive_config=HyperDriveConfig(
+                estimator=estimator,
+                hyperparameter_sampling=param_sampling,
+                policy=None,
+                primary_metric_name="accuracy",
+                primary_metric_goal=PrimaryMetricGoal.MAXIMIZE,
+                max_total_runs=2,
+                max_concurrent_runs=None
+            ),
+            estimator_entry_script_arguments=script_params_1,
+            inputs=[subset_train, subset_test],
+            outputs=[],
+            metrics_output=metrics_data,
+            allow_reuse=True,
+            version=None
 )
 
 fullmodel = PythonScriptStep(
@@ -219,11 +223,13 @@ fullmodel = PythonScriptStep(
     script_name="train.py",
     arguments=script_params_2,
     inputs=[
-        metrics_data,
-        train,
-        test
+            metrics_data,
+            train,
+            test
     ],
-    outputs=[],
+    outputs=[
+             modelpath
+    ],
     runconfig=run_config_full,
     source_directory=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
@@ -260,7 +266,7 @@ if args.await_completion is True:
         print(step_run)
         print("outputs: {}".format(step_run.get_outputs()))
 
-        port_data_reference = step_run.get_output_data("models")
+        port_data_reference = step_run.get_output_data("modelpath")
         port_data_reference.download(local_path=os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             '../../',

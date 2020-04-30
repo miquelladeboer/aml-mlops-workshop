@@ -60,16 +60,22 @@ def preprocess(input_data_json):
 
 
 def postprocess(result):
-    print(result)
+    if len(result) > 4:
+        raise ValueError('The length of the model output exceeded the number of expected classes.')
+
     index = np.argmax(result)
+
     if index == 0:
         predicted = 'alt.atheism'
     elif index == 1:
         predicted = 'talk.religion.misc'
     elif index == 2:
         predicted = 'comp.graphics'
-    else:
+    elif index == 3:
         predicted = 'sci.space'
+    else:
+        raise ValueError('The returned model output could not be mapped.')
+
     return predicted
 
 
