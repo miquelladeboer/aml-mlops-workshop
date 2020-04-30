@@ -9,6 +9,10 @@ import pickle
 import string
 
 
+OUTPUTSFOLDER = "outputs"
+WORD2INDEX_PKL = "word2index"
+
+
 def init():
     global session, input_name, output_name
     # AZUREML_MODEL_DIR is an environment variable created during deployment.
@@ -25,13 +29,10 @@ def to_numpy(tensor):
 
 
 def preprocess(input_data_json):
-
     input_data = json.loads(input_data_json)
 
-    # print("Parsed json {}".format(input_data))
-    OUTPUTSFOLDER = "outputs"
-    pickle_name = "word2index"
-    filename = os.path.join(OUTPUTSFOLDER, pickle_name)
+    print("Parsed json {}".format(input_data))
+    filename = os.path.join(OUTPUTSFOLDER, WORD2INDEX_PKL)
     infile = open(filename, 'rb')
     word2index = pickle.load(infile)
     infile.close()
