@@ -20,6 +20,7 @@ import nltk
 from nltk.corpus import stopwords
 from textblob import TextBlob
 from azureml.core import Run
+from packages.get_data import load_data
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -55,9 +56,24 @@ parser.add_argument(
     dest='profile_folder',
     help='profile folder mounting point'
 )
-parser.add_argument('--local',
-                    type=str,
-                    default='yes')
+parser.add_argument(
+    '--local',
+    type=str,
+    default='yes'
+)
+parser.add_argument(
+    "--output_train",
+    type=str
+)
+parser.add_argument(
+    "--output_test",
+    type=str
+)
+parser.add_argument(
+    '--data_drift_report',
+    type=str
+)
+
 opts = parser.parse_args()
 
 try:
@@ -75,37 +91,10 @@ run = Run.get_context()
 nltk.download('stopwords')
 stop = stopwords.words('english')
 
-if opts.local == 'no':
-    subsubsubpath = opts.data_folder_train + '/workspaceblobstore'
-    dir_list = os.listdir(subsubsubpath)
-    subsubpath = subsubsubpath + '/' + dir_list[0]
-    dir_list_1 = os.listdir(subsubpath)
-    subpath = subsubpath + '/' + dir_list_1[-1]
-    dir_list_2 = os.listdir(subpath)
-    path_train = subpath + '/' + dir_list_2[0]
-
-    subsubsubpath1 = opts.data_folder_test + '/workspaceblobstore'
-    dir_list00 = os.listdir(subsubsubpath1)
-    subsubpath1 = subsubsubpath1 + '/' + dir_list00[0]
-    dir_list_11 = os.listdir(subsubpath1)
-    subpath1 = subsubpath1 + '/' + dir_list_11[-1]
-    dir_list_22 = os.listdir(subpath1)
-    path_test = subpath1 + '/' + dir_list_22[0]
-
-else:
-    path_train = opts.data_folder_train
-    path_test = opts.data_folder_test
-
 # import data and profile
 print("loading data from from storage")
-data_train = pd.read_csv(
-    os.path.join(path_train),
-    lineterminator='\n'
-)
-data_test = pd.read_csv(
-    os.path.join(path_train),
-    lineterminator='\n'
-)
+data_train, data_test = load_data(opts)
+
 data_train.columns.values[-1] = 'target'
 data_test.columns.values[-1] = 'target'
 print("data downloaded")
@@ -228,9 +217,29 @@ if (sent_avg - (0.05*sent_avg)) <= (sent_avg + (0.05*sent_avg)):
     print(warning)
     profile_summary.append(warning)
 
-### WHY DOES THIS NOT WORK WITH LIST?!
+print("Data succesfully validated")
+
 run.log_list(
     name="Data drift warnings",
     value= profile_summary,
-    description='List of possible data drift detected in the new dataset compared to the baseline profile'
+    description='List of possible data drift detected in dataset'
 )
+
+datadrift = pd.DataFrame(profile_summary)
+
+if not (opts.output_train is None):
+    os.makedirs(opts.output_train, exist_ok=True)
+    path = opts.output_train + '_validated.csv'
+    write_df = data_train.to_csv(path)
+
+if not (opts.output_test is None):
+    os.makedirs(opts.output_test, exist_ok=True)
+    path = opts.output_test + '_validated.csv'
+    write_df = data_test.to_csv(path)
+
+if not (opts.data_drift_report is None):
+    os.makedirs(opts.data_drift_report, exist_ok=True)
+    path = opts.data_drift_report + 'data_drift_report.csv'
+    write_df = datadrift.to_csv(path)
+
+print("Uploaded validated data to cloud")

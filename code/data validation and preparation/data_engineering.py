@@ -4,8 +4,8 @@ import argparse
 from azureml.core import Run
 from azureml.core import Datastore
 import uuid
-from datetime import date
 from packages.get_data import load_data
+import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_folder_train',
@@ -26,6 +26,10 @@ parser.add_argument("--output_train",
                     type=str)
 parser.add_argument("--output_test",
                     type=str)
+parser.add_argument("--input_train",
+                    type=str)
+parser.add_argument("--input_test",
+                    type=str)
 
 opts = parser.parse_args()
 
@@ -43,16 +47,39 @@ if opts.local == 'yes':
                     "../..",
                     "outputs/raw_data/", "raw_subset_test.csv",
                     ))
-
-# Load data
-data_train, data_test = load_data(opts)
+    data_train = pd.read_csv(
+        os.path.join(
+            opts.data_folder_train
+        ),
+        lineterminator='\n'
+    )
+    data_test = pd.read_csv(
+        os.path.join(
+            opts.data_folder_test
+        ),
+        lineterminator='\n'
+    )
+else:
+    if not (opts.input_train is None):
+        data_train = pd.read_csv(
+            os.path.join(
+                opts.input_train + '_validated.csv'
+            ),
+            lineterminator='\n'
+        )
+        data_test = pd.read_csv(
+            os.path.join(
+                opts.input_test + '_validated.csv'
+            ),
+            lineterminator='\n'
+        )
+    else:
+        data_train, data_test = load_data(opts)
 
 if opts.subset == "yes":
     dataset = "subset_"
 else:
     dataset = ""
-
-weekNumber = str(date.today().isocalendar()[1]+ 1)
 
 # make every thing lower case
 data_train.text = data_train.text.apply(lambda x: x.lower())
@@ -75,10 +102,10 @@ if opts.local == 'yes':
     OUTPUTSFOLDER = "C:/Users/mideboer.EUROPE/Documents/GitHub/aml-mlops-workshop/outputs/prepared_data"
 # Save to local file
 else:
-    OUTPUTSFOLDERtrain = "outputs/cloud_data_train/" + weekNumber
-    OUTPUTSFOLDERtest = "outputs/cloud_data_test/" + weekNumber
-    OUTPUTSFOLDERtrainsubset = "outputs/cloud_data_train_subset/" + weekNumber
-    OUTPUTSFOLDERtestsubset = "outputs/cloud_data_test_subset/" + weekNumber
+    OUTPUTSFOLDERtrain = "outputs/cloud_data_train"
+    OUTPUTSFOLDERtest = "outputs/cloud_data_test"
+    OUTPUTSFOLDERtrainsubset = "outputs/cloud_data_train_subset"
+    OUTPUTSFOLDERtestsubset = "outputs/cloud_data_test_subset"
 
 # create outputs folder if not exists
 if not os.path.exists(OUTPUTSFOLDERtrain):
@@ -124,7 +151,7 @@ if opts.local == "no":
         src_dir=os.path.join(
             OUTPUTSFOLDERtr
         ),
-        target_path="/" + dataset + 'train' + '/' + weekNumber,
+        target_path="/" + dataset + 'train',
         overwrite=True,
         show_progress=True
     )
@@ -134,17 +161,17 @@ if opts.local == "no":
         src_dir=os.path.join(
             OUTPUTSFOLDERte
         ),
-        target_path="/" + dataset + 'test' + '/' + weekNumber,
+        target_path="/" + dataset + 'test',
         overwrite=True,
         show_progress=True
     )
 
     if not (opts.output_train is None):
         os.makedirs(opts.output_train, exist_ok=True)
-        path = opts.output_train + "/" + 'train-' + str(uuid.uuid1()) + '.csv'
+        path = opts.output_train + "_prepared.csv"
         write_df = data_train.to_csv(path)
 
     if not (opts.output_test is None):
         os.makedirs(opts.output_test, exist_ok=True)
-        path = opts.output_test + "/" + 'test-' + str(uuid.uuid1()) + '.csv'
+        path = opts.output_test + "_prepared.csv"
         write_df = data_test.to_csv(path)

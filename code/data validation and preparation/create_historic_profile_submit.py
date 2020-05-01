@@ -7,12 +7,16 @@ import os
 from azureml.core import Workspace, Experiment, ScriptRunConfig
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.runconfig import RunConfiguration
+from azureml.core.dataset import Dataset
 
 # Define compute target for data engineering from AML
 compute_target = 'alwaysoncluster'
 
 # load Azure ML workspace
 workspace = Workspace.from_config(auth=AzureCliAuthentication())
+
+input_name_train = 'newsgroups_raw_train'
+dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
 
 # Define datasets names
 # Get environment from config yml for data engineering for full dataset
@@ -34,7 +38,7 @@ est = ScriptRunConfig(
     run_config=run_config,
     arguments=[
         '--data_folder',
-        'DatasetConsumptionConfig:{}'.format(input_name_train),
+        dataset_train.as_named_input('train').as_mount(),
         '--local', 'no',
         '--new_profile', 'no'
     ],

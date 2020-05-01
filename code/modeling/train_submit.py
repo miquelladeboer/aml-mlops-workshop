@@ -12,13 +12,15 @@ from azureml.core.runconfig import RunConfiguration, MpiConfiguration
 from azureml.train.hyperdrive.parameter_expressions import uniform, choice
 from azureml.train.hyperdrive import (
     BayesianParameterSampling,
-    HyperDriveConfig, PrimaryMetricGoal)
+    HyperDriveConfig,
+    PrimaryMetricGoal
+)
 from azureml.train.dnn import PyTorch
 
 # Define comfigs
 subset = True
 models = 'sklearnmodels'
-data_local = False
+data_local = True
 hyperdrive = False
 
 # If deep learning define hyperparameters
@@ -74,8 +76,14 @@ if models != 'deeplearning':
         )
 
     if data_local is False:
-        dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
-        dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
+        dataset_train = Dataset.get_by_name(
+            workspace,
+            name=input_name_train
+        )
+        dataset_test = Dataset.get_by_name(
+            workspace,
+            name=input_name_test
+        )
 
         # Load run Config
         run_config = RunConfiguration.load(

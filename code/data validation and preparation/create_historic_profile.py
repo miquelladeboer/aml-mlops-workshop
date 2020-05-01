@@ -1,10 +1,8 @@
 """
-Script the creation of the historic  profile
-We use the historic profiles to see and monitor
-how our data is changing over time
-In this senario we assume that data is loaded every day
-This is the profile we automatically train (every day) from
-a trigger from cloud with cloud data (pipeline-step)
+Script the creation of the historic  profile, we use the historic profiles to
+see and monitor how our data is changing over time. In this senario we assume
+that data is loaded every day. This is the profile we automatically train
+(every day) from a trigger from cloud with cloud data (pipeline-step)
 -----------------------------
 - report basic statistics
 - SME knowledge data
@@ -61,6 +59,10 @@ parser.add_argument('--new_profile',
 parser.add_argument('--local',
                     type=str,
                     default='yes')
+parser.add_argument("--input_train",
+                    type=str)
+parser.add_argument('--historicprofile',
+                    type=str)
 
 opts = parser.parse_args()
 try:
@@ -70,10 +72,20 @@ try:
     dir_list_2 = dir_list[1]
     opts.profile_folder = path + '/' + dir_list_1
     opts.word_profile_folder = path + '/' + dir_list_2
+    print("Downloaded historic profile from cloud")
 except IOError:
     print("no file present")
 except TypeError:
     print("no file present")
+
+if not (opts.input_train is None):
+    data = pd.read_csv(
+        os.path.join(
+            opts.input_train + '_validated.csv'
+        ),
+        lineterminator='\n'
+    )
+    print("Data downsloaded from cloud")
 
 # Get run context
 run = Run.get_context()
@@ -90,25 +102,29 @@ stop = stopwords.words('english')
 
 today = str(date.today())
 
-if opts.local == 'no':
-    subsubsubpath = opts.data_folder + '/workspaceblobstore'
-    dir_list = os.listdir(subsubsubpath)
-    subsubpath = subsubsubpath + '/' + dir_list[0]
-    dir_list_1 = os.listdir(subsubpath)
-    subpath = subsubpath + '/' + dir_list_1[-1]
-    dir_list_2 = os.listdir(subpath)
-    path = subpath + '/' + dir_list_2[0]
-else:
-    path = opts.data_folder
+if opts.input_train is None:
+    if opts.local == 'no':
+        subsubsubpath = opts.data_folder
+        dir_list = os.listdir(subsubsubpath)
+        subsubpath = subsubsubpath + '/' + dir_list[0]
+        dir_list_1 = os.listdir(subsubpath)
+        subpath = subsubpath + '/' + dir_list_1[0]
+        dir_list_2 = os.listdir(subpath)
+        path1 = subpath + '/' + dir_list_2[-1]
+        dir_list_3 = os.listdir(path1)
+        path = path1 + '/' + dir_list_3[0]
+    else:
+        path = opts.data_folder
 
-# import data and profile
-print("loading data from from storage")
-data = pd.read_csv(
-    os.path.join(path),
-    lineterminator='\n'
-)
+    # import data and profile
+    print("loading data from from storage")
+    data = pd.read_csv(
+        os.path.join(path),
+        lineterminator='\n'
+    )
+    print("Data downloaded")
+
 data.columns.values[-1] = 'target'
-print("data downloaded")
 
 # clean data
 data.text = data.text.apply(lambda x: x.lower())
@@ -210,7 +226,9 @@ df1 = pd.DataFrame()
 
 # create dataframe
 print("start word count")
+print("This may take a while")
 for classes in range(0, 4):
+    print("Class number:", classes)
     vocab = Counter()
     df_train = data_clean[data.target == classes]
     for text in df_train:
@@ -245,6 +263,8 @@ most_importantwords.columns = [
 
 lst1 = most_importantwords.values.T.tolist()
 print("word count completed")
+
+print("Historic profile created succesfully")
 
 # save profile to local file
 print("writing profile to temp file")
@@ -286,3 +306,9 @@ mean_classes = plots.plot_mean_of_classes(profile)
 run.log_image("Mean of classes over time ", plot=mean_classes)
 std_classes = plots.plot_std_of_classes(profile)
 run.log_image("Standard deviation over time ", plot=std_classes)
+
+if not (opts.historicprofile is None):
+    os.makedirs(opts.historicprofile, exist_ok=True)
+    path = opts.historicprofile + "/" + 'historic_profile.csv'
+    write_df = profile.to_csv(path)
+

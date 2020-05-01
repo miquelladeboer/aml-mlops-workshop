@@ -3,10 +3,6 @@ from azureml.core import Workspace, Datastore, Dataset
 from datetime import date
 from azureml.core.authentication import AzureCliAuthentication
 
-startWeek = 17
-weekNumber = date.today().isocalendar()[1]
-
-
 # Retrieve a datastore from a ML workspace
 ws = Workspace.from_config(auth=AzureCliAuthentication())
 datastore_name = 'workspaceblobstore'
@@ -17,17 +13,13 @@ for data_split in ['train', 'test']:
     for set in ['', 'subset_']:
         # Create a TabularDataset from paths in datastore in split folder
         # Note that wildcards can be used
-        datastore_paths = []
-        for i in range(startWeek, (weekNumber+1)):
-            datastore_path = (
-                datastore,
-                '{}/*.csv'.format(set + data_split + '/' + str(i))
-            )
-            datastore_paths.insert(0, datastore_path)
-
+        datastore_path = (
+            datastore,
+            '{}/*.csv'.format(set + data_split)
+        )
         # Create a TabularDataset from paths in datastore
         dataset = Dataset.File.from_files(
-            path=datastore_paths
+            path=datastore_path
         )
 
         # Register the defined dataset for later use
