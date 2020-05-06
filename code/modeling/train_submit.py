@@ -18,10 +18,17 @@ from azureml.train.hyperdrive import (
 from azureml.train.dnn import PyTorch
 
 # Define comfigs
-subset = True
+# allowed arguments are: randomforest, sklearn, deeplearning
+# randomforest will perform 1 run of randomforest fit
+# sklearnmodels will fit 15 models from sklearn
+# deeplearning will fit a neural network with pytorch
 models = 'sklearnmodels'
 data_local = True
+# if data_local is true, subset is alwats true
+subset = True
+# hyperdrive only works with deeplearning
 hyperdrive = False
+
 
 # If deep learning define hyperparameters
 # Set parameters for search
@@ -62,7 +69,7 @@ if models != 'deeplearning':
                     os.path.dirname(os.path.realpath(__file__)),
                     "../..",
                     "outputs/prepared_data/subset_test.csv",
-                    )),
+                    ))
             }
 
         # Define Run Configuration
@@ -102,7 +109,8 @@ if models != 'deeplearning':
                 '--data_folder_train',
                 'DatasetConsumptionConfig:{}'.format(input_name_train),
                 '--data_folder_test',
-                'DatasetConsumptionConfig:{}'.format(input_name_test)
+                'DatasetConsumptionConfig:{}'.format(input_name_test),
+                '--local', 'no'
             ],
             run_config=run_config
         )
@@ -122,7 +130,8 @@ if models == 'deeplearning':
         '--data_folder_train':
         dataset_train.as_named_input('train').as_mount(),
         '--data_folder_test':
-        dataset_test.as_named_input('test').as_mount()
+        dataset_test.as_named_input('test').as_mount(),
+        '--local': 'no'
         }
 
     estimator = PyTorch(

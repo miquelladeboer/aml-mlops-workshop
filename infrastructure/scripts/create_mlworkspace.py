@@ -1,13 +1,23 @@
+"""
+Scripts for the createin of an ML workspace. It is recommended to deploy
+your workspaced through Azure DevOps using the ARM templates, but for quick
+deployment, you vcan you this script.
+-----------------------------
+- deploy Azure ML workspace
+- deploy dafault strogae account
+- deploy Azure Key Valut
+- Deploy Application Insights
+"""
 import os
 from azureml.core import Workspace
 from azureml.core.authentication import AzureCliAuthentication
 
 # Create the workspace using the specified parameters
 ws = Workspace.create(
-    name='azuremlworkshopws',
+    name='<Name of workspace>',
     subscription_id='<ID>',
-    resource_group='azuremlworkshoprgp',
-    location='westeurope',
+    resource_group='<Name of recourse group>',
+    location='<location>',
     create_resource_group=True,
     sku='basic',
     exist_ok=True,

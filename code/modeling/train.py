@@ -25,10 +25,19 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
 
 parser = argparse.ArgumentParser()
+# allowed arguments are: randomforest, sklearn, deeplearning
+# randomforest will perform 1 run of randomforest fit
+# sklearnmodels will fit 15 models from sklearn
+# deeplearning will fit a neural network with pytorch
 parser.add_argument(
     "--models",
     type=str,
-    default='sklearnmodels'
+    default='randomforest'
+)
+parser.add_argument(
+    '--local',
+    type=str,
+    default='yes'
 )
 parser.add_argument(
     "--fullmodel",
@@ -103,6 +112,8 @@ parser.add_argument(
 )
 opts = parser.parse_args()
 
+# load in data from two different sources
+# if data is pipeline data
 if not (opts.input_train is None):
     data_train = pd.read_csv(
             os.path.join(
@@ -117,6 +128,7 @@ if not (opts.input_train is None):
             lineterminator='\n'
         )
 else:
+    # load data from blob or local
     data_train = pd.read_csv(
             os.path.join(
                 opts.data_folder_train
@@ -130,21 +142,27 @@ else:
             lineterminator='\n'
         )
 
+# set right name for target variable
 data_train.columns.values[-1] = 'target'
 data_test.columns.values[-1] = 'target'
 
+# if we want to fit either sklearnmodels or randomforest
 if opts.models != 'deeplearning':
-    # get numpy back
+    # transform data from pandas to numpy
     X_train, X_test, y_train, y_test = pandas_to_numpy(data_train, data_test)
     # vectorize data
     X_train, X_test = vectorizer(X_train, X_test)
     # Get models from sklearn
+    # can be 15 models or 1 randomforest
     models = Model_choice(opts.models)
 
     # Run benchmark and collect results with multiple classifiers
+    # for evert model in Model_choice
     for i in range(models.number_of_models()):
+        # fit model
         clf, name = models.select_model(i)
 
+        # get importan metrics
         (clf_descr, accuracy, balanced_accuracy,
          precision, recall, f1, fpr, tpr, roc_auc,
          disp, cm, classes) = fit_sklearn(
@@ -154,10 +172,11 @@ if opts.models != 'deeplearning':
             y_test
         )
 
-        # child runs
+        # create child runs if we have many models
         if opts.models == 'sklearnmodels':
             # create a child run for Azure ML logging
             child_run = run.child_run(name=name, outputs="outputs/models")
+            # start logging all metrics to aml
             child_run.log(
                 "accuracy",
                 float(accuracy)
@@ -282,43 +301,45 @@ if opts.models != 'deeplearning':
             name=model_name,
             path_or_stream=filename
         )
+    # if we are not running local, we can retrieve best run
+    if opts.local == "no":
+        if opts.models == 'sklearnmodels':
+            max_accuracy_runid = None
+            max_accuracy = None
+            modelfile = None
+            best_run = None
+            for childrun in run.get_children():
+                run_metrics = childrun.get_metrics()
+                run_details = childrun.get_details()
+                run_files = child_run.get_file_names
+                run_accuracy = run_metrics["accuracy"]
+                run_id = run_details["runId"]
 
-    if opts.models == 'sklearnmodels':
-        max_accuracy_runid = None
-        max_accuracy = None
-        modelfile = None
-        best_run = None
-        for childrun in run.get_children():
-            run_metrics = childrun.get_metrics()
-            run_details = childrun.get_details()
-            run_files = child_run.get_file_names
-            run_accuracy = run_metrics["accuracy"]
-            run_id = run_details["runId"]
-
-            if max_accuracy is None:
-                max_accuracy = run_accuracy
-                max_accuracy_runid = run_id
-                best_run = childrun
-            else:
-                if run_accuracy > max_accuracy:
+                if max_accuracy is None:
                     max_accuracy = run_accuracy
                     max_accuracy_runid = run_id
-                    best_run = child_run
+                    best_run = childrun
+                else:
+                    if run_accuracy > max_accuracy:
+                        max_accuracy = run_accuracy
+                        max_accuracy_runid = run_id
+                        best_run = child_run
 
-    print("Best run_id: " + max_accuracy_runid)
-    print("Best run_id accuracy: " + str(max_accuracy))
-    # all_files = best_run.get_file_names()
-    # sub = '.pkl'
-    # bestfilename = [i for i in all_files if sub in i]
-    # files = bestfilename[0]
-    # print(files)
-    # if not (opts.sklearnmodel is None):
-    #     best_run.download_file(
-    #         name=files,
-    #         output_file_path=opts.sklearnmodel
-    #     )
+        print("Best run_id: " + max_accuracy_runid)
+        print("Best run_id accuracy: " + str(max_accuracy))
+        # all_files = best_run.get_file_names()
+        # sub = '.pkl'
+        # bestfilename = [i for i in all_files if sub in i]
+        # files = bestfilename[0]
+        # print(files)
+        # if not (opts.sklearnmodel is None):
+        #     best_run.download_file(
+        #         name=files,
+        #         output_file_path=opts.sklearnmodel
+        #    )
 
 else:
+    # fit deeplearning model
     import torch.nn as nn
     from torch.autograd import Variable
     import torch
@@ -331,14 +352,17 @@ else:
         OurNet, train_model,
         test_model
         )
-
+    # if we are runnig pipeline data, we can use the hyper parameters from the
+    # hyperdrive to train the model with these parameters. 
     try:
         with open(os.environ.get("AZUREML_DATAREFERENCE_metrics_data")) as f:
+            # read json
             metrics_output_result = f.read()
             deserialized_metrics_output = json.loads(metrics_output_result)
             df = pd.DataFrame(deserialized_metrics_output)
             df = df.T
 
+            # make pandas dataframe in rtight format
             for column in df:
                 df[column] = (
                     df[column]
@@ -348,10 +372,13 @@ else:
                     .astype(float)
                 )
 
+            # get run ID of best run
             runID = df.accuracy.idxmax()
 
+            # select parameters of best run
             parameters = df.loc[runID].iloc[1:]
             print(parameters)
+            # set parameters for model to the best run parameters
             opts.learning_rate = parameters.learning_rate
             opts.num_epochs = int(parameters.num_epochs)
             opts.batch_size = int(parameters.batch_size)
@@ -362,15 +389,18 @@ else:
     except TypeError:
         print("No file present")
 
+    # calculate the indexes of the words present in the dataset
     vocab, total_words = index_words(
         data_train,
         data_test
     )
     word2index = get_word_2_index(vocab)
+
+    # set hyperparameters
     (learning_rate, num_epochs,
         batch_size, hidden_size) = get_hyperparameters(opts)
     input_size = total_words  # Words in vocab
-    num_classes = len(np.unique(data_train.target))
+    num_classes = len(np.unique(data_train.target)) # 4 categories in the example
 
     # output [max index for each item in batch, ... ,batch_size-1]
     loss = nn.CrossEntropyLoss()
@@ -381,6 +411,7 @@ else:
     output = loss(input, target)
     output.backward()
 
+    # set structure of neural network
     net = OurNet(
         input_size,
         hidden_size,
@@ -394,6 +425,7 @@ else:
         lr=learning_rate
     )
 
+    # train neural network
     epoch_losses, epoch_accuracy, net = train_model(
         num_epochs,
         data_train,
@@ -406,6 +438,7 @@ else:
         word2index
     )
 
+    # get accuracy of network woth out of sample data
     accuracy = test_model(
         data_test,
         net,
@@ -413,6 +446,7 @@ else:
         word2index
     )
 
+    # plot loss per epoch
     plt_loss = plot_loss_per_epoch(
         epoch_losses,
         num_epochs
@@ -421,6 +455,8 @@ else:
         "Loss grapgh "+str(accuracy),
         plot=plt_loss
     )
+
+    # plot accuracy per epoch
     plt_acc = plot_accuracy_per_epoch(
         epoch_accuracy,
         num_epochs
@@ -462,9 +498,11 @@ else:
         os.makedirs(OUTPUTSFOLDER)
 
     if opts.fullmodel == 'yes':
-        # preproces data example
+        # generate some small sample data
         y = np.empty([1, total_words])
         dummy_input = Variable(torch.FloatTensor(y))
+
+        # save model to onnx with sample data and word indexes
         model_name = "net.onnx"
         pickle_name = "word2index"
         filename = os.path.join(
@@ -494,6 +532,7 @@ else:
             model_path=filename
         )
 
+        # if pipeline, generate model path as ouput pipeline data
         if not (opts.savemodel is None):
             os.makedirs(opts.savemodel, exist_ok=True)
             path = opts.savemodel + "/" + pickle_name

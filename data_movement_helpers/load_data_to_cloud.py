@@ -76,7 +76,8 @@ for data_split in ['train', 'test']:
     # write to csv
     df_subset.to_csv(
         path_or_buf=os.path.join(
-            OUTPUTSFOLDERSUBSET, 'raw_subset_' + data_split + '_' + str(uuid.uuid1()) +
+            OUTPUTSFOLDERSUBSET,
+            'raw_subset_' + data_split + '_' + str(uuid.uuid1()) +
             '.csv')
     )
 
@@ -86,7 +87,6 @@ for data_split in ['train', 'test']:
             OUTPUTSFOLDER, 'raw_' + data_split + '_' + str(uuid.uuid1()) +
             '.csv')
     )
-
 
     # upload files
     datastore.upload(
@@ -100,7 +100,7 @@ for data_split in ['train', 'test']:
         show_progress=True
     )
 
-     # upload files
+    # upload files
     datastore.upload(
         src_dir=os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
