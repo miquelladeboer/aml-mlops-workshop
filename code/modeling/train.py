@@ -5,6 +5,7 @@ import os
 from azureml.core import Run
 import json
 import pandas as pd
+import pandas
 
 from packages.sklearn import (Model_choice,
                               fit_sklearn,
@@ -14,7 +15,7 @@ from packages.plots import (plot_auc, plot_loss_per_epoch,
                             plot_accuracy_per_epoch,
                             plot_confusion_matrix,
                             plot_confusion_matrix_abs)
-
+from packages.get_data import load_data
 from sklearn.externals import joblib
 
 # Get run context
@@ -98,7 +99,7 @@ parser.add_argument(
 parser.add_argument(
     "--num_epochs",
     type=int,
-    default=1
+    default=20
 )
 parser.add_argument(
     "--batch_size",
@@ -128,19 +129,22 @@ if not (opts.input_train is None):
             lineterminator='\n'
         )
 else:
-    # load data from blob or local
-    data_train = pd.read_csv(
-            os.path.join(
-                opts.data_folder_train
-            ),
-            lineterminator='\n'
-        )
-    data_test = pd.read_csv(
-            os.path.join(
-                opts.data_folder_test
-            ),
-            lineterminator='\n'
-        )
+    # load data from local
+    try:
+        data_train = pd.read_csv(
+                os.path.join(
+                    opts.data_folder_train
+                ),
+                lineterminator='\n'
+            )
+        data_test = pd.read_csv(
+                os.path.join(
+                    opts.data_folder_test
+                ),
+                lineterminator='\n'
+            )
+    except pandas.errors.ParserError:
+        data_train, data_test = load_data(opts)
 
 # set right name for target variable
 data_train.columns.values[-1] = 'target'
@@ -325,18 +329,18 @@ if opts.models != 'deeplearning':
                         max_accuracy_runid = run_id
                         best_run = child_run
 
-        print("Best run_id: " + max_accuracy_runid)
-        print("Best run_id accuracy: " + str(max_accuracy))
-        # all_files = best_run.get_file_names()
-        # sub = '.pkl'
-        # bestfilename = [i for i in all_files if sub in i]
-        # files = bestfilename[0]
-        # print(files)
-        # if not (opts.sklearnmodel is None):
-        #     best_run.download_file(
-        #         name=files,
-        #         output_file_path=opts.sklearnmodel
-        #    )
+            print("Best run_id: " + max_accuracy_runid)
+            print("Best run_id accuracy: " + str(max_accuracy))
+            # all_files = best_run.get_file_names()
+            # sub = '.pkl'
+            # bestfilename = [i for i in all_files if sub in i]
+            # files = bestfilename[0]
+            # print(files)
+            # if not (opts.sklearnmodel is None):
+            #     best_run.download_file(
+            #         name=files,
+            #         output_file_path=opts.sklearnmodel
+            #    )
 
 else:
     # fit deeplearning model
@@ -445,6 +449,7 @@ else:
         total_words,
         word2index
     )
+    print("model accuracu out of sample:", accuracy)
 
     # plot loss per epoch
     plt_loss = plot_loss_per_epoch(

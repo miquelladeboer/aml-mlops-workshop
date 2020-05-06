@@ -28,8 +28,9 @@ This folder contains scripts for modeling. This folder contains three files: a t
 
     * Deep Learning
 
-        In this pat we are going to build a Deep Neural Network using Pytorch. If we set the parameters of `--models` to `deeplearning`, we will train this nework. 
+        In this pat we are going to build a Deep Neural Network using Pytorch. If we set the parameters of `--models` to `deeplearning`, we will train this network. The output will look like this:
 
+        ![An example of tracking accuracy across multiple models](deeplearning.PNG)
 
 *   `train_submit.py`
 
@@ -81,6 +82,11 @@ This folder contains scripts for modeling. This folder contains three files: a t
 
     For a full example on how to run a hyperdrive on Azure Machine Learning and how to log metrics, follow the labs [HERE]
 
+    The output of the hyperdrive will look like this:
+
+     ![An example of tracking accuracy across multiple models](hyperdrive.PNG)
+
+
 * `score.py`
 
     The `score.py` file we use when deploying our trained model. The scoring file consist of 3 steps: preprocessing, scoring and postporcoessing.
@@ -92,3 +98,4 @@ This folder contains scripts for modeling. This folder contains three files: a t
     This is similar to postprocessing. The postprocessing step is highly dependent on the model output. The model will most likely output a binary number or a continuous number. In almost every case, these numbers need to be translated into different outputs like logical names of categories. These transformations are most likely to differ for different models and should therefor also be developed together with the scoring file.
     
     As a last point on this, is that every time that we deploy a new model, we need to do integration test with pre-processing, scoring and post-processing. If we let these steps handle by different tools, these integration test become way harder and the change of failure bigger. So in order to develop and deploy models fast and correct I would highly recommend tot NOT use azure functions for this.
+

@@ -327,6 +327,16 @@ estimator = PyTorch(
 
 # DEFINE ALL PIPELINE STEPS
 # data validation for enitre dataset
+define_new_dataset = PythonScriptStep(
+    name="data_validation",
+    script_name="define_dataset_raw.py",
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '..',
+        'data_movement_helpers'
+    )
+)
+
 data_validation = PythonScriptStep(
     name="data_validation",
     script_name="data_validation.py",

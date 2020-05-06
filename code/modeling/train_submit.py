@@ -22,12 +22,12 @@ from azureml.train.dnn import PyTorch
 # randomforest will perform 1 run of randomforest fit
 # sklearnmodels will fit 15 models from sklearn
 # deeplearning will fit a neural network with pytorch
-models = 'sklearnmodels'
-data_local = True
+models = 'deeplearning'
+data_local = False
 # if data_local is true, subset is alwats true
-subset = True
+subset = False
 # hyperdrive only works with deeplearning
-hyperdrive = False
+hyperdrive = True
 
 
 # If deep learning define hyperparameters

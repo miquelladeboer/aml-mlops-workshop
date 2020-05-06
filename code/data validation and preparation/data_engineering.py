@@ -3,9 +3,9 @@ import os
 import argparse
 from azureml.core import Run
 from azureml.core import Datastore
-import uuid
 from packages.get_data import load_data
 import pandas as pd
+from datetime import date
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -76,6 +76,8 @@ opts = parser.parse_args()
 # Get run context
 run = Run.get_context()
 
+weekNumber = str(date.today().isocalendar()[1])
+
 # load data
 # can be from three locations:
 # - local computer
@@ -112,6 +114,8 @@ else:
         )
     else:
         # load mounted data from blob storage
+        print(opts.data_folder_train)
+        print(os.listdir(opts.data_folder_train))
         data_train, data_test = load_data(opts)
 
 # if data is subset, take argument from writing to local or blob purpose
@@ -187,13 +191,13 @@ else:
     # write to csv
     data_train.to_csv(
         path_or_buf=os.path.join(
-            OUTPUTSFOLDERtr, dataset + 'train_' + str(uuid.uuid1()) + '.csv')
+            OUTPUTSFOLDERtr, dataset + 'train.csv')
     )
 
     # write to csv
     data_test.to_csv(
         path_or_buf=os.path.join(
-            OUTPUTSFOLDERte, dataset + 'test_' + str(uuid.uuid1()) + '.csv')
+            OUTPUTSFOLDERte, dataset + 'test.csv')
     )
 
 if opts.local == "no":
@@ -205,25 +209,47 @@ if opts.local == "no":
     # retrieve an existing datastore in the workspace by name
     datastore = Datastore.get(workspace, datastore_name)
 
-    # upload files
-    datastore.upload(
-        src_dir=os.path.join(
-            OUTPUTSFOLDERtr
-        ),
-        target_path="/" + dataset + 'train',
-        overwrite=True,
-        show_progress=True
-    )
+    if not (opts.input_train is None):
+        # upload files
+        datastore.upload(
+            src_dir=os.path.join(
+                OUTPUTSFOLDERtr
+            ),
+            target_path="/" + dataset + 'train',
+            overwrite=True,
+            show_progress=True
+        )
 
-    # upload files
-    datastore.upload(
-        src_dir=os.path.join(
-            OUTPUTSFOLDERte
-        ),
-        target_path="/" + dataset + 'test',
-        overwrite=True,
-        show_progress=True
-    )
+        # upload files
+        datastore.upload(
+            src_dir=os.path.join(
+                OUTPUTSFOLDERte
+            ),
+            target_path="/" + dataset + 'test',
+            overwrite=True,
+            show_progress=True
+        )
+    else:
+        # upload files
+        datastore.upload(
+            src_dir=os.path.join(
+                OUTPUTSFOLDERtr
+            ),
+            target_path="/" + dataset + 'train/' + weekNumber,
+            overwrite=True,
+            show_progress=True
+        )
+
+        # upload files
+        datastore.upload(
+            src_dir=os.path.join(
+                OUTPUTSFOLDERte
+            ),
+            target_path="/" + dataset + 'test/' + weekNumber,
+            overwrite=True,
+            show_progress=True
+        )
+
 
     # if pipeline data, ouput data to pipeline
     if not (opts.output_train is None):

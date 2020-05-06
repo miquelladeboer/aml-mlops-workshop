@@ -27,4 +27,4 @@ I will briefly explain the concept and need for datasets. In many cases, a datas
 
 When you upload data to the service, you should get something like this:
 
- ![experiment example](datasets1.png)
+ ![experiment example](datasets1.PNG)

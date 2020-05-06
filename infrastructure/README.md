@@ -50,7 +50,7 @@ Within the Azure Machine Learning Workspace, there are three big decision to be 
 
 ## Who has access to the workspace.
 Best practice is to use Role Based Access Control, to grand user access to the workspace. There are three roles available in AML, as in many Azure services, owner, contributor and reader. This is an overview of the standard roles:
-![An example of a pipeline for Infrastructure roll out](acess.PNG)
+![An example of a pipeline for Infrastructure roll out](acess.png)
 In my opinion, these standard roles to not suffice in most enterprise scenario. As a Data Scientist working in the Machine Learning workspace  I should be a contributor, so I can run experiments, create images, attach compute to a run and connect to the data stores. But as a standard contributor, I am also able to create my own compute and create workspaces and deploy models. In most enterprise scenario’s I see that for security/management and cost reason, the data scientist are not allowed to create their own workspaces or compute. And is most scenario’s you only want to be able to deploy models via Azure DevOps, where is will follow the standard dev practices of dev/test and prod environments and model CI/CD. Within Azure Machine Learning you can cerate your own custom roles. Custom roles can have read, write, or delete permissions on the workspace and on the compute resource in that workspace. You can make the role available at a specific workspace level, a specific resource-group level, or a specific subscription level. Best Practice is to not allow data scientist to create new workspaces or compute but let them ask permission through the IT department.
 
 ## Data configuration. Which data can be used by the workspace?
@@ -94,8 +94,27 @@ For now, we will focus on the infrastructure deployment, and later in this docum
 As mentioned above, the platform infrastructure is following a standard DevOps deployment structure:
  
 Changes in the infrastructure are made in dev. These changes can be anything from provisioning new compute to an AML workspace or attaching a new Datastore to an AML workspace to changing the Azure Data Factory Pipeline or adding new Data Transformation Pipelines in Azure Databricks.
+
 Best practice is to have the infrastructure of the whole ML project owned by IT. It is very important that the infrastructure is managed in one place as all PaaS solutions relate to each other. For example, the data science team expects data to come in a certain format. If the data engineer changes the data format in Azure Databricks, the solution can potentially break.
 Infrastructure as a code
 
 Azure Resource Manager (ARM) templates & Azure ML CLI commands can easily be used to bootstrap and provision workspaces for your data scientists prior to enabling them to begin data preparation & model training.
 
+## Working with multiple environments
+As is standard in DevOps practices, we work with multiple environment DEV, TEST and PRD. Normal practice is that applications are being developed in DEV with DEV data, are being tested in TEST and only deployed to production via Azure DevOps if all test are passed.
+
+Working with a ML project, this process becomes a bit more difficult. The reason for this, is that most data scientist need access to production data when developing ML models. This Is because they need the full data to get the right statistics, spot outliers, detect biased, but also to build reliable models with enough training data. In this case Data Scientists cannot develop their models in a DEV environment, but in a PRD environment.  The ML engineer however, who is designing the ML pipelines is able to design the pipelines with DEV data, as they only need small sample data to test the solution. This will result in the following structure:
+
+![An example of a pipeline for Infrastructure roll out](git.png)
+
+As we can see from this picture, the Data Scientist is restricted to publish models and pipelines or mange any of the compute. This is very important as they are working in a PRD environment.
+The next part is to set up the Azure DevOps automation pipelines to deploy the new models or pipelines after a new commit is made to master. As discussed in the previous section, the CI is for both modeling and pipeline development and the CD is done for the produced model as illustrated here:
+
+![An example of a pipeline for Infrastructure roll out](git1.png)
+
+Lastly, we need to deploy the published model from the model CD into the different environments. We also have a separate deployment cycle of the pipeline that we want to publish in production for retraining, as we have introduced in a previous section.
+The “strange” thing that happens here, is that the Data Scientists were working in a PRD environment to develop their models, but the actual deployment of the model will be tested again first in a DEV environment. This is highly recommended to do as you do not want your models directly to be deployed in PRD as they have a change to break your application.
+
+![An example of a pipeline for Infrastructure roll out](git2.png)
+
+The last thing to notice, that makes this process different from standard processes is that the ML pipeline for retraining that is in production, is also able to produce a new model that needs to be published and deployed. Even though there is only a very small change that the model produced by the retraining pipeline will break the application, we still want to make sure it will follow the same steps of deployment to avoid breaking the application. It could happen that if you retrain your model, you have used more data and therefore created a bigger model (e.g. more nodes/arcs and weights in your neural network) that will not fit on the AKS cluster you used for deployment. This will then break your app. Since the machine learning pipeline did not change any code in master on git, the produced model will go directly into the model CD. To set this trigger you could use an Azure Function app.
