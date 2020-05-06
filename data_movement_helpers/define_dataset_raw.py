@@ -3,7 +3,7 @@ from azureml.core import Workspace, Datastore, Dataset
 from datetime import date
 from azureml.core.authentication import AzureCliAuthentication
 
-startWeek = 17
+startWeek = 19  # put here the current week for the first time
 weekNumber = date.today().isocalendar()[1]
 
 # Retrieve a datastore from a ML workspace
@@ -14,7 +14,6 @@ datastore = Datastore.get(ws, datastore_name)
 for data_split in ['train', 'test']:
     for set in ['', 'subset_']:
         # Create a TabularDataset from paths in datastore in split folder
-        # Note that wildcards can be used
         datastore_paths = []
         for i in range(startWeek, (weekNumber+1)):
             datastore_path = (

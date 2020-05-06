@@ -10,8 +10,8 @@ This folder contains scripts for modeling. This folder contains three files: a t
     * random forest
 
         If we set the parameter of `--models` to `randomforest`, we train script will fit a random forest from sklearn over the data. We will log different metrics and plots to Azure Machine Learning inlcuding the confusion matrix, AUC curve and accuracy metrics. The output in Azure Machine learning will look similair to this. (Note that I am using old experience of the studio here as in my opion this give a better overview of my runs).
-        ![An example of Random Forest](attributesrandomforest.png)
-        ![An example of Random Forest](metricsrandomforest.png)
+        ![An example of Random Forest](attributesrandomforest.PNG)
+        ![An example of Random Forest](metricsrandomforest.PNG)
 
         We can caputure the results from our run and log the result to Azure Machine Learning. This way we can keep track of the performance of our models while we are experimenting with different models, parameters, data transformations or feature selections. We can specify for ourselfves what is important to track and log number, graphs and tables to Azure ML, including confusion matrices from SKlearn. For a full overview check the [avaiable metrics to track](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-track-experiments#available-metrics-to-track)
 
@@ -21,7 +21,7 @@ This folder contains scripts for modeling. This folder contains three files: a t
     * 15 different sklearn models
 
         If we set the parameters of `--models` to `sklearnmodels`, we will train 15 different models from the sklearn packages, including randomforeser, naive bayes and Ridge classifier. A full overview of the models being trained, can be founs in the `class Model_choice` on the `sklearn.py` package under `packages`. Comparing different algorithms is possible is different ways. We could submit a new experiment for every algorithm that we try. However, Azure ML offers a better, easier way to manage the exploration of multiple models. This concept is called child runs.  We are going to make use of these child runs. The expiriment will perform a parent run that is going to execute `explore/code/train_15models.py`. Within this file we are going to create child runs. For every of the 15 algoritms that we have we want to create a sub run and log the metrics seprately. Whihin the child run we are going to log the performane and the model .pkl files. This way we can easily track and compare our experiment in Azure ML. If we run this file, the output will look like the following:
-        ![An example of tracking accuracy across multiple models](manymodels.png)
+        ![An example of tracking accuracy across multiple models](manymodels.PNG)
         (Note that in this case I am using the new experience, as I believe the new experience is better in tracking child run metrics.)
 
         For a full example on how to run a multiple model on Azure Machine Learning and how to log metrics and create child runs follow the labs [HERE]

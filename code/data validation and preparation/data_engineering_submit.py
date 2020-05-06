@@ -11,7 +11,7 @@ from azureml.train.estimator import Estimator
 
 # Define comfigs
 # if data_local = 'yes', then subset should always be 'yes
-data_local = "yes"  # allowed options: "yes", "no"
+data_local = "no"  # allowed options: "yes", "no"
 subset = "yes"  # allowed options: "yes", "no"
 
 # load Azure ML workspace

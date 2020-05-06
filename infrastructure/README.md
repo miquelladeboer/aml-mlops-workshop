@@ -46,11 +46,11 @@ Complete the below steps to set up your pipeline for infrastructure roll out.
 Before we start working with the Azure Machine Learning workspace, there are infrastructure decisions to be made. The following pictures shows the infrastructure component of the Azure Machine Learning workspace: 
 
 Within the Azure Machine Learning Workspace, there are three big decision to be made:
-![An example of a pipeline for Infrastructure roll out](acess1.png)
+![An example of a pipeline for Infrastructure roll out](acess1.PNG)
 
 ## Who has access to the workspace.
 Best practice is to use Role Based Access Control, to grand user access to the workspace. There are three roles available in AML, as in many Azure services, owner, contributor and reader. This is an overview of the standard roles:
-![An example of a pipeline for Infrastructure roll out](acess.png)
+![An example of a pipeline for Infrastructure roll out](acess.PNG)
 In my opinion, these standard roles to not suffice in most enterprise scenario. As a Data Scientist working in the Machine Learning workspace  I should be a contributor, so I can run experiments, create images, attach compute to a run and connect to the data stores. But as a standard contributor, I am also able to create my own compute and create workspaces and deploy models. In most enterprise scenario’s I see that for security/management and cost reason, the data scientist are not allowed to create their own workspaces or compute. And is most scenario’s you only want to be able to deploy models via Azure DevOps, where is will follow the standard dev practices of dev/test and prod environments and model CI/CD. Within Azure Machine Learning you can cerate your own custom roles. Custom roles can have read, write, or delete permissions on the workspace and on the compute resource in that workspace. You can make the role available at a specific workspace level, a specific resource-group level, or a specific subscription level. Best Practice is to not allow data scientist to create new workspaces or compute but let them ask permission through the IT department.
 
 ## Data configuration. Which data can be used by the workspace?
@@ -68,7 +68,7 @@ To work with MLOps and Azure Machine Learning, we need some extra PaaS solutions
 
 Every workspace in AML can have their own recourses, but I believe it is best practice to share these resources across workspaces as showed in the following picture:
 
-![An example of a pipeline for Infrastructure roll out](acess2.png)
+![An example of a pipeline for Infrastructure roll out](acess2.PNG)
 
 What I see most of my customers do, is that they create 1 Resource Group in Azure for Machine Learning purposes per geo location. Within this resource group, they create multiple Azure Machine Learning workspaces, all designed for different solutions. All these workspaces share the same resources mentioned above. This way, you make it more accessible to share environment/models/metrics across workspaces. They create a separate Resource Group for the management of the ML resources, because this is mostly done from 1 place, where the management for all Azure resources happen.
 By using Application Insights and Azure Key Vault across workspace, we create one place for the management of all resources in Azure.
@@ -76,4 +76,26 @@ By using the default storage account across workspaces, users can easily share m
 We use Event grids, Azure functions and logic apps across workspace to put actions on events happening in AML workspaces, like triggers when a job fails, or the filtering of certain logs.
 By using container registry across workspaces, user can share and reuse already build environments. This way you can lower the costs of container registry, limit the time waiting for new images being build and promote the sharing of recourses. 
 
-![An example of a pipeline for Infrastructure roll out](acess3.png)
+![An example of a pipeline for Infrastructure roll out](acess3.PNG)
+
+## Workspace organization 
+We have already discussed this a bit int the previous sections, but as a summary, I believe it is best to create workspace according to the access level of data. Because every user in the workspace has access to all the data that is in the workspace, I think it is most advisable to have only projects that require similar data use the same workspace. This is of course completely dependent on the security requirements of the company. I believe that it always in the best interest of the project if data scientist can have access to as much data that is possible and needed. But, especially in enterprise organizations, limiting the access to data is important and should be leading in designing the infrastructure.
+Infrastructure deployment
+As it is with all resources that we deploy in Azure, it is always bets practice to use ARM templates. Moreover it is always bets practice to work with multiple environment when deploying solutions. 
+ 
+As we can see from this picture, it is best practice to work with DEV, TEST and PRD environment. Similar to normal DevOps practices, we allow only changes in the PRD environment through Azure DevOps.
+What we also see in this picture, is that we have multiple release cycles within the ML lifecycle, namely:
+
+* ML workspace and infrastructure deployment
+* Model deployment
+* Pipeline deployment
+
+For now, we will focus on the infrastructure deployment, and later in this document we will focus on the model and pipeline deployment.
+As mentioned above, the platform infrastructure is following a standard DevOps deployment structure:
+ 
+Changes in the infrastructure are made in dev. These changes can be anything from provisioning new compute to an AML workspace or attaching a new Datastore to an AML workspace to changing the Azure Data Factory Pipeline or adding new Data Transformation Pipelines in Azure Databricks.
+Best practice is to have the infrastructure of the whole ML project owned by IT. It is very important that the infrastructure is managed in one place as all PaaS solutions relate to each other. For example, the data science team expects data to come in a certain format. If the data engineer changes the data format in Azure Databricks, the solution can potentially break.
+Infrastructure as a code
+
+Azure Resource Manager (ARM) templates & Azure ML CLI commands can easily be used to bootstrap and provision workspaces for your data scientists prior to enabling them to begin data preparation & model training.
+
