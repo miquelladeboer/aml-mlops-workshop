@@ -31,13 +31,6 @@ stages:
     steps:
     # - download: current
     #   artifact: ModelCIBuildArtifacts
-
-    - script: |
-        python code/build-and-release/scripts/download_model.py \
-        --name ${{ parameters.modelName }} \
-        --version ${{ parameters.modelVersion }} \
-        --output outputs/models/
-      displayName: Download Model Outputs
     
     # Load Scoring Environment
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
@@ -46,6 +39,13 @@ stages:
     - script: |
         conda env create -n scoringenv --file code/environments/scoring/conda_dependencies.yml
       displayName: Load Scoring Environment
+
+    - script: |
+        python code/build-and-release/scripts/download_model.py \
+        --name ${{ parameters.modelName }} \
+        --version ${{ parameters.modelVersion }} \
+        --output outputs/models/
+      displayName: Download Model Outputs
 
     # Model Validation Tests
     - script: |
