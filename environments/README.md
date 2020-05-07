@@ -1,6 +1,6 @@
 # Run Configurations
 
-![An example of a pipeline for Infrastructure roll out](acess3.png)
+![An example of a pipeline for Infrastructure roll out](acess3.PNG)
 
 ## Managing environments
 When developing ML models at scale, it is very important to manage your conda environment correctly. Especially if you are working with multiple people on the same projects. It is even more important to manage your conda environment during local training as you will need the exact environment when training on a AML cluster or when you deploy your model for inferencing. The solution might fail if you use a different version a certain package. 
@@ -12,7 +12,7 @@ If we combine the different environment, different datasets, and different compu
  By using different models, different environment, different compute or different data, we can create different run configuration files that will result in different experiments:
   ![experiment example](env2.png)
   As we have seen from the example, certain data, compute, environments, and models result in a specific run configuration for different steps of the training. I would recommend storing these run configurations in a structured matter, so it is easier to reuse and share across the organization. This will help you with speeding up the process of development. An example in your code base could look like this:
-  ![experiment example](env4.png)
+  ![experiment example](env4.PNG)
   Where I have different YAML files within every environment, like the one for a neural network.
 Best practise is to create YAML files for your run configuration. Azure DevOps pipelines has chosen the direction of working with YAML files for building pipelines. It is therefore recommended to also build the Azure Machine Learning pipelines and configurations with YAML.
 

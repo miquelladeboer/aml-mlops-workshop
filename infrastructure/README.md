@@ -48,6 +48,7 @@ Before we start working with the Azure Machine Learning workspace, there are inf
 Within the Azure Machine Learning Workspace, there are three big decision to be made:
 ![An example of a pipeline for Infrastructure roll out](acess1.PNG)
 
+
 ## Who has access to the workspace.
 Best practice is to use Role Based Access Control, to grand user access to the workspace. There are three roles available in AML, as in many Azure services, owner, contributor and reader. This is an overview of the standard roles:
 ![An example of a pipeline for Infrastructure roll out](acess.png)
@@ -133,7 +134,7 @@ In my opinion, I would recommend going with DSVM’s if cost are not a constrain
 AML offers different types of training clusters. The biggest difference between the compute instances and training cluster is, is that we can turn on and off training compute on demand, whereas the compute instances are always on. 
 The following types are available in AML:
 
-![An example of a pipeline for Infrastructure roll out](compute1.png)
+![An example of a pipeline for Infrastructure roll out](comute1.png)
 
 As we can see DSVM’s and AML compute are the only compute targets that support all solutions. Therefore, I would recommend to use either of these computes.
 If you are already using DSVM’s for code development, it is very cost efficient to use the same compute for model training because you are already paying for that compute. However, certain model training might not fit on the VM compute. Moreover, certain jobs of the data science lifecycle might have better performance on certain types of compute and some models perform best on certain runtimes that are optimized for certain computes. In this case me might want to use Azure ML compute, that we only spin on to execute a certain job and then put it off until the next job. Let illustrate this with an example.

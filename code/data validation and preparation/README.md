@@ -6,7 +6,7 @@ We understand why bias is bad for model training, but I think it is important to
 
 Therefore, I would recommend to build a baseline profile of basic and more advanced statistics of your dataset, that you found when exploring the data, and every time you retrain your model, validate if your new data is within a certain interval of these statistics. I would recommend building a small report of warning and output this to the blob storage. I would also recommend to build a small dataset of all these statistics over time. This way, you can you Power BI for example, to create reports and profiles of your data and check and guarantee data quality and transparency. Here is an example of folder structures for examining data:
 
-![An example of folder structure](mapstructure.png)
+![An example of folder structure](mapstructure.PNG)
 
 This folder contains scripts for data validation and data preperation. In  this folder you will fidn three python files and three python submit files for submitting the scripts to AML.
 
