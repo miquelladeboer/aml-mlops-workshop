@@ -4,14 +4,13 @@ import onnxruntime
 
 def setup_function():
     """
-    The pre-processing function relies on a word2index
-    vocubalary file, which is changing with each model iteration.
-    To test accordingly, we mock the word2index file (to be static)
-    and pass it along with the tests and in the test directory.
+    Load the model from the outputs folder
+    When running integration tests, make sure to populate the outputs
+    folder with the model version under tests
     """
     OUTPUTSFOLDER = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        "../../outputs/models/"
+        "../../../outputs/models/"
     )
 
     # Load ONNX Model

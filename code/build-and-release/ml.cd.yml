@@ -37,7 +37,7 @@ stages:
       displayName: Add Conda to PATH
 
     - script: |
-        conda env create -n scoringenv --file code/environments/scoring/conda_dependencies.yml
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
       displayName: Load Scoring Environment
 
     - script: |

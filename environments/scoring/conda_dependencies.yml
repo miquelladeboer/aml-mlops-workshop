@@ -1,4 +1,4 @@
-name: scoringenvironment
+name: scoringenv
 dependencies:
 - python=3.6.10
 - pytorch
