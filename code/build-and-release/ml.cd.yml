@@ -79,13 +79,18 @@ stages:
         conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
       displayName: Load Scoring Environment
 
-    - script: |
-        source activate scoringenv
-        python code/build-and-release/scripts/download_model.py \
-        --name ${{ parameters.modelName }} \
-        --version ${{ parameters.modelVersion }} \
-        --output outputs/models/
+    - task: AzureCLI@2
       displayName: Download Model Outputs
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/build-and-release/scripts/download_model.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/
 
     - script: |
         source activate scoringenv
@@ -119,12 +124,20 @@ stages:
         conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
       displayName: Load Scoring Environment
 
-    - script: |
-        python code/build-and-release/scripts/download_model.py \
-        --name ${{ parameters.modelName }} \
-        --version ${{ parameters.modelVersion }} \
-        --output outputs/models/
-      displayName: Download Model Outputs
+    - task: AzureCLI@2
+      displayName: Deploy the model to DEV
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/deployment/model_deployment.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/
+
+    # @TODO test webservice API call
 
 - stage: SystemIntegrationTests
   displayName: 'System Integration Tests'
@@ -134,8 +147,6 @@ stages:
       vmImage: 'ubuntu-16.04'
 
     steps:
-    - download: current
-      artifact: ModelCIBuildArtifacts
     # - download: current
     #   artifact: ModelCIBuildArtifacts
     
@@ -146,26 +157,31 @@ stages:
         conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
       displayName: Load Scoring Environment
 
-    - script: |
-        python code/build-and-release/scripts/download_model.py \
-        --name ${{ parameters.modelName }} \
-        --version ${{ parameters.modelVersion }} \
-        --output outputs/models/
+    - task: AzureCLI@2
       displayName: Download Model Outputs
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/build-and-release/scripts/download_model.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/
 
-    # Deploy App
-
-# - stage: LoadTesting
-#   displayName: 'Load Test Scoring App'
-#   # Deploy scoring app and system integrate
-#   jobs:
-#   - job: Validate_Model
-#     pool:
-#       vmImage: 'ubuntu-16.04'
-
-#     steps:
-#     - download: current
-#       artifact: ModelCIBuildArtifacts
+    - task: AzureCLI@2
+      displayName: Deploy the model to INT
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/deployment/model_deployment.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/
 
 - stage: DeployPROD
   displayName: 'Deploy PROD'

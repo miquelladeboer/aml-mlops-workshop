@@ -6,6 +6,8 @@ from azureml.core.conda_dependencies import CondaDependencies
 from azureml.core.webservice import AciWebservice
 from azureml.core.model import Model
 from azureml.core import Workspace
+from azureml.core.authentication import AzureCliAuthentication
+
 
 # Parse Definition Arguments
 parser = argparse.ArgumentParser()
@@ -38,7 +40,9 @@ print("Model name: ", args.name)
 print("Model version: ", args.version)
 
 # Load the AML Workspace and Model
-ws = Workspace.from_config()
+ws = Workspace.from_config(
+    auth=AzureCliAuthentication()
+)
 
 model = Model(
     workspace=ws,
@@ -68,7 +72,9 @@ scoringenv = Environment.from_conda_specification(
     )
 )
 
-# Configure Scoring App
+# Configure Service Deployment Enviromment and compute-wise
+service_name = 'onnx-demo'
+
 inference_config = InferenceConfig(
     entry_script=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
@@ -86,15 +92,13 @@ compute_config = AciWebservice.deploy_configuration(
     description='ONNX for text'
 )
 
-service_name = 'onnx-demo2'
-print("Service", service_name)
-
+# Run the deployment
 deployment = Model.deploy(
-    ws,
-    service_name,
-    [model],
-    inference_config,
-    compute_config
+    workspace=ws,
+    name=service_name,
+    models=[model],
+    inference_config=inference_config,
+    deployment_config=compute_config
 )
 
 # Wait for completion
