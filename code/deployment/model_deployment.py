@@ -2,7 +2,6 @@ import os
 import argparse
 from azureml.core.model import InferenceConfig
 from azureml.core.environment import Environment
-from azureml.core.conda_dependencies import CondaDependencies
 from azureml.core.webservice import AciWebservice
 from azureml.core.model import Model
 from azureml.core import Workspace
@@ -34,6 +33,14 @@ parser.add_argument(
     type=str,
     help='output folder'
 )
+parser.add_argument(
+    "-s",
+    "--service_name",
+    dest='service_name',
+    type=str,
+    default="onnx-demo",
+    help='the web service name'
+)
 args = parser.parse_args()
 
 print("Model name: ", args.name)
@@ -50,19 +57,7 @@ model = Model(
     version=args.version
 )
 
-# Configure Scoring Environment
-# myenv = CondaDependencies(
-#     conda_dependencies_file_path=os.path.join(
-#         os.path.dirname(os.path.realpath(__file__)),
-#         '../../',
-#         'conda_dependencies.yml'
-#     )
-# )
-# myenv.add_channel("pytorch")
-
-# with open("myenv.yml", "w") as f:
-#     f.write(myenv.serialize_to_string())
-
+# Configure Scoring App Environment
 scoringenv = Environment.from_conda_specification(
     name="scoringenv",
     file_path=os.path.join(
@@ -72,9 +67,6 @@ scoringenv = Environment.from_conda_specification(
     )
 )
 
-# Configure Service Deployment Enviromment and compute-wise
-service_name = 'onnx-demo'
-
 inference_config = InferenceConfig(
     entry_script=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
@@ -83,6 +75,7 @@ inference_config = InferenceConfig(
     environment=scoringenv
 )
 
+# Configure Deployment Compute
 compute_config = AciWebservice.deploy_configuration(
     cpu_cores=1,
     memory_gb=1,
@@ -95,7 +88,7 @@ compute_config = AciWebservice.deploy_configuration(
 # Run the deployment
 deployment = Model.deploy(
     workspace=ws,
-    name=service_name,
+    name=args.service_name,
     models=[model],
     inference_config=inference_config,
     deployment_config=compute_config
@@ -104,11 +97,10 @@ deployment = Model.deploy(
 # Wait for completion
 deployment.wait_for_deployment(True)
 
-# Print debug if deployment was unsuccesful
 if deployment.state != 'Healthy':
-    # run this command for debugging.
-    print(deployment.get_logs())
+    logs = deployment.get_logs()
+    raise Exception('Service Deployment Failed {}'.format(logs))
 
-    # thow error, is this done?
-
-print(deployment.scoring_uri)
+else:
+    print("Deployment was succesful")
+    print("Scoring URI is {}".format(deployment.scoring_uri))
