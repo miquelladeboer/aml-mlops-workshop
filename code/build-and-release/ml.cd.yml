@@ -30,7 +30,7 @@ stages:
 
     steps:
     - download: current
-      artifact: MLBuildArtifacts
+      artifact: ModelCIBuildArtifacts
 
     - script: |
         python code/build-and-release/scripts/download_model.py \
@@ -70,7 +70,7 @@ stages:
 
     steps:
     - download: current
-      artifact: MLBuildArtifacts
+      artifact: ModelCIBuildArtifacts
     
     # Load Scoring Environment
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
@@ -89,7 +89,7 @@ stages:
 
     steps:
     - download: current
-      artifact: MLBuildArtifacts
+      artifact: ModelCIBuildArtifacts
 
 - stage: SystemIntegrationTests
   displayName: 'System Integration Tests'
@@ -100,7 +100,7 @@ stages:
 
     steps:
     - download: current
-      artifact: MLBuildArtifacts
+      artifact: ModelCIBuildArtifacts
 
 - stage: LoadTesting
   displayName: 'Load Test Scoring App'
@@ -112,7 +112,7 @@ stages:
 
     steps:
     - download: current
-      artifact: MLBuildArtifacts
+      artifact: ModelCIBuildArtifacts
 
 - stage: DeployPROD
   displayName: 'Deploy PROD'
@@ -123,7 +123,7 @@ stages:
 
     steps:
     - download: current
-      artifact: MLBuildArtifacts
+      artifact: ModelCIBuildArtifacts
 
 # - stage: ReleaseDEV
 #   displayName: 'Release to DEV'
@@ -142,7 +142,7 @@ stages:
 
 #     steps:
 #     - download: current
-#       artifact: MLBuildArtifacts
+#       artifact: ModelCIBuildArtifacts
   
 #     - task: AzureCLI@2
 #       displayName: Generate AML Workspace Config File
