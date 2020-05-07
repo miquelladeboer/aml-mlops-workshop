@@ -1,23 +1,24 @@
 # Azure Pipeline Definition for ML CD
+# @TODO model registry event to trigger this pipeline
 
 # Trigger on changes in the Model CI pipeline                 
 resources:
   pipelines:
   - pipeline: modelci   # Name of the pipeline resource
     source: "ML Model CI" # Name of the triggering pipeline
-    # trigger: 
-    #   branches:
-    #   - releases/*
-    #   - master
+    trigger: 
+      branches:
+      - master
 
-# parameters:
-# - name: model_name
-#   type: string
-# - name: model_version
-#   type: string
-
-# @TODO add pipeline parameters
-# @TODO model registry event to trigger this pipeline
+# Some steps in this pipeline use upstream generated model outputs
+# for testing and deployment. We pass these in as pipeline parameters.
+parameters:
+- name: modelName
+  type: string
+  default: net.onnx  # tmp
+- name: modelVersion
+  type: number
+  default: 3 # tmp
 
 stages:
 - stage: ModelValidation
@@ -30,6 +31,12 @@ stages:
     steps:
     - download: current
       artifact: MLBuildArtifacts
+
+    - script: |
+        python code/build-and-release/scripts/download_model.py \
+        --name ${{ parameters.modelName }} \
+        --version ${{ parameters.modelVersion }}
+      displayName: Download Model Outputs
     
     # Load Scoring Environment
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
