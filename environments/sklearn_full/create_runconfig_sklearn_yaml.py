@@ -1,13 +1,15 @@
 from azureml.core.conda_dependencies import CondaDependencies
 from azureml.core.runconfig import RunConfiguration
-from azureml.core import Workspace
+from azureml.core import Workspace, Run
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.dataset import Dataset
 import os
-
+from azureml.exceptions._azureml_exception import UserErrorException
 from azureml.core.runconfig import (Data,
                                     DataLocation,
                                     Dataset as RunDataset)
+
+run = Run.get_context()
 
 
 def load_data(dataset, input_name):
@@ -22,7 +24,11 @@ def load_data(dataset, input_name):
     return data
 
 
-workspace = Workspace.from_config(auth=AzureCliAuthentication())
+# Retrieve a datastore from a ML workspace
+try:
+    workspace = Workspace.from_config(auth=AzureCliAuthentication())
+except UserErrorException:
+    workspace = run.experiment.workspace
 
 # Define the conda dependencies
 cd = CondaDependencies(
@@ -49,7 +55,7 @@ amlcompute_run_config = RunConfiguration(
     conda_dependencies=cd,
     framework='Python',
 )
-    
+
 amlcompute_run_config.environment.docker.enabled = True
 amlcompute_run_config.environment.spark.precache_packages = False
 amlcompute_run_config.target = compute_target

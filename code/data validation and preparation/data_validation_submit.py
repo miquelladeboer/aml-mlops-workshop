@@ -10,7 +10,7 @@ from azureml.core.runconfig import RunConfiguration
 from azureml.core.dataset import Dataset
 
 # parameter switch
-subset = "yes"
+subset = "no"
 
 # Define compute target for data engineering from AML
 compute_target = 'alwaysoncluster'

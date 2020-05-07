@@ -1,13 +1,15 @@
 from azureml.core.conda_dependencies import CondaDependencies
-from azureml.core.runconfig import RunConfiguration
-from azureml.core import Workspace
+from azureml.core.runconfig import RunConfiguration, DataReferenceConfiguration
+from azureml.core import Workspace, Run
 from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.dataset import Dataset
 import os
-
+from azureml.exceptions._azureml_exception import UserErrorException
 from azureml.core.runconfig import (Data,
                                     DataLocation,
                                     Dataset as RunDataset)
+
+run = Run.get_context()
 
 
 def load_data(dataset, input_name):
@@ -22,7 +24,11 @@ def load_data(dataset, input_name):
     return data
 
 
-workspace = Workspace.from_config(auth=AzureCliAuthentication())
+# Retrieve a datastore from a ML workspace
+try:
+    workspace = Workspace.from_config(auth=AzureCliAuthentication())
+except UserErrorException:
+    workspace = run.experiment.workspace
 
 # Define the conda dependencies
 cd = CondaDependencies(
@@ -54,6 +60,14 @@ amlcompute_run_config.data = {input_name_train: load_data(dataset_train,
                                                           input_name_train),
                               input_name_test: load_data(dataset_test,
                                                          input_name_test)}
+amlcompute_run_config.data_references = {
+    "baseline_profile":
+    DataReferenceConfiguration(
+        datastore_name='workspaceblobstore',
+        mode='download',
+        path_on_datastore='baseline_profile',
+    )
+}
 
 amlcompute_run_config.save(path=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),

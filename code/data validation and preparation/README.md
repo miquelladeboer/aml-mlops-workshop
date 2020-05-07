@@ -16,11 +16,17 @@ This folder contains scripts for data validation and data preperation. In  this 
 
 * data_validation.py
 
-    In this file, new data that comes in will be validated against a baseline profile. In the demo we have created a baseline profile [here](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/code/data%20exploration/data_validation.py). In this file, we will calculate some basic statistics and check if they fit into the interval of the baseline profile. A warning report is created and logged to Azure Machine Learning and to blob storage, so we can monitor potential data drift. Within this file there are also some data quality checks that will generage an error, like empty values for example. This baseline profile is a static profile that might only change every month or when nessacry and only on manual command.
+    In this file, new data that comes in will be validated against a baseline profile. In the demo we have created a baseline profile [here](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/code/data%20exploration/data_validation.py). In this file, we will calculate some basic statistics and check if they fit into the interval of the baseline profile. A warning report is created and logged to Azure Machine Learning and to blob storage, so we can monitor potential data drift. Within this file there are also some data quality checks that will generage an error, like empty values for example. This baseline profile is a static profile that might only change every month or when nessacry and only on manual command. We can create report like:
+
+    ![An example of folder structure](validation.PNG)
 
 * create_historic_profile.py
 
     In contrast to the baseline profile, that we will use for validation, we also want to keep track of the statistics of the data every time we update the data with a new dataset. This can for example happen every week when we want to retrain our model with current data. For data quality checks an transparancy, we want to log over time, how our data profile is changing. This way we can easily monitor if data is drifting, detect trends and explain shifts in model parameters or model performance. This historic profile is saved in a blob storage and can be used for reporting in Power BI.
+
+    ![An example of foldder structure](tracktime.PNG)
+    ![An example of folder structure](tracktime2.PNG)
+    ![An example of folder structure](tracktime3.PNG)
 
 ## Data preparation
 In many cases, a lot of the data preparation is done by the data engineer. However, for the ML purpose the data still needs to be transformed for better and logical model results (logs, abs values, etc..), new features need to be created, categories need to be one-hot-encoded or data need to be indexed. All these steps are ML model specific. Therefore I would recommend to do these steps within a data science project (e.g. data engineering within the project and within the ML pipeline) instead of having this done in another place by a data engineer. These data transformations can of course still be done by a data engineer, but I will advise to perform these steps within a ML project as it is part of the ML lifecycle.

@@ -49,13 +49,13 @@ dataReferences:
   baseline_profile:
 # Name of the datastore.
     dataStoreName: workspaceblobstore
-# relative path on the datastore.
+# Relative path on the datastore.
     pathOnDataStore: baseline_profile
-# operation on the datastore, mount, download, upload
+# Operation on the datastore, mount, download, upload
     mode: download
-# whether to overwrite the data if existing
+# Whether to overwrite the data if existing
     overwrite: false
-# the path on the compute target.
+# The path on the compute target.
     pathOnCompute:
 # The configuration details for data.
 data:
@@ -65,7 +65,7 @@ data:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: 424765b4-1da7-4bbb-83ed-5588c3f84d68
+        id: 636c8ab2-25d7-46c3-946f-9ff6945a1873
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.
@@ -84,7 +84,7 @@ data:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: 415c1d49-5b8b-48c7-b3a2-a69ae7fa17ce
+        id: ec94deee-ea3f-4c81-9c76-1e6baee58dda
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.

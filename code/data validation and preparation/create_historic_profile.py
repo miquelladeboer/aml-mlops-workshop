@@ -16,13 +16,14 @@ import numpy as np
 from collections import Counter
 from nltk.corpus import stopwords
 from textblob import TextBlob
-from datetime import date
+from datetime import date, timedelta
 import argparse
 import os
 from azureml.core import Datastore
 import csv
 from azureml.core import Run
 from packages import plots
+from packages.get_data import load_data
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_folder',
@@ -67,11 +68,9 @@ parser.add_argument('--historicprofile',
 opts = parser.parse_args()
 try:
     path = os.environ.get("AZUREML_DATAREFERENCE_historicProfile")
-    dir_list = os.listdir(path)
-    dir_list_1 = dir_list[0]
-    dir_list_2 = dir_list[1]
-    opts.profile_folder = path + '/' + dir_list_1
-    opts.word_profile_folder = path + '/' + dir_list_2
+
+    opts.profile_folder = path + '/' + "historic_profile.csv"
+    opts.word_profile_folder = path + '/' + "historic_word_profile.csv"
     print("Downloaded historic profile from cloud")
 except IOError:
     print("no file present")
@@ -100,23 +99,46 @@ if not os.path.exists(OUTPUTSFOLDER):
 nltk.download('stopwords')
 stop = stopwords.words('english')
 
-today = str(date.today())
+today = str(date.today() + + timedelta(days=49))
+#today = str(date.today())
+print(today)
 
 if opts.input_train is None:
-    if opts.local == 'no':
-        subsubsubpath = opts.data_folder
-        dir_list = os.listdir(subsubsubpath)
-        subsubpath = subsubsubpath + '/' + dir_list[0]
-        dir_list_1 = os.listdir(subsubpath)
-        subpath = subsubpath + '/' + dir_list_1[0]
-        dir_list_2 = os.listdir(subpath)
-        path1 = subpath + '/' + dir_list_2[-1]
-        dir_list_3 = os.listdir(path1)
-        path = path1 + '/' + dir_list_3[0]
-    else:
+    if opts.local == 'yes':
         path = opts.data_folder
-
-    # import data and profile
+        print(path)
+    else:
+        print(opts.data_folder)
+        print(os.listdir(opts.data_folder))
+        try:
+            subsubpath = opts.data_folder + '/workspaceblobstore'
+            dir_list_1 = os.listdir(subsubpath)
+            subpath = opts.data_folder + '/workspaceblobstore/' + dir_list_1[0]
+            df = []
+            dir_list = os.listdir(
+                subpath
+                )
+            for week in dir_list:
+                print("weeks in dataset:", week)
+                sub_list = os.listdir(subpath + '/' + week)
+                path = os.path.join(subpath, str(week) + '/' + sub_list[0])
+                dataset_train = pd.read_csv(os.path.join(path), lineterminator='\n')
+                df.append(dataset_train)
+            data = pd.concat(df, ignore_index=True)
+            print(len(data))
+        except FileNotFoundError:
+            print("one week present")
+            subsubpath = opts.data_folder
+            print(subsubpath)
+            dir_list_1 = os.listdir(subsubpath)
+            print(dir_list_1)
+            df = []
+            for csvfile in dir_list_1:
+                path = subsubpath + '/' + csvfile
+                dataset_train = pd.read_csv(os.path.join(path), lineterminator='\n')
+                df.append(dataset_train)
+            data = pd.concat(df, ignore_index=True)
+    # import data
     print("loading data from from storage")
     data = pd.read_csv(
         os.path.join(path),
@@ -177,7 +199,7 @@ if opts.new_profile == 'yes':
         'standard deviation of classes': [data_std],
         'average word length': [mean_avg_word],
         'average number of stopwords': [mean_stopwords],
-        'average sentiment': [mean_stopwords]
+        'average sentiment': [mean_sentiment]
     }
 
     profile = pd.DataFrame(
@@ -193,15 +215,17 @@ if opts.new_profile == 'yes':
         )
 if opts.new_profile == 'no':
     profile = pd.DataFrame()
-    new_profile = pd.read_csv(os.path.join(opts.profile_folder))
+    new_profile = pd.read_csv(os.path.join(opts.profile_folder), lineterminator='\n')
+    print("Downloaded file", new_profile)
     int_profile = new_profile.drop(new_profile.columns[[0]], axis=1)
+    print("Downloaded file", int_profile)
     values = {
         'date': [today],
         'mean of classes':  [data_mean],
         'standard deviation of classes': [data_std],
         'average word length': [mean_avg_word],
         'average number of stopwords': [mean_stopwords],
-        'average sentiment': [mean_stopwords]
+        'average sentiment': [mean_sentiment]
     }
 
     prof = pd.DataFrame(
@@ -216,6 +240,16 @@ if opts.new_profile == 'no':
         ],
         )
     profile = int_profile.append(prof, ignore_index=True)
+
+print("new profile", profile)
+for index in range(len(profile)):
+    run.log_row("profile",
+                date=profile.iloc[index, 0],
+                mean_of_classes=profile.iloc[index, 1],
+                standard_deviation=profile.iloc[index, 2],
+                word_lengt=profile.iloc[index, 3],
+                average_nummber_of_stop_words=profile.iloc[index, 4],
+                average_sentiment=profile.iloc[index, 5])
 
 # get words first
 data_clean = data['text'].apply(
@@ -306,9 +340,12 @@ mean_classes = plots.plot_mean_of_classes(profile)
 run.log_image("Mean of classes over time ", plot=mean_classes)
 std_classes = plots.plot_std_of_classes(profile)
 run.log_image("Standard deviation over time ", plot=std_classes)
+avg_word_length = plots.plot_average_word_length(profile)
+run.log_image("Average word length over time ", plot=avg_word_length)
+avg_stop_words = plots.plot_average_number_of_stopwords(profile)
+run.log_image("Average stop word over time ", plot=avg_stop_words)
 
 if not (opts.historicprofile is None):
     os.makedirs(opts.historicprofile, exist_ok=True)
     path = opts.historicprofile + "/" + 'historic_profile.csv'
     write_df = profile.to_csv(path)
-

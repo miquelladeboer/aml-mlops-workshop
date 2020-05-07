@@ -9,6 +9,8 @@ from azureml.core.authentication import AzureCliAuthentication
 from azureml.core.runconfig import RunConfiguration
 from azureml.core.dataset import Dataset
 
+newprofile = 'no'
+
 # Define compute target for data engineering from AML
 compute_target = 'alwaysoncluster'
 
@@ -40,7 +42,7 @@ est = ScriptRunConfig(
         '--data_folder',
         dataset_train.as_named_input('train').as_mount(),
         '--local', 'no',
-        '--new_profile', 'no'
+        '--new_profile', newprofile
     ],
 )
 

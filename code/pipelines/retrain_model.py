@@ -328,12 +328,101 @@ estimator = PyTorch(
 # DEFINE ALL PIPELINE STEPS
 # data validation for enitre dataset
 define_new_dataset = PythonScriptStep(
-    name="data_validation",
+    name="define_new_dataset",
     script_name="define_dataset_raw.py",
+    compute_target='alwaysoncluster',
     source_directory=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        '..',
+        '../..',
         'data_movement_helpers'
+    )
+)
+
+env_data_preparation = PythonScriptStep(
+    name="env_data_praparation",
+    script_name="create_runconfig_data_preperation_yaml.py",
+    compute_target='alwaysoncluster',
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../..',
+        'environments/data_preperation'
+    )
+)
+
+env_data_preparation_subset = PythonScriptStep(
+    name="env_data_praparation_subset",
+    script_name="create_runconfig_data_preperation_yaml.py",
+    compute_target='alwaysoncluster',
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../..',
+        'environments/data_preperation_subset'
+    )
+)
+
+env_data_profiling = PythonScriptStep(
+    name="env_data_profiling",
+    script_name="create_runconfig_data_profiling_yaml.py",
+    compute_target='alwaysoncluster',
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../..',
+        'environments/data_profiling'
+    )
+)
+
+env_data_validation = PythonScriptStep(
+    name="env_data_validation",
+    script_name="create_runconfig_data_validation_yaml.py",
+    compute_target='alwaysoncluster',
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../..',
+        'environments/data_validation'
+    )
+)
+
+env_data_validation_subset = PythonScriptStep(
+    name="env_data_validation_subset",
+    script_name="create_runconfig_data_validation_yaml.py",
+    compute_target='alwaysoncluster',
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../..',
+        'environments/data_validation_subset'
+    )
+)
+
+env_fullmodel = PythonScriptStep(
+    name="env_fullmodel",
+    script_name="create_runconfig_fullmodel_yaml.py",
+    compute_target='alwaysoncluster',
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../..',
+        'environments/fullmodel_step'
+    )
+)
+
+env_sklearn_full = PythonScriptStep(
+    name="env_sklearn_full",
+    script_name="create_runconfig_sklearn_yaml.py",
+    compute_target='alwaysoncluster',
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../..',
+        'environments/sklearn_full'
+    )
+)
+
+env_sklearn_subset = PythonScriptStep(
+    name="env_sklearn_subset",
+    script_name="create_runconfig_sklearn_yaml.py",
+    compute_target='alwaysoncluster',
+    source_directory=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../..',
+        'environments/sklearn_subset'
     )
 )
 
@@ -501,10 +590,34 @@ model_training = PythonScriptStep(
     )
 )
 
+env_data_preparation.run_after(define_new_dataset)
+env_data_preparation_subset.run_after(define_new_dataset)
+env_data_profiling.run_after(define_new_dataset)
+env_data_validation.run_after(define_new_dataset)
+env_data_validation_subset.run_after(define_new_dataset)
+env_fullmodel.run_after(define_new_dataset)
+env_sklearn_subset.run_after(define_new_dataset)
+
+data_validation.run_after(env_data_validation)
+data_validation_subset.run_after(env_data_validation_subset)
+data_engineering_subset.run_after(env_data_preparation_subset)
+historic_profile.run_after(env_data_profiling)
+data_engineering.run_after(env_data_preparation)
+model_training.run_after(env_fullmodel)
+sklearn_models.run_after(env_sklearn_subset)
+
 # Attach step to the pipelines
 pipeline = Pipeline(
     workspace=workspace,
     steps=[
+        env_data_preparation,
+        env_data_preparation_subset,
+        env_data_profiling,
+        env_data_validation,
+        env_data_validation_subset,
+        env_fullmodel,
+        env_sklearn_subset,
+        define_new_dataset,
         data_validation,
         data_validation_subset,
         historic_profile,
