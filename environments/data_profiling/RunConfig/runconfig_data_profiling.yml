@@ -49,13 +49,13 @@ dataReferences:
   historic_profile:
 # Name of the datastore.
     dataStoreName: workspaceblobstore
-# relative path on the datastore.
+# Relative path on the datastore.
     pathOnDataStore: historic_profile
-# operation on the datastore, mount, download, upload
+# Operation on the datastore, mount, download, upload
     mode: download
-# whether to overwrite the data if existing
+# Whether to overwrite the data if existing
     overwrite: false
-# the path on the compute target.
+# The path on the compute target.
     pathOnCompute:
 # The configuration details for data.
 data:
@@ -65,7 +65,7 @@ data:
 # the Dataset used for this run.
       dataset:
 # Id of the dataset.
-        id: 4d4bf3e7-e80a-47a7-b423-ffa1e2407421
+        id: 994025cf-d092-4dd1-9380-3ff1cfaf4d95
 # the DataPath used for this run.
       datapath:
 # Whether to create new folder.
