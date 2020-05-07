@@ -5,8 +5,10 @@ import pandas as pd
 from sklearn.datasets import fetch_20newsgroups
 import uuid
 from datetime import date
+from sklearn.model_selection import train_test_split
 
-weekNumber = str(date.today().isocalendar()[1])
+weekNumber = str(date.today().isocalendar()[1]+7)
+print(weekNumber)
 
 OUTPUTSFOLDERtrain = "outputs/cloud_data_train/" + weekNumber
 OUTPUTSFOLDERtest = "outputs/cloud_data_test/" + weekNumber
@@ -44,70 +46,103 @@ categories = [
     'sci.space',
 ]
 
-for data_split in ['train', 'test']:
-    if data_split == 'train':
-        OUTPUTSFOLDER = OUTPUTSFOLDERtrain
-        OUTPUTSFOLDERSUBSET = OUTPUTSFOLDERtrainsubset
-    else:
-        OUTPUTSFOLDER = OUTPUTSFOLDERtest
-        OUTPUTSFOLDERSUBSET = OUTPUTSFOLDERtestsubset
+# retrieve newsgroup data
+newsgroupdata = fetch_20newsgroups(
+    subset='all',
+    categories=categories,
+    shuffle=True,
+)    
 
-    # retrieve newsgroup data
-    newsgroupdata = fetch_20newsgroups(
-        subset=data_split,
-        categories=categories,
-        shuffle=True,
-        random_state=42
-    )
+# construct pandas data frame from loaded sklearn newsgroup data
+df = pd.DataFrame({
+    'text': newsgroupdata.data,
+    'target': newsgroupdata.target
+})
 
-    # construct pandas data frame from loaded sklearn newsgroup data
-    df = pd.DataFrame({
-        'text': newsgroupdata.data,
-        'target': newsgroupdata.target
-    })
+#df1 = df.sample(n=3000)
 
-    # pre-process:
-    # remove line breaks
-    df.text = df.text.replace('\n', ' ', regex=True)
+# pre-process:
+# remove line breaks
+df.text = df.text.replace('\n', ' ', regex=True)
 
-    # create random subsample to hyper tuning (50% of data)
-    df_subset = df.sample(frac=0.5)
+x_train, x_test = train_test_split(df, test_size=0.2)
+# create random subsample to hyper tuning (50% of data)
+x_train_subset = x_train.sample(frac=0.5)
+x_test_subset = x_test.sample(frac=0.5)
 
-    # write to csv
-    df_subset.to_csv(
-        path_or_buf=os.path.join(
-            OUTPUTSFOLDERSUBSET, 'raw_subset_' + data_split + '_' + str(uuid.uuid1()) +
-            '.csv')
-    )
+# write to csv
+x_train_subset.to_csv(
+    path_or_buf=os.path.join(
+        OUTPUTSFOLDERtrainsubset,
+        'raw_subset_' + "train" + '_' + str(uuid.uuid1()) +
+        '.csv')
+)
 
-    # write to csv
-    df.to_csv(
-        path_or_buf=os.path.join(
-            OUTPUTSFOLDER, 'raw_' + data_split + '_' + str(uuid.uuid1()) +
-            '.csv')
-    )
+x_test_subset.to_csv(
+    path_or_buf=os.path.join(
+        OUTPUTSFOLDERtestsubset,
+        'raw_subset_' + "test" + '_' + str(uuid.uuid1()) +
+        '.csv')
+)
 
+# write to csv
+x_train.to_csv(
+    path_or_buf=os.path.join(
+        OUTPUTSFOLDERtrain, 'raw_' + 'train' + '_' + str(uuid.uuid1()) +
+        '.csv')
+)
 
-    # upload files
-    datastore.upload(
-        src_dir=os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            '../',
-            OUTPUTSFOLDER
-        ),
-        target_path="/" + 'raw_' + data_split + '/' + weekNumber,
-        overwrite=True,
-        show_progress=True
-    )
+# write to csv
+x_test.to_csv(
+    path_or_buf=os.path.join(
+        OUTPUTSFOLDERtest, 'raw_' + 'test' + '_' + str(uuid.uuid1()) +
+        '.csv')
+)
 
-     # upload files
-    datastore.upload(
-        src_dir=os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            '../',
-            OUTPUTSFOLDERSUBSET
-        ),
-        target_path="/" + 'raw_subset_' + data_split + '/' + weekNumber,
-        overwrite=True,
-        show_progress=True
-    )
+# upload files
+datastore.upload(
+    src_dir=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../',
+        OUTPUTSFOLDERtrain
+    ),
+    target_path="/" + 'raw_' + 'train' + '/' + weekNumber,
+    overwrite=True,
+    show_progress=True
+)
+
+# upload files
+datastore.upload(
+    src_dir=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../',
+        OUTPUTSFOLDERtest
+    ),
+    target_path="/" + 'raw_' + 'test' + '/' + weekNumber,
+    overwrite=True,
+    show_progress=True
+)
+
+# upload files
+datastore.upload(
+    src_dir=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../',
+        OUTPUTSFOLDERtrainsubset
+    ),
+    target_path="/" + 'raw_subset_' + "train" + '/' + weekNumber,
+    overwrite=True,
+    show_progress=True
+)
+
+# upload files
+datastore.upload(
+    src_dir=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../',
+        OUTPUTSFOLDERtestsubset
+    ),
+    target_path="/" + 'raw_subset_' + "test" + '/' + weekNumber,
+    overwrite=True,
+    show_progress=True
+)

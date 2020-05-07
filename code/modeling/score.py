@@ -114,11 +114,6 @@ def run(input_data):
 
     return result_dict
 
-# def choose_class(result_prob):
-#    """We use argmax to deterftrmine the right label to choose from our
-#  output"""
-#    return int(np.argmax(result_prob, axis=0))
-
 
 if __name__ == "__main__":
     # set local env var for testing purposes

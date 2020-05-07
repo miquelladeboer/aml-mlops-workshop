@@ -2,19 +2,26 @@
 from azureml.core import Workspace, Datastore, Dataset
 from datetime import date
 from azureml.core.authentication import AzureCliAuthentication
+from azureml.core import Run
+from azureml.exceptions._azureml_exception import UserErrorException
 
-startWeek = 17
-weekNumber = date.today().isocalendar()[1]
+run = Run.get_context()
+
+startWeek = 19  # put here the current week for the first time
+weekNumber = (date.today().isocalendar()[1]+7)
 
 # Retrieve a datastore from a ML workspace
-ws = Workspace.from_config(auth=AzureCliAuthentication())
+try:
+    ws = Workspace.from_config(auth=AzureCliAuthentication())
+except UserErrorException:
+    ws = run.experiment.workspace
+
 datastore_name = 'workspaceblobstore'
 datastore = Datastore.get(ws, datastore_name)
 # Register dataset and sebset version for each data split
 for data_split in ['train', 'test']:
     for set in ['', 'subset_']:
         # Create a TabularDataset from paths in datastore in split folder
-        # Note that wildcards can be used
         datastore_paths = []
         for i in range(startWeek, (weekNumber+1)):
             datastore_path = (

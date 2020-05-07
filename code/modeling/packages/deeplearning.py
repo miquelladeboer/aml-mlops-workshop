@@ -114,6 +114,7 @@ def train_model(num_epochs, data_train, data_test, batch_size,
     epoch_losses = []
     epoch_accuracy = []
     for epoch in range(num_epochs):
+        print("Epoch:", epoch)
         total_batch = int(len(data_train.text)/batch_size)
         epoch_loss = 0
         epoch_acc = 0
@@ -142,6 +143,7 @@ def train_model(num_epochs, data_train, data_test, batch_size,
 
         epoch_losses.append(epoch_loss / total_batch)
         epoch_accuracy.append(epoch_acc)
+        print("epoch accuracy:", epoch_acc)
 
     return epoch_losses, epoch_accuracy, net
 

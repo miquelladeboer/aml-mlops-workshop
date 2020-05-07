@@ -8,7 +8,7 @@ workspace = Workspace.from_config(auth=AzureCliAuthentication())
 
 # Create compute target if not present
 # Choose a name for your CPU cluster
-cpu_cluster_name = "hypercomputecpu"
+cpu_cluster_name = "alwaysoncluster"
 
 # Verify that cluster does not exist already
 try:
@@ -16,7 +16,8 @@ try:
     print('Found existing cluster, use it.')
 except ComputeTargetException:
     compute_config = AmlCompute.provisioning_configuration(vm_size='STANDARD_D3_V2',
-                                                           max_nodes=4)
+                                                           min_nodes=2,
+                                                           max_nodes=2)
     cpu_cluster = ComputeTarget.create(workspace, cpu_cluster_name,
                                        compute_config)
 

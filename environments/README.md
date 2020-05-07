@@ -1,5 +1,22 @@
 # Run Configurations
 
+![An example of a pipeline for Infrastructure roll out](acess3.png)
+
+## Managing environments
+When developing ML models at scale, it is very important to manage your conda environment correctly. Especially if you are working with multiple people on the same projects. It is even more important to manage your conda environment during local training as you will need the exact environment when training on a AML cluster or when you deploy your model for inferencing. The solution might fail if you use a different version a certain package. 
+It is also very important to work in a structured way when managing these environments. Especially if the project grows larger and when you add more steps to the solution, you might want to use different environments for different parts of the solution. To go back to the example I gave during ‘choosing the right compute’, I might have for the same steps different environments. For example, if we are preparing the data, I might use libraries as Dask or Fastparquet, whereas in model training I might need a Pytorch framework or onnx runtime. 
+
+## Run configurations
+If we combine the different environment, different datasets, and different compute together with the different training scripts, I can create a configuration file. This configuration file will sent an experiment to the AML service as explained in the following picture:
+ ![experiment example](env1.png)
+ By using different models, different environment, different compute or different data, we can create different run configuration files that will result in different experiments:
+  ![experiment example](env2.png)
+  As we have seen from the example, certain data, compute, environments, and models result in a specific run configuration for different steps of the training. I would recommend storing these run configurations in a structured matter, so it is easier to reuse and share across the organization. This will help you with speeding up the process of development. An example in your code base could look like this:
+  ![experiment example](env4.png)
+  Where I have different YAML files within every environment, like the one for a neural network.
+Best practise is to create YAML files for your run configuration. Azure DevOps pipelines has chosen the direction of working with YAML files for building pipelines. It is therefore recommended to also build the Azure Machine Learning pipelines and configurations with YAML.
+
+
 This folder contains configurations for different steps of datapreperation, hypertuning and modeling. These run configurations consist of:
 * Conda dependencies file 
 * Compute target
@@ -10,7 +27,7 @@ As we can understand, for each part of the progress we might need slighly differ
 
 ## Configure the run configurations
 
-In this example we make use of 5 different run configuration files:
+In this example we make use of different run configuration files:
 * data_preparation_subset
     * Condadependencies file: conda_dependencies_data_preperation.yml, including dask, pysprark, azureml-sdk[notebooks]
     * Compute Target: Small AML compute
@@ -36,3 +53,8 @@ In this example we make use of 5 different run configuration files:
     * Compute Target: 1 cpu cluster
     * Data sets: entire
     * Framework: PyTorch
+* data_profiling
+
+* data validation
+
+

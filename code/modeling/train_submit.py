@@ -12,14 +12,23 @@ from azureml.core.runconfig import RunConfiguration, MpiConfiguration
 from azureml.train.hyperdrive.parameter_expressions import uniform, choice
 from azureml.train.hyperdrive import (
     BayesianParameterSampling,
-    HyperDriveConfig, PrimaryMetricGoal)
+    HyperDriveConfig,
+    PrimaryMetricGoal
+)
 from azureml.train.dnn import PyTorch
 
 # Define comfigs
-subset = True
-models = 'sklearnmodels'
+# allowed arguments are: randomforest, sklearn, deeplearning
+# randomforest will perform 1 run of randomforest fit
+# sklearnmodels will fit 15 models from sklearn
+# deeplearning will fit a neural network with pytorch
+models = 'deeplearning'
 data_local = False
-hyperdrive = False
+# if data_local is true, subset is alwats true
+subset = False
+# hyperdrive only works with deeplearning
+hyperdrive = True
+
 
 # If deep learning define hyperparameters
 # Set parameters for search
@@ -60,7 +69,7 @@ if models != 'deeplearning':
                     os.path.dirname(os.path.realpath(__file__)),
                     "../..",
                     "outputs/prepared_data/subset_test.csv",
-                    )),
+                    ))
             }
 
         # Define Run Configuration
@@ -74,9 +83,15 @@ if models != 'deeplearning':
         )
 
     if data_local is False:
-        dataset_train = Dataset.get_by_name(workspace, name=input_name_train)
-        dataset_test = Dataset.get_by_name(workspace, name=input_name_test)
-    
+        dataset_train = Dataset.get_by_name(
+            workspace,
+            name=input_name_train
+        )
+        dataset_test = Dataset.get_by_name(
+            workspace,
+            name=input_name_test
+        )
+
         # Load run Config
         run_config = RunConfiguration.load(
             path=os.path.join(os.path.join(
@@ -94,7 +109,8 @@ if models != 'deeplearning':
                 '--data_folder_train',
                 'DatasetConsumptionConfig:{}'.format(input_name_train),
                 '--data_folder_test',
-                'DatasetConsumptionConfig:{}'.format(input_name_test)
+                'DatasetConsumptionConfig:{}'.format(input_name_test),
+                '--local', 'no'
             ],
             run_config=run_config
         )
@@ -114,7 +130,8 @@ if models == 'deeplearning':
         '--data_folder_train':
         dataset_train.as_named_input('train').as_mount(),
         '--data_folder_test':
-        dataset_test.as_named_input('test').as_mount()
+        dataset_test.as_named_input('test').as_mount(),
+        '--local': 'no'
         }
 
     estimator = PyTorch(
