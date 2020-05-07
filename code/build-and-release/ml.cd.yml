@@ -39,13 +39,18 @@ stages:
         conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
       displayName: Load Scoring Environment
 
-    - script: |
-        source activate scoringenv
-        python code/build-and-release/scripts/download_model.py \
-        --name ${{ parameters.modelName }} \
-        --version ${{ parameters.modelVersion }} \
-        --output outputs/models/
+    - task: AzureCLI@2
       displayName: Download Model Outputs
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/build-and-release/scripts/download_model.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/
 
     - script: |
         source activate scoringenv
