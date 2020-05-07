@@ -1,6 +1,12 @@
 {
-    "python.pythonPath": "C:\\Users\\mideboer.EUROPE\\Miniconda3\\envs\\venvaml\\python.exe",
+    "python.pythonPath": "C:\\Users\\deeikele\\AppData\\Local\\Continuum\\miniconda3\\envs\\parnassia\\python.exe",
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true
 }

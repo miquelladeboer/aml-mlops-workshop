@@ -1,0 +1,266 @@
+# Azure Pipeline Definition for ML CD
+# @TODO model registry event to trigger this pipeline
+
+# Trigger on changes in the Model CI pipeline                 
+resources:
+  pipelines:
+  - pipeline: modelci   # Name of the pipeline resource
+    source: "ML Model CI" # Name of the triggering pipeline
+    trigger: 
+      branches:
+      - master
+
+# Some steps in this pipeline use upstream generated model outputs
+# for testing and deployment. We pass these in as pipeline parameters.
+parameters:
+- name: modelName
+  type: string
+  default: net.onnx  # tmp
+- name: modelVersion
+  type: number
+  default: 3 # tmp
+
+stages:
+- stage: ModelValidation
+  displayName: 'Model Validation'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
+
+    - task: AzureCLI@2
+      displayName: Download Model Outputs
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/build-and-release/scripts/download_model.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/
+
+    - script: |
+        source activate scoringenv
+        pytest --junitxml=test_report_modelvalidation.xml
+      workingDirectory: code/tests/model_validation
+      displayName: 'Model Validation Tests'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFiles: 'code/tests/model_validation/test_report_modelvalidation.xml'
+        testRunTitle: 'Model Validation Test Results'
+        failTaskOnFailedTests: true
+      condition: succeededOrFailed()
+      
+- stage: IntegrationTestScoringApp
+  displayName: 'Integration Tests Scoring App'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:    
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
+
+    - task: AzureCLI@2
+      displayName: Download Model Outputs
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/build-and-release/scripts/download_model.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/
+
+    - script: |
+        source activate scoringenv
+        pytest --junitxml=test_report_scoringapp.xml
+      workingDirectory: code/tests/model_integrate_scoring
+      displayName: 'Scoring App Tests'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFiles: 'code/tests/model_integrate_scoring/test_report_scoringapp.xml'
+        testRunTitle: 'Scoring App Integration Test Results'
+        failTaskOnFailedTests: true
+      condition: succeededOrFailed()
+
+- stage: DeployScoringApp
+  displayName: 'Deploy the Scoring App'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:    
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
+
+#     - task: AzureCLI@2
+#       displayName: Generate AML Workspace Config File
+#       inputs:
+#         azureSubscription: "my-service-connection"
+#         scriptType: bash
+#         scriptLocation: inlineScript
+#         inlineScript: |
+#           az extension add -n azure-cli-ml
+#           az ml folder attach \
+#           -w $(amlWorkspaceName) \
+#           -g $(resourceGroupName)
+
+    - task: AzureCLI@2
+      displayName: Deploy RT Scoring App to DEV
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/deployment/model_deployment.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/ \
+          --service_name "onnx-demo-$(Build.BuildId)-dev"
+
+#     - task: AzureCLI@2
+#       displayName: Deploy Training Pipeline to DEV
+#       inputs:
+#         azureSubscription: "my-service-connection"
+#         scriptType: bash
+#         scriptLocation: inlineScript
+#         inlineScript: |
+#           python code/build-and-release/scripts/publish_pipeline_from_yml.py --definition $(aml_ci_pipeline_definition)
+
+
+- stage: SystemIntegrationTests
+  displayName: 'System Integration Tests'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+    # - download: current
+    #   artifact: ModelCIBuildArtifacts
+    
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
+
+    - task: AzureCLI@2
+      displayName: Download Model Outputs
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/build-and-release/scripts/download_model.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/
+
+#     - task: AzureCLI@2
+#       displayName: Configure env: write AML config
+#       inputs:
+#         azureSubscription: "my-service-connection"
+#         scriptType: bash
+#         scriptLocation: inlineScript
+#         inlineScript: |
+#           az extension add -n azure-cli-ml
+#           az ml folder attach \
+#           -w $(amlWorkspaceName) \
+#           -g $(resourceGroupName)
+
+    - task: AzureCLI@2
+      displayName: Deploy RT Scoring App to INT
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/deployment/model_deployment.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/ \
+          --service_name "onnx-demo-$(Build.BuildId)-int"
+
+#     - task: AzureCLI@2
+#       displayName: Deploy Training Pipeline to INT
+#       inputs:
+#         azureSubscription: "my-service-connection"
+#         scriptType: bash
+#         scriptLocation: inlineScript
+#         inlineScript: |
+#           python code/build-and-release/scripts/publish_pipeline_from_yml.py --definition $(aml_ci_pipeline_definition)
+
+- stage: DeployPROD
+  displayName: 'Deploy PROD'
+  jobs:
+  - job: Validate_Model
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+#     - task: AzureCLI@2
+#       displayName: Configure env: write AML config
+#       inputs:
+#         azureSubscription: "my-service-connection"
+#         scriptType: bash
+#         scriptLocation: inlineScript
+#         inlineScript: |
+#           az extension add -n azure-cli-ml
+#           az ml folder attach \
+#           -w $(amlWorkspaceName) \
+#           -g $(resourceGroupName)
+
+    - task: AzureCLI@2
+      displayName: Deploy RT Scoring App to PRD
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate scoringenv
+          python code/deployment/model_deployment.py \
+          --name ${{ parameters.modelName }} \
+          --version ${{ parameters.modelVersion }} \
+          --output outputs/models/ \
+          --service_name "onnx-demo-$(Build.BuildId)-prd"
+
+#     - task: AzureCLI@2
+#       displayName: Deploy Training Pipeline to PRD
+#       inputs:
+#         azureSubscription: "my-service-connection"
+#         scriptType: bash
+#         scriptLocation: inlineScript
+#         inlineScript: |
+#           python code/build-and-release/scripts/publish_pipeline_from_yml.py --definition $(aml_ci_pipeline_definition)

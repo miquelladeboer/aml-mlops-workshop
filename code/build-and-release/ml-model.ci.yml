@@ -1,0 +1,118 @@
+# Azure Pipeline Definition for Model CI
+
+# Trigger on changes in the modeling folder and on the master branch                      
+trigger:
+  branches:
+    include:
+    - master
+
+  paths:
+    include:
+    - code/*
+
+stages:
+# ML Build Stage
+- stage: Build
+  displayName: 'Model Build (code/model validation and training)'
+  jobs:
+  - job: ML_Build
+    displayName: ML Build
+    pool:
+      vmImage: 'ubuntu-16.04'
+    variables:
+    - name: resourceGroupName
+      value: devopsforaidev
+    - name: resourceGroupLocation
+      value: westeurope
+    - name: amlWorkspaceName
+      value: mlworkspacedevdeeikele
+    - name: amlPipelineRunner
+      value: code/pipelines/retrain_model.py
+
+    steps:
+    # Prepare the build environment
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n trainenv --file environments/fullmodel_step/conda_dependencies.yml
+      displayName: Create Agent Anaconda environment
+
+    - script: |
+        source activate trainenv
+        pytest --junitxml=$(Build.ArtifactStagingDirectory)/testreports/test_report_unittests.xml
+      workingDirectory: 'code/tests/modeling/'
+      displayName: 'Model Unit Tests'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFiles: '$(Build.ArtifactStagingDirectory)/testreports/test_report_unittests.xml'
+        testRunTitle: 'Modeling: Unit Test Results'
+        failTaskOnFailedTests: true # unifies failure across different types of tests
+      condition: succeededOrFailed()
+
+    # Code Linting
+    - script: |
+        source activate trainenv
+        flake8 --format junit-xml --output-file $(Build.BinariesDirectory)/flake8_report.xml --exit-zero --ignore E111
+      displayName: 'Check code quality'
+
+    # Publish Linting report to ADO
+    - task: PublishTestResults@2
+      displayName: 'Publish Linting Results'
+      inputs:
+        testResultsFiles: 'tests/reports/test_report_linting.xml'
+        testRunTitle: 'Linting Results'
+        failTaskOnFailedTests: true # unifies failure across different types of tests
+      condition: succeededOrFailed()
+
+    # ML Pipeline Experiment (before-publish)
+    #   For long execution times, one could first run a training pipeline on a data sample to validate all
+    #   pipeline steps complete; then run the pipeline on the full data set.
+    - task: AzureCLI@1
+      displayName: 'Generate AML Workspace Config File'
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptLocation: inlineScript
+        inlineScript: |
+          subscription=$(az account list --query "[?isDefault].id | [0]" --output tsv)
+          echo {\"subscription_id\":\"$subscription\", \"resource_group\":\"$(resourceGroupName)\", \"workspace_name\":\"$(amlWorkspaceName)\"} > .azureml/config.json
+
+    - task: AzureCLI@2
+      displayName: Run Training Pipeline
+      inputs:
+        azureSubscription: "my-service-connection"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          source activate trainenv
+          python $(amlPipelineRunner) --await_completion True --download_outputs True
+
+    - task: CopyFiles@2
+      displayName: Copy Model Metadata (name and version)
+      inputs:
+        contents: 'outputs/models/**'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    # Publish model artifacts for release
+    - task: PublishBuildArtifacts@1
+      displayName: Publish ML Build Artifacts
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: ModelCIBuildArtifacts
+
+    # Optional for long training workflows. With this step, one could decide
+    # to run the first training step on a data sample (to get fast feedback on the training process/pipeline). Whereas
+    # the second pipeline step is used to asynchronously start training on the full dataset.
+    # Continuous deployment would in this way trigger upon a model registry event and a rest call instead of pipeline completion.
+
+    # - task: AzureCLI@2
+    #   displayName: Run Training Pipeline (a-sync)
+    #   inputs:
+    #     azureSubscription: "my-service-connection"
+    #     scriptType: bash
+    #     scriptLocation: inlineScript
+    #     inlineScript: |
+    #       source activate trainenv
+    #       python $(amlPipelineRunner) --await_completion True
