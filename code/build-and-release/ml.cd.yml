@@ -35,7 +35,8 @@ stages:
     - script: |
         python code/build-and-release/scripts/download_model.py \
         --name ${{ parameters.modelName }} \
-        --version ${{ parameters.modelVersion }}
+        --version ${{ parameters.modelVersion }} \
+        --output outputs/models/
       displayName: Download Model Outputs
     
     # Load Scoring Environment
