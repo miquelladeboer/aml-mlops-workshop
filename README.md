@@ -45,6 +45,11 @@ So what we propose, is a 3-day workshop, covering all the artifact of Azure Mach
 [PPT Introduction to Azure Machine Learning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%201%20-%20Introduction.pptx) 
 
 [Lab 1: Setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)
+
+## Infrastructure as a Code
+* Automated roll out of infrastructure
+* Best practices on customizing the templates for your environment and team
+
  
 ## Experiment
 * Experiment Tracking
