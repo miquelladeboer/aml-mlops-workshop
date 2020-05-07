@@ -20,10 +20,15 @@ The resportoty contains te foolowing material:
 * [Final code for demo/ example](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/code)
 * [Quickstart template](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/template)
 
-
 The labs + final code follow the MLOps guidelines and best practices. For the template, look at: https://github.com/Azure/MLOps-TDSP-Template
 
 In the lab we take 1 use-case and show different capabilities of Azure Machine Learning. 
+
+# Quick start
+
+To quickstart the solution, follow the [quickstart template](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/quickstart.md)
+
+
 
 
 # workshop
