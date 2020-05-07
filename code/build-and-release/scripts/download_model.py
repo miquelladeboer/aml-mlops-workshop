@@ -20,7 +20,7 @@ parser.add_argument(
 parser.add_argument(
     "-o",
     "--output",
-    dest='output dir',
+    dest='output_dir',
     type=int,
     help='output folder'
 )
