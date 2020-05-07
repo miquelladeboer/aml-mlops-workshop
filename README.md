@@ -55,7 +55,7 @@ Before we start working with the Azure Machine Learning workspace, there are inf
 Within the Azure Machine Learning Workspace, there are three big decision to be made:
 ![An example of a pipeline for Infrastructure roll out](acess1.PNG)
 
-For best practices follow the guideline [here](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/infrastructure
+For best practices follow the guideline [here](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/infrastructure)
 
 ## Shared resources across workspaces
 To work with MLOps and Azure Machine Learning, we need some extra PaaS solutions. These solutions include:
@@ -68,7 +68,7 @@ Every workspace in AML can have their own recourses, but I believe it is best pr
 
 ![An example of a pipeline for Infrastructure roll out](acess2.PNG)
 
-For best practices follow the guideline [here](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/infrastructure
+For best practices follow the guideline [here](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/infrastructure)
 
 
 ## datatset creation
