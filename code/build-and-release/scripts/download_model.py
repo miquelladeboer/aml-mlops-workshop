@@ -21,7 +21,7 @@ parser.add_argument(
     "-o",
     "--output",
     dest='output_dir',
-    type=int,
+    type=str,
     help='output folder'
 )
 args = parser.parse_args()
