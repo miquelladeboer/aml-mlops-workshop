@@ -29,8 +29,8 @@ stages:
       vmImage: 'ubuntu-16.04'
 
     steps:
-    - download: current
-      artifact: ModelCIBuildArtifacts
+    # - download: current
+    #   artifact: ModelCIBuildArtifacts
 
     - script: |
         python code/build-and-release/scripts/download_model.py \
