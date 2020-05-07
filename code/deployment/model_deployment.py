@@ -1,54 +1,106 @@
+import os
+import argparse
 from azureml.core.model import InferenceConfig
 from azureml.core.environment import Environment
-from azureml.core.conda_dependencies import CondaDependencies
 from azureml.core.webservice import AciWebservice
 from azureml.core.model import Model
 from azureml.core import Workspace
+from azureml.core.authentication import AzureCliAuthentication
 
-import os
 
-ws = Workspace.from_config()
-model_name = "net.onnx"
+# Parse Definition Arguments
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-n",
+    "--name",
+    dest='name',
+    type=str,
+    default='net.onnx',
+    help='The model name'
+)
+parser.add_argument(
+    "-v",
+    "--version",
+    dest='version',
+    type=int,
+    default=3,
+    help='The model version'
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    dest='output_dir',
+    type=str,
+    help='output folder'
+)
+parser.add_argument(
+    "-s",
+    "--service_name",
+    dest='service_name',
+    type=str,
+    default="onnx-demo",
+    help='the web service name'
+)
+args = parser.parse_args()
 
-model = Model(workspace=ws, name=model_name)
+print("Model name: ", args.name)
+print("Model version: ", args.version)
 
-myenv = CondaDependencies(
-    conda_dependencies_file_path=os.path.join(
+# Load the AML Workspace and Model
+ws = Workspace.from_config(
+    auth=AzureCliAuthentication()
+)
+
+model = Model(
+    workspace=ws,
+    name=args.name,
+    version=args.version
+)
+
+# Configure Scoring App Environment
+scoringenv = Environment.from_conda_specification(
+    name="scoringenv",
+    file_path=os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        '../../',
-        'conda_dependencies.yml'
+        '../../environments/',
+        'scoring/conda_dependencies.yml'
     )
 )
-myenv.add_channel("pytorch")
-
-with open("myenv.yml", "w") as f:
-    f.write(myenv.serialize_to_string())
-
-
-myenv = Environment.from_conda_specification(name="myenv",
-                                             file_path="myenv.yml")
 
 inference_config = InferenceConfig(
-    entry_script="code_final/deployment/score.py",
-    environment=myenv)
+    entry_script=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../modeling/score.py'
+    ),
+    environment=scoringenv
+)
 
+# Configure Deployment Compute
+compute_config = AciWebservice.deploy_configuration(
+    cpu_cores=1,
+    memory_gb=1,
+    tags={
+        'demo': 'onnx'
+    },
+    description='ONNX for text'
+)
 
-aciconfig = AciWebservice.deploy_configuration(cpu_cores=1,
-                                               memory_gb=1,
-                                               tags={'demo': 'onnx'},
-                                               description='ONNX for text')
+# Run the deployment
+deployment = Model.deploy(
+    workspace=ws,
+    name=args.service_name,
+    models=[model],
+    inference_config=inference_config,
+    deployment_config=compute_config
+)
 
+# Wait for completion
+deployment.wait_for_deployment(True)
 
-aci_service_name = 'onnx-demo2'
-print("Service", aci_service_name)
-aci_service = Model.deploy(ws, aci_service_name, [model],
-                           inference_config, aciconfig)
-aci_service.wait_for_deployment(True)
-print(aci_service.state)
+if deployment.state != 'Healthy':
+    logs = deployment.get_logs()
+    raise Exception('Service Deployment Failed {}'.format(logs))
 
-if aci_service.state != 'Healthy':
-    # run this command for debugging.
-    print(aci_service.get_logs())
-
-print(aci_service.scoring_uri)
-
+else:
+    print("Deployment was succesful")
+    print("Scoring URI is {}".format(deployment.scoring_uri))

@@ -1,0 +1,63 @@
+# Azure Pipeline Definition for Code Health Continuous Integration
+#
+# Trigger on changes in the code folder and for each feature branch                
+#
+trigger:
+  branches:
+    include:
+    - master
+    - feature/*
+
+  paths:
+    include:
+    - code/*
+
+stages:
+# ML Build Stage
+- stage: CodeHealth
+  displayName: 'Check Code Health'
+  jobs:
+  - job: Tests
+    displayName: Tests
+    pool:
+      vmImage: 'ubuntu-16.04'
+
+    steps:
+    # Prepare the build environment
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n trainenv \
+        --file environments/fullmodel_step/conda_dependencies.yml
+      displayName: Create Agent Anaconda environment
+
+    - script: |
+        source activate trainenv
+        pytest \
+        --junitxml=$(Build.ArtifactStagingDirectory)/testreports/test_report_unittests.xml
+      workingDirectory: 'code/tests/modeling/'
+      displayName: 'Model Unit Tests'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFiles: '$(Build.ArtifactStagingDirectory)/testreports/test_report_unittests.xml'
+        testRunTitle: 'Modeling: Unit Test Results'
+        failTaskOnFailedTests: true # unifies failure across different types of tests
+      condition: succeededOrFailed()
+
+    # Code Linting
+    - script: |
+        source activate trainenv
+        flake8 --format junit-xml --output-file $(Build.BinariesDirectory)/flake8_report.xml --exit-zero --ignore E111
+      displayName: 'Check code quality'
+
+    # Publish Linting report to ADO
+    - task: PublishTestResults@2
+      displayName: 'Publish Linting Results'
+      inputs:
+        testResultsFiles: 'tests/reports/test_report_linting.xml'
+        testRunTitle: 'Linting Results'
+        failTaskOnFailedTests: true # unifies failure across different types of tests
+      condition: succeededOrFailed()

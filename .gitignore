@@ -2,3 +2,7 @@ outputs/
 .azureml/
 .ssh/
 .vscode/
+*.pyc
+*.pyo
+*/__pycache__
+__pycache__

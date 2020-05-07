@@ -9,6 +9,10 @@ import pickle
 import string
 
 
+OUTPUTSFOLDER = "outputs"
+WORD2INDEX_PKL = "word2index"
+
+
 def init():
     global session, input_name, output_name
     # AZUREML_MODEL_DIR is an environment variable created during deployment.
@@ -25,13 +29,10 @@ def to_numpy(tensor):
 
 
 def preprocess(input_data_json):
-
     input_data = json.loads(input_data_json)
 
-    # print("Parsed json {}".format(input_data))
-    OUTPUTSFOLDER = "outputs"
-    pickle_name = "word2index"
-    filename = os.path.join(OUTPUTSFOLDER, pickle_name)
+    print("Parsed json {}".format(input_data))
+    filename = os.path.join(OUTPUTSFOLDER, WORD2INDEX_PKL)
     infile = open(filename, 'rb')
     word2index = pickle.load(infile)
     infile.close()
@@ -60,16 +61,22 @@ def preprocess(input_data_json):
 
 
 def postprocess(result):
-    print(result)
+    if len(result) > 4:
+        raise ValueError('The length of the model output exceeded the number of expected classes.')
+
     index = np.argmax(result)
+
     if index == 0:
         predicted = 'alt.atheism'
     elif index == 1:
         predicted = 'talk.religion.misc'
     elif index == 2:
         predicted = 'comp.graphics'
-    else:
+    elif index == 3:
         predicted = 'sci.space'
+    else:
+        raise ValueError('The returned model output could not be mapped.')
+
     return predicted
 
 
@@ -106,11 +113,6 @@ def run(input_data):
         result_dict = {"error": str(e)}
 
     return result_dict
-
-# def choose_class(result_prob):
-#    """We use argmax to deterftrmine the right label to choose from our
-#  output"""
-#    return int(np.argmax(result_prob, axis=0))
 
 
 if __name__ == "__main__":

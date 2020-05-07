@@ -3,10 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "saname": {
-            "value": "mlopssadev"
+            "value": "mle2ebigdatasa"
         },
         "location": {
-            "value": "westeurope"
+            "value": "eastus2"
         },
         "accountType": {
             "value": "Standard_RAGRS"

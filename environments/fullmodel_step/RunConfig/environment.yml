@@ -59,7 +59,5 @@ databricks:
   jarLibraries: []
 # List of Egg libraries
   eggLibraries: []
-# R details
-r:
 # Inferencing stack version
 inferencingStackVersion:

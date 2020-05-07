@@ -13,6 +13,8 @@ Full end-to-end solution of text classifciation with Pytorch on Azure Machine Le
 * Monitoring models using Application Insights
 * Feedback Loop with Active Learning based on Model Drift
 
+
+
 # Content 
 The resportoty contains te foolowing material:
 * [Powerpoint slides with theory](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/Powerpoints) 
@@ -34,7 +36,7 @@ To quickstart the solution, follow the [quickstart template](https://github.com/
 # workshop
 In this workshop, you learn about Azure Machine Learning, a cloud-based environment you can use to train, deploy, automate, manage, and track ML models. Azure Machine Learning can be used for any kind of machine learning, from classical ml to deep learning, supervised, and unsupervised learning. Whether you prefer to write Python or R code or zero-code/low-code options such as the designer, you can build, train, and track highly accurate machine learning and deep-learning models in an Azure Machine Learning Workspace.
 
-So what we propose, is a 3-day workshop, covering all the artifact of Azure Machine Learning Service for advanced Data Scientist that want to get to know the Azure Machine Learning Service on a deeply technical level, covering the following subjects:
+So what we propose, is a workshop, covering all the artifact of Azure Machine Learning Service for advanced Data Scientist that want to get to know the Azure Machine Learning Service  and MLops best practises on a deeply technical level, covering the following subjects:
  
 ## Introduction
 * AI Platform
@@ -46,14 +48,16 @@ So what we propose, is a 3-day workshop, covering all the artifact of Azure Mach
 
 [Lab 1: Setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)
 
-## Infrastructure as a Code
+## Infrastructure as a code
 * Automated roll out of infrastructure
 * Best practices on customizing the templates for your environment and team
 
+[PPT Experiments on Infrastructure as a code](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%202%20-%20Experiments.pptx) 
  
 ## Experiment
 * Experiment Tracking
 * Unattended Remote Execution (parallel with child runs)
+
 
 [PPT Experiments on Azure Machine Learning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%202%20-%20Experiments.pptx) 
 
@@ -70,6 +74,7 @@ So what we propose, is a 3-day workshop, covering all the artifact of Azure Mach
 [Lab 4: Hyperparameter Tuning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/04_hyperdrive)
 
 ## Remote Compute
+* Choosing the right compute target.
 
 [PPT Hyperparameter Tuning on Azure Machine Learning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%203%20-%20Hyperparameter%20tuning.pptx) 
 
@@ -81,20 +86,25 @@ So what we propose, is a 3-day workshop, covering all the artifact of Azure Mach
 * Datasets
 
  
-Pipelines
+## Pipelines
 * Pipelines conceptually
 * Pipeline Experiments
 * Publishing pipelines
  
-Model Management
+## Model Management
 * Artifact Store
 * Model CI/CD
 * Monitoring
  
-Azure ML in the Enterprise
+## Azure ML in the Enterprise
 * Governance
 * RBAC
 * Custom Roles
+* Best practises to organize your workspaces 
+* Data configuration. Which data can be used by the workspace?
+* Managed Compute Configuration
+* Shared resources across workspaces
+* Working with multiple environments
 
 # Get started
 To get started, follow the setup file [01_setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)

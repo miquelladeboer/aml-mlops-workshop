@@ -1,0 +1,6 @@
+{
+    "subscription_id": "240bc337-4a98-427e-8786-48503f388661",
+    "resource_group": "atpdeep-aml-int",
+    "workspace_name": "atpdeep-cv1-aml-int",
+    "acr": "atpdeepacrint"
+}
