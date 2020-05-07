@@ -230,6 +230,13 @@ stages:
       vmImage: 'ubuntu-16.04'
 
     steps:
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
+
 #     - task: AzureCLI@2
 #       displayName: Configure env: write AML config
 #       inputs:
