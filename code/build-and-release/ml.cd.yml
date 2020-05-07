@@ -29,9 +29,6 @@ stages:
       vmImage: 'ubuntu-16.04'
 
     steps:
-    # - download: current
-    #   artifact: ModelCIBuildArtifacts
-    
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
       displayName: Add Conda to PATH
 
@@ -73,10 +70,7 @@ stages:
     pool:
       vmImage: 'ubuntu-16.04'
 
-    steps:
-    # - download: current
-    #   artifact: ModelCIBuildArtifacts
-    
+    steps:    
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
       displayName: Add Conda to PATH
 
@@ -118,10 +112,7 @@ stages:
     pool:
       vmImage: 'ubuntu-16.04'
 
-    steps:
-    # - download: current
-    #   artifact: ModelCIBuildArtifacts
-    
+    steps:    
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
       displayName: Add Conda to PATH
 
@@ -137,7 +128,9 @@ stages:
 #         scriptLocation: inlineScript
 #         inlineScript: |
 #           az extension add -n azure-cli-ml
-#           az ml folder attach -w $(amlWorkspaceName) -g $(resourceGroupName)
+#           az ml folder attach \
+#           -w $(amlWorkspaceName) \
+#           -g $(resourceGroupName)
 
     - task: AzureCLI@2
       displayName: Deploy RT Scoring App to DEV
@@ -153,10 +146,8 @@ stages:
           --output outputs/models/ \
           --service_name "onnx-demo-$(Build.BuildId)-dev"
 
-    # @TODO test webservice API call
-
 #     - task: AzureCLI@2
-#       displayName: Deploy 
+#       displayName: Deploy Training Pipeline to DEV
 #       inputs:
 #         azureSubscription: "my-service-connection"
 #         scriptType: bash
@@ -204,7 +195,9 @@ stages:
 #         scriptLocation: inlineScript
 #         inlineScript: |
 #           az extension add -n azure-cli-ml
-#           az ml folder attach -w $(amlWorkspaceName) -g $(resourceGroupName)
+#           az ml folder attach \
+#           -w $(amlWorkspaceName) \
+#           -g $(resourceGroupName)
 
     - task: AzureCLI@2
       displayName: Deploy RT Scoring App to INT
@@ -221,7 +214,7 @@ stages:
           --service_name "onnx-demo-$(Build.BuildId)-int"
 
 #     - task: AzureCLI@2
-#       displayName: Publish ML Pipeline
+#       displayName: Deploy Training Pipeline to INT
 #       inputs:
 #         azureSubscription: "my-service-connection"
 #         scriptType: bash
@@ -237,9 +230,6 @@ stages:
       vmImage: 'ubuntu-16.04'
 
     steps:
-    - download: current
-      artifact: ModelCIBuildArtifacts
-
 #     - task: AzureCLI@2
 #       displayName: Configure env: write AML config
 #       inputs:
@@ -248,7 +238,9 @@ stages:
 #         scriptLocation: inlineScript
 #         inlineScript: |
 #           az extension add -n azure-cli-ml
-#           az ml folder attach -w $(amlWorkspaceName) -g $(resourceGroupName)
+#           az ml folder attach \
+#           -w $(amlWorkspaceName) \
+#           -g $(resourceGroupName)
 
     - task: AzureCLI@2
       displayName: Deploy RT Scoring App to PRD
@@ -263,9 +255,9 @@ stages:
           --version ${{ parameters.modelVersion }} \
           --output outputs/models/ \
           --service_name "onnx-demo-$(Build.BuildId)-prd"
-  
+
 #     - task: AzureCLI@2
-#       displayName: Configure env: write AML config
+#       displayName: Deploy Training Pipeline to PRD
 #       inputs:
 #         azureSubscription: "my-service-connection"
 #         scriptType: bash
