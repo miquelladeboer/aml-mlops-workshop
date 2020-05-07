@@ -40,6 +40,7 @@ stages:
       displayName: Load Scoring Environment
 
     - script: |
+        source activate scoringenv
         python code/build-and-release/scripts/download_model.py \
         --name ${{ parameters.modelName }} \
         --version ${{ parameters.modelVersion }} \
@@ -79,6 +80,7 @@ stages:
       displayName: Load Scoring Environment
 
     - script: |
+        source activate scoringenv
         python code/build-and-release/scripts/download_model.py \
         --name ${{ parameters.modelName }} \
         --version ${{ parameters.modelVersion }} \
