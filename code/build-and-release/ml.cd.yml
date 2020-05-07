@@ -32,7 +32,6 @@ stages:
     # - download: current
     #   artifact: ModelCIBuildArtifacts
     
-    # Load Scoring Environment
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
       displayName: Add Conda to PATH
 
@@ -47,7 +46,6 @@ stages:
         --output outputs/models/
       displayName: Download Model Outputs
 
-    # Model Validation Tests
     - script: |
         source activate scoringenv
         pytest --junitxml=test_report_modelvalidation.xml
@@ -58,8 +56,8 @@ stages:
       displayName: 'Publish Test Results'
       inputs:
         testResultsFiles: 'code/tests/model_validation/test_report_modelvalidation.xml'
-        testRunTitle: '$(projectname): Model Validation Test Results'
-        failTaskOnFailedTests: true # unifies failure across different types of tests
+        testRunTitle: 'Model Validation Test Results'
+        failTaskOnFailedTests: true
       condition: succeededOrFailed()
       
 - stage: IntegrationTestScoringApp
@@ -70,16 +68,36 @@ stages:
       vmImage: 'ubuntu-16.04'
 
     steps:
-    - download: current
-      artifact: ModelCIBuildArtifacts
+    # - download: current
+    #   artifact: ModelCIBuildArtifacts
     
-    # Load Scoring Environment
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
       displayName: Add Conda to PATH
 
     - script: |
-        conda env create -n scoringenv --file code/environments/scoring/conda_dependencies.yml
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
       displayName: Load Scoring Environment
+
+    - script: |
+        python code/build-and-release/scripts/download_model.py \
+        --name ${{ parameters.modelName }} \
+        --version ${{ parameters.modelVersion }} \
+        --output outputs/models/
+      displayName: Download Model Outputs
+
+    - script: |
+        source activate scoringenv
+        pytest --junitxml=test_report_scoringapp.xml
+      workingDirectory: code/tests/model_integrate_scoring
+      displayName: 'Scoring App Tests'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFiles: 'code/tests/model_integrate_scoring/test_report_scoringapp.xml'
+        testRunTitle: 'Scoring App Integration Test Results'
+        failTaskOnFailedTests: true
+      condition: succeededOrFailed()
 
 - stage: DeployScoringApp
   displayName: 'Deploy the Scoring App'
@@ -89,8 +107,22 @@ stages:
       vmImage: 'ubuntu-16.04'
 
     steps:
-    - download: current
-      artifact: ModelCIBuildArtifacts
+    # - download: current
+    #   artifact: ModelCIBuildArtifacts
+    
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
+
+    - script: |
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
+
+    - script: |
+        python code/build-and-release/scripts/download_model.py \
+        --name ${{ parameters.modelName }} \
+        --version ${{ parameters.modelVersion }} \
+        --output outputs/models/
+      displayName: Download Model Outputs
 
 - stage: SystemIntegrationTests
   displayName: 'System Integration Tests'
@@ -102,18 +134,36 @@ stages:
     steps:
     - download: current
       artifact: ModelCIBuildArtifacts
+    # - download: current
+    #   artifact: ModelCIBuildArtifacts
+    
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add Conda to PATH
 
-- stage: LoadTesting
-  displayName: 'Load Test Scoring App'
-  # Deploy scoring app and system integrate
-  jobs:
-  - job: Validate_Model
-    pool:
-      vmImage: 'ubuntu-16.04'
+    - script: |
+        conda env create -n scoringenv --file environments/scoring/conda_dependencies.yml
+      displayName: Load Scoring Environment
 
-    steps:
-    - download: current
-      artifact: ModelCIBuildArtifacts
+    - script: |
+        python code/build-and-release/scripts/download_model.py \
+        --name ${{ parameters.modelName }} \
+        --version ${{ parameters.modelVersion }} \
+        --output outputs/models/
+      displayName: Download Model Outputs
+
+    # Deploy App
+
+# - stage: LoadTesting
+#   displayName: 'Load Test Scoring App'
+#   # Deploy scoring app and system integrate
+#   jobs:
+#   - job: Validate_Model
+#     pool:
+#       vmImage: 'ubuntu-16.04'
+
+#     steps:
+#     - download: current
+#       artifact: ModelCIBuildArtifacts
 
 - stage: DeployPROD
   displayName: 'Deploy PROD'
