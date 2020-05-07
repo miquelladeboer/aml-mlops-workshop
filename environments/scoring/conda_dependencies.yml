@@ -1,9 +1,8 @@
-name: scoring_environment
+name: scoringenvironment
 dependencies:
 - python=3.6.10
 - pytorch
 - pip
-
 - pip:
   - numpy==1.15.4
   - pandas==1.0.3
