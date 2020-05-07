@@ -17,7 +17,15 @@ parser.add_argument(
     type=int,
     help='The model version'
 )
+parser.add_argument(
+    "-o",
+    "--output",
+    dest='output dir',
+    type=int,
+    help='output folder'
+)
 args = parser.parse_args()
 
 print("Model name: ", args.name)
 print("Model version: ", args.version)
+print("Output dir: ", args.output_dir)
