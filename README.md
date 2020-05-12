@@ -64,28 +64,6 @@ In this folder we have created a pipeline including all the steps that we have d
 
 # Detailed overview of the solution
 
-## Infrastructure as a Code
-Before we start working with the Azure Machine Learning workspace, there are infrastructure decisions to be made. The following pictures shows the infrastructure component of the Azure Machine Learning workspace: 
-
-Within the Azure Machine Learning Workspace, there are three big decision to be made:
-![An example of a pipeline for Infrastructure roll out](images/acess1.PNG)
-
-For best practices follow the guideline [here](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/infrastructure)
-
-## Shared resources across workspaces
-To work with MLOps and Azure Machine Learning, we need some extra PaaS solutions. These solutions include:
-* ML Key Vault
-* Application Insights
-* Container Registry
-* Workspace storage Account
-
-Every workspace in AML can have their own recourses, but I believe it is best practice to share these resources across workspaces as showed in the following picture:
-
-![An example of a pipeline for Infrastructure roll out](images/acess2.PNG)
-
-For best practices follow the guideline [here](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/infrastructure)
-
-
 ## datatset creation
 
 When new data came in, the pipeline was triggered. Now we want to create a new version of the dataset by running the `define_new_dataset` step in the pipeline. This way, we know exactly which data is used during the model creation in the pipeline. After this step, we expect the following output it the portal:

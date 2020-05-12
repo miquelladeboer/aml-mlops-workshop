@@ -10,8 +10,8 @@ This folder contains scripts for modeling. This folder contains three files: a t
     * random forest
 
         If we set the parameter of `--models` to `randomforest`, we train script will fit a random forest from sklearn over the data. We will log different metrics and plots to Azure Machine Learning inlcuding the confusion matrix, AUC curve and accuracy metrics. The output in Azure Machine learning will look similair to this. (Note that I am using old experience of the studio here as in my opion this give a better overview of my runs).
-        ![An example of Random Forest](attributesrandomforest.PNG)
-        ![An example of Random Forest](metricsrandomforest.PNG)
+        ![An example of Random Forest](images/attributesrandomforest.PNG)
+        ![An example of Random Forest](images/metricsrandomforest.PNG)
 
         We can caputure the results from our run and log the result to Azure Machine Learning. This way we can keep track of the performance of our models while we are experimenting with different models, parameters, data transformations or feature selections. We can specify for ourselfves what is important to track and log number, graphs and tables to Azure ML, including confusion matrices from SKlearn. For a full overview check the [avaiable metrics to track](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-track-experiments#available-metrics-to-track)
 
@@ -21,7 +21,7 @@ This folder contains scripts for modeling. This folder contains three files: a t
     * 15 different sklearn models
 
         If we set the parameters of `--models` to `sklearnmodels`, we will train 15 different models from the sklearn packages, including randomforeser, naive bayes and Ridge classifier. A full overview of the models being trained, can be founs in the `class Model_choice` on the `sklearn.py` package under `packages`. Comparing different algorithms is possible is different ways. We could submit a new experiment for every algorithm that we try. However, Azure ML offers a better, easier way to manage the exploration of multiple models. This concept is called child runs.  We are going to make use of these child runs. The expiriment will perform a parent run that is going to execute `explore/code/train_15models.py`. Within this file we are going to create child runs. For every of the 15 algoritms that we have we want to create a sub run and log the metrics seprately. Whihin the child run we are going to log the performane and the model .pkl files. This way we can easily track and compare our experiment in Azure ML. If we run this file, the output will look like the following:
-        ![An example of tracking accuracy across multiple models](manymodels.PNG)
+        ![An example of tracking accuracy across multiple models](images/manymodels.PNG)
         (Note that in this case I am using the new experience, as I believe the new experience is better in tracking child run metrics.)
 
         For a full example on how to run a multiple model on Azure Machine Learning and how to log metrics and create child runs follow the labs [HERE]
@@ -30,7 +30,7 @@ This folder contains scripts for modeling. This folder contains three files: a t
 
         In this pat we are going to build a Deep Neural Network using Pytorch. If we set the parameters of `--models` to `deeplearning`, we will train this network. The output will look like this:
 
-        ![An example of tracking accuracy across multiple models](deeplearning.PNG)
+        ![An example of tracking accuracy across multiple models](images/deeplearning.PNG)
 
 *   `train_submit.py`
 
@@ -84,18 +84,9 @@ This folder contains scripts for modeling. This folder contains three files: a t
 
     The output of the hyperdrive will look like this:
 
-     ![An example of tracking accuracy across multiple models](hyperdrive.PNG)
+     ![An example of tracking accuracy across multiple models](images/hyperdrive.PNG)
 
 
 * `score.py`
 
     The `score.py` file we use when deploying our trained model. The scoring file consist of 3 steps: preprocessing, scoring and postporcoessing.
-
-    The reason that we want to have all these steps together is because they are dependent on each other and make use of the same conda environments. To illustrate an example:
-
-    As a data scientist, I have created a Neural Network with PyTorch. PyTorch is a framework for deep learning. I have created this neural network to perform text classification on emails. A you can image, a neural network cannot read text, but can only read binaries. Therefore, I need to transform my data to binaries. I could let my data engineer do this in an Azure function, but this would not make sense. Because the way my text data is transformed to binaries is dependent on the training data that I have used. This is a highly advanced calculation that follows the same structure as my neural network. Moreover, my neural network is not expecting simple binaries, but binaries of a format called Tensor. The variable format is specific to deep learning frameworks like TensorFlow, Keras and PyTorch. I therefore need the corresponding python libraries. I also need to make sure that the libraries that I use for model training are exactly the same as for preprocessing as most versions of libraries are incompatible with each other (famous example is TesorFlow version 1.* and 2.* and above). And what happens if I have more than 100 different ML models running that all expect the data to arrive in a slightly different manner? We can imagine at this point that this is simply  not feasible to do for a data engineer in an Azure function. A lot of these responsibilities should remain with the data scientist and within the scoring script.
-
-    This is similar to postprocessing. The postprocessing step is highly dependent on the model output. The model will most likely output a binary number or a continuous number. In almost every case, these numbers need to be translated into different outputs like logical names of categories. These transformations are most likely to differ for different models and should therefor also be developed together with the scoring file.
-    
-    As a last point on this, is that every time that we deploy a new model, we need to do integration test with pre-processing, scoring and post-processing. If we let these steps handle by different tools, these integration test become way harder and the change of failure bigger. So in order to develop and deploy models fast and correct I would highly recommend tot NOT use azure functions for this.
-

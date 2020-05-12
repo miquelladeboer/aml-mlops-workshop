@@ -526,3 +526,91 @@ test our train.py code in modeling, perform model validation and also validate t
 the model. Below is a recommended structured way of organizing test folders and an example framework for testing.
 
 ![An example of folder structure](images/tests.PNG)
+
+### Build and release
+Testing is a part of the two step we take in the CI. The first test that we want to perform is the Code
+Health Continuous Integration. With this this we ensure code quality. For this, we define an Azure
+Pipeline in Azure DevOps. This pipeline will be triggered either when there is a code change in master in
+the code folder, containing data prep, modeling and/or scoring, or in the pipeline folder, that contains
+the pipeline development. In this step we will perform two task:
+1. We perform a model unit tests test where we use the unit test as described in the previous section. This step will publish a report and will fail if one of the unit tests fails.
+2. We perform a code linting test where we check for the code quality. We perform a flake 8report. The test will fail if the code quality is not as we have expected.
+
+The second part in Model Continuous Integration. This part is trigger on each pull request and will
+perform the following steps: Ensuring code quality + model training + model validation + model
+publishing. So this part will perform the same code quality test as above, then trains the model with the
+azure machine learning pipeline, perform model validation with test as we described in a previous
+section and publish the model if all tests succeed for model CD.
+An example for code quality testing will look like this:
+
+![An example of folder structure](images/modelci.PNG)
+
+### Model CD
+CI we did for both models and pipelines, but the CD we only do for the published model. Continuous
+Delivery (CD) is the process to build, test, configure and deploy from a build to a production
+environment. Release pipelines help you automate the deployment and testing of your software in
+multiple stages.
+
+Without Continuous Delivery, software release cycles were previously a bottleneck for application and
+operation teams. Manual processes led to unreliable releases that produced delays and errors. These
+teams often relied on handoffs that resulted in issues during release cycles. The automated release
+pipeline allows a “fail fast” approach to validation, where the tests most likely to fail quickly are run first
+and longer-running tests happen after the faster ones complete successfully. Issues found in production
+can be remediated quickly by rolling forward with a new deployment. In this way, continuous delivery
+creates a continuous stream of customer value.
+
+Continuous Delivery is frequently a challenge for data science teams. The step of model deployment
+requires typically more of a dev/infra background when compared to other steps in the data science
+lifecycle. This is causing teams that are skewed to the analytical side in terms of their skill set, to rely on
+traditional SDE teams for model deployment. By owning the complete delivery process as a team, the
+data team can break out of their isolation, increase agility and reduce refactoring efforts.
+
+![An example of folder structure](images/modelcd.PNG)
+
+## Working with multiple environments
+As is standard in DevOps practices, we work with multiple environment DEV, TEST and PRD. Normal
+practice is that applications are being developed in DEV with DEV data, are being tested in TEST and only
+deployed to production via Azure DevOps if all test are passed.
+Working with a ML project, this process becomes a bit more difficult. The reason for this, is that most
+data scientist need access to production data when developing ML models. This Is because they need
+the full data to get the right statistics, spot outliers, detect biased, but also to build reliable models with
+enough training data. In this case Data Scientists cannot develop their models in a DEV environment, but
+in a PRD environment. The ML engineer however, who is designing the ML pipelines is able to design
+the pipelines with DEV data, as they only need small sample data to test the solution. This will result in
+the following structure:
+
+![An example of folder structure](images/git.PNG)
+
+As we can see from this picture, the Data Scientist is restricted to publish models and pipelines or mange
+any of the compute. This is very important as they are working in a PRD environment.
+
+The next part is to set up the Azure DevOps automation pipelines to deploy the new models or pipelines
+after a new commit is made to master. As discussed in the previous section, the CI is for both modeling
+and pipeline development and the CD is done for the produced model as illustrated here:
+
+![An example of folder structure](images/git1.PNG)
+
+Lastly, we need to deploy the published model from the model CD into the different environments. We
+also have a separate deployment cycle of the pipeline that we want to publish in production for
+retraining, as we have introduced in a previous section.
+
+The “strange” thing that happens here, is that the Data Scientists were working in a PRD environment to
+develop their models, but the actual deployment of the model will be tested again first in a DEV
+environment. This is highly recommended to do as you do not want your models directly to be deployed
+in PRD as they have a change to break your application.
+
+![An example of folder structure](images/git2.PNG)
+
+The last thing to notice, that makes this process different from standard processes is that the ML
+pipeline for retraining that is in production, is also able to produce a new model that needs to be
+published and deployed. Even though there is only a very small change that the model produced by the
+retraining pipeline will break the application, we still want to make sure it will follow the same steps of
+deployment to avoid breaking the application. It could happen that if you retrain your model, you have
+used more data and therefore created a bigger model (e.g. more nodes/arcs and weights in your neural
+network) that will not fit on the AKS cluster you used for deployment. This will then break your app.
+Since the machine learning pipeline did not change any code in master on git, the produced model will
+go directly into the model CD. To set this trigger you could use an Azure Function app.
+
+Now we have concluded all MLOps practices for the ML lifecycle:
+
+![An example of folder structure](images/git3.PNG)
