@@ -280,7 +280,7 @@ And within code we have structures for:
 Azure ML offers different types of compute for different usages. The picture below gives you an
 overview of the different types of compute.
 
-![An example of a pipeline for Infrastructure roll out](images/compute-copy.PNG)
+![An example of a pipeline for Infrastructure roll out](images/compute-copy.png)
 
 ### Compute instance
 AML offers compute instances for code development. These VM are notebook based and contain all
@@ -299,7 +299,7 @@ be found here:
 https://azuremarketplace.microsoft.com/nl-nl/marketplace/apps/microsoft-dsvm.dsvm-win2019?tab=Overview
 We would recommend going with DSVM’s if cost are not a constraint. Otherwise, develpoing locally is a good altertative if requirement allow for this.
 
-![An example of a pipeline for Infrastructure roll out](images/dsvm.PNG)
+![An example of a pipeline for Infrastructure roll out](images/dsvm.png)
 
 ### Training cluster
 AML offers different types of training clusters. The biggest difference between the compute instances
@@ -307,7 +307,7 @@ and training cluster is, is that we can turn on and off training compute on dema
 compute instances are always on.
 The following types are available in AML:
 
-![An example of a pipeline for Infrastructure roll out](images/comute1.PNG)
+![An example of a pipeline for Infrastructure roll out](images/comute1.png)
 
 As we can see DSVM’s and AML compute are the only compute targets that support all solutions.
 Therefore, I would recommend to use either of these computes.
@@ -339,7 +339,7 @@ need it.
 The inference cluster is being used for the deployment of models. For inferencing, we have the following
 compute options:
 
-![An example of a pipeline for Infrastructure roll out](images/compute2.PNG)
+![An example of a pipeline for Infrastructure roll out](images/compute2.png)
 
 At the time of writing, only ACI and AKS are in GA and since we are discussing enterprise solutions, I
 assume that only GA product can be used.
@@ -383,7 +383,7 @@ storage account of AML and use your private packages for model training and depl
 We have already discussed how we can connect our AML to a storage account. But what I see at most
 customers, is that they add an extra layer on top of the datastores. This layer is called a dataset.
 
-![experiment example](images/datasets.PNG)
+![experiment example](images/datasets.png)
 
 I will briefly explain the concept and need for datasets. In many cases, a datastore, like a blob storage
 will receive new data every hour/day/week or so, so data in constantly streaming in. However, when
@@ -489,8 +489,8 @@ As discussed in previous topics, each of these steps need to be able to run with
 What I see at most customers, is that AML pipelines are not designed by the data scientist. The data scientists focus mostly on creating the scripts that need to be executed in the pipeline. Mostly, the development of pipelines is done by the ML engineers. I would also recommend if you have the capacity to divide the work in this way. The development of pipelines involves more software engineering skills.
 It is possible to create your ML models with azure machine learning pipelines. An example is shown here:
 
-![An example of folder structure](images/pipelinegood.png)
-![An example of folder structure](images/pipelinescript3.png)
+![An example of folder structure](images/pipelinegood.PNG)
+![An example of folder structure](images/pipelinescript3.PNG)
 
 ## Model and pipeline deployment
 
@@ -525,4 +525,4 @@ Within this test folder, we want to create multiple folders for different parts 
 test our train.py code in modeling, perform model validation and also validate the scoring function of
 the model. Below is a recommended structured way of organizing test folders and an example framework for testing.
 
-![An example of folder structure](images/tests.png)
+![An example of folder structure](images/tests.PNG)
