@@ -9,10 +9,8 @@ In this tuturial, we are going to track the progress of or experiments with Azur
 * Inpect the results in Azure Machine Learning
 
 # Pre-requirements #
-1. Familiarize yourself with the concept of Azure Machine Learning by going though the [Introduction](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%201%20-%20Introduction.pptx)
-2. Familiarize yourself with the concept of experiments by going though [Experiments](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%202%20-%20Experiments.pptx)
-3. Read the documentation on [Azure Machile Learning architecture](https://docs.microsoft.com/en-us/azure/machine-learning/concept-azure-machine-learning-architecture)
-4. Finished the setup file [01_setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)
+1. Read the documentation on [Azure Machile Learning architecture](https://docs.microsoft.com/en-us/azure/machine-learning/concept-azure-machine-learning-architecture)
+2. Finished the setup file [00_setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/00_setup.md)
 
 
 # Understand the non-azure / open source ml model code #

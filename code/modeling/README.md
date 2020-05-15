@@ -52,41 +52,6 @@ This folder contains scripts for modeling. This folder contains three files: a t
 
     Note here the comments. f the set the  `data_local` parameter to `True`, then we need to net the `subset` parameter also to true, because we only have our subset data locally. If you have your full data also available locally, you can of course set this variable to `False`. Nor that we also have a parameter for `hyperdrive`. 
 
-    In this lab, we are going to see how we can levarge Azure ML to do hyeperparameter tuning of our neural network.  Azure Machine Learning can efficiently tune hyperparameters for your model using Azure Machine Learning. Hyperparameter tuning includes the following steps:
-    * Define the parameter search space
-    * Specify a primary metric to optimize
-    * Specify early termination criteria for poorly performing runs
-    * Allocate resources for hyperparameter tuning
-    * Launch an experiment with the above configuration
-    * Visualize the training runs
-    * Select the best performing configuration for your model
-
-    ## What are hyperparameters?   
-    Hyperparameters are adjustable parameters you choose to train a model that govern the training process itself. For example, to train a deep neural network, you decide the number of hidden layers in the network and the number of nodes in each layer prior to training the model. These values usually stay constant during the training process.
-
-
-    ## Bayesian sampling
-    Bayesian sampling is based on the Bayesian optimization algorithm and makes intelligent choices on the hyperparameter values to sample next. It picks the sample based on how the previous samples performed, such that the new sample improves the reported primary metric.
-
-    When you use Bayesian sampling, the number of concurrent runs has an impact on the effectiveness of the tuning process. Typically, a smaller number of concurrent runs can lead to better sampling convergence, since the smaller degree of parallelism increases the number of runs that benefit from previously completed runs.
-
-    Bayesian sampling only supports choice, uniform, and quniform distributions over the search space.
-
-    ## Distributed training
-    The PyTorch estimator also supports distributed training across CPU and GPU clusters. You can easily run distributed PyTorch jobs and Azure Machine Learning will manage the orchestration for you.
-
-    Horovod
-    Horovod is an open-source, all reduce framework for distributed training developed by Uber. It offers an easy path to distributed GPU PyTorch jobs.
-
-    To use Horovod, specify an MpiConfiguration object for the distributed_training parameter in the PyTorch constructor. This parameter ensures that Horovod library is installed for you to use in your training script.
-
-    For a full example on how to run a hyperdrive on Azure Machine Learning and how to log metrics, follow the labs [HERE]
-
-    The output of the hyperdrive will look like this:
-
-     ![An example of tracking accuracy across multiple models](images/hyperdrive.PNG)
-
-
 * `score.py`
 
     The `score.py` file we use when deploying our trained model. The scoring file consist of 3 steps: preprocessing, scoring and postporcoessing.

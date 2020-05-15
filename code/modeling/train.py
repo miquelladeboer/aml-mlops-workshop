@@ -181,43 +181,18 @@ if opts.models != 'deeplearning':
             # create a child run for Azure ML logging
             child_run = run.child_run(name=name, outputs="outputs/models")
             # start logging all metrics to aml
-            child_run.log(
-                "accuracy",
-                float(accuracy)
-            )
-            child_run.log(
-                "balanced accuracy",
-                float(balanced_accuracy)
-            )
-            child_run.log(
-                "F1 score",
-                float(f1)
-            )
-            child_run.log(
-                "precision",
-                float(precision)
-            )
-            child_run.log(
-                "recall",
-                float(recall)
-            )
-            plot3 = plot_auc(
-                fpr,
-                tpr,
-                roc_auc
-            )
-            child_run.log_image(
-                "AUC  "+name,
-                plot=plot3
-            )
+            child_run.log("accuracy", float(accuracy))
+            child_run.log("balanced accuracy", float(balanced_accuracy))
+            child_run.log("F1 score", float(f1))
+            child_run.log("precision", float(precision))
+            child_run.log("recall", float(recall))
+            plot3 = plot_auc(fpr, tpr, roc_auc)
+            child_run.log_image("AUC  "+name, plot=plot3)
             child_run.log_confusion_matrix(
                 name="confusion matrix " + name,
                 value=disp
             )
-            plot = plot_confusion_matrix(
-                cm,
-                target_names=classes
-            )
+            plot = plot_confusion_matrix(cm, target_names=classes)
             child_run.log_image(
                 "normalized confusion matrix " + name,
                 plot=plot
@@ -244,35 +219,13 @@ if opts.models != 'deeplearning':
             child_run.complete()
 
         # log score to AML
-        run.log(
-            "accuracy",
-            float(accuracy)
-        )
-        run.log(
-            "balanced accuracy",
-            float(balanced_accuracy)
-        )
-        run.log(
-            "F1 score",
-            float(f1)
-        )
-        run.log(
-            "precision",
-            float(precision)
-        )
-        run.log(
-            "recall",
-            float(recall)
-        )
-        plot3 = plot_auc(
-            fpr,
-            tpr,
-            roc_auc
-        )
-        run.log_image(
-            "AUC "+name,
-            plot=plot3
-        )
+        run.log("accuracy", float(accuracy))
+        run.log("balanced accuracy", float(balanced_accuracy))
+        run.log("F1 score", float(f1))
+        run.log("precision", float(precision))
+        run.log("recall", float(recall))
+        plot3 = plot_auc(fpr, tpr, roc_auc)
+        run.log_image("AUC "+name, plot=plot3)
         run.log_confusion_matrix(
             name="confusion matrix " + name,
             value=disp
@@ -331,17 +284,6 @@ if opts.models != 'deeplearning':
 
             print("Best run_id: " + max_accuracy_runid)
             print("Best run_id accuracy: " + str(max_accuracy))
-            # all_files = best_run.get_file_names()
-            # sub = '.pkl'
-            # bestfilename = [i for i in all_files if sub in i]
-            # files = bestfilename[0]
-            # print(files)
-            # if not (opts.sklearnmodel is None):
-            #     best_run.download_file(
-            #         name=files,
-            #         output_file_path=opts.sklearnmodel
-            #    )
-
 else:
     # fit deeplearning model
     import torch.nn as nn
@@ -472,30 +414,12 @@ else:
     )
 
     # log metrics
-    run.log(
-        "accuracy",
-        float(accuracy)
-    )
-    run.log(
-        "learning_rate",
-        learning_rate
-    )
-    run.log(
-        "num_epochs",
-        num_epochs
-    )
-    run.log(
-        "batch_size",
-        batch_size
-    )
-    run.log(
-        "hidden_size",
-        hidden_size
-    )
-    run.log(
-        "total_words",
-        total_words
-    )
+    run.log("accuracy", float(accuracy))
+    run.log("learning_rate", learning_rate)
+    run.log("num_epochs", num_epochs)
+    run.log("batch_size", batch_size)
+    run.log("hidden_size", hidden_size)
+    run.log("total_words", total_words)
 
     # create outputs folder if not exists
     OUTPUTSFOLDER = "outputs/models"

@@ -1,4 +1,4 @@
-# Lab 1: setting up the environment
+# Lab 0: setting up the environment
 
 In this first lab, we'll set up our working environment.
 

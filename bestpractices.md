@@ -22,7 +22,7 @@ In this document, we want to tell the best practises for MLOps on Azure from the
 There is a wide discussion on the official definition of MLOps. Mostly, when people talk about MLOps,
 they talk about the automatic deployment of models, including model CI/CD. However, the MLOps definition is much more comprehensive. In this repo, the definition is defined as follows:
 
-## MLOps is all the DevOps practices applied to the ML lifecycle, modified to the requirements of uncertainty in data and model exploration. ##
+## MLOps is all the DevOps practices applied to the ML lifecycle, modified to the requirements of uncertainty in data exporation and model experimentation. ##
 
 ![An example of folder structure](images/mlops.PNG)
 
@@ -276,83 +276,6 @@ And within code we have structures for:
 * modeling (train, train submit, scoring)
 * Machine Learning Pipelines
 
-## Choosing the right compute target.
-Azure ML offers different types of compute for different usages. The picture below gives you an
-overview of the different types of compute.
-
-![An example of a pipeline for Infrastructure roll out](images/compute-copy.png)
-
-### Compute instance
-AML offers compute instances for code development. These VM are notebook based and contain all
-common packages used by data scientist. These Compute Instances are an easy way to demo or get
-started with AML, but in my opinion, these compute instances are not designed for ML at scale. For code
-development I would recommend using VScode either on local machines or within Virtual Machines.
-You could opt for local machines, because this is the cheapest solution. However, local machines might
-not be sufficient for certain memory and RAM requirements. Moreover, it might not be following
-company guidelines, as data needs to reside on the local machine. The second option is to use Virtual
-Machines to work in. This is the most save way and allows you to choose the right VM size. However,
-there are logically cost associated with VM’s. An even more comprehensive solution is to use Data
-Science Virtual Machines. These machines include all tools and framework data scientist need. This way,
-you do not lose any time to set up environments, you can make sure all data scientist use the same tools
-and frameworks and you can easily scale out the solution. Everything that is included in the DSVM can
-be found here:
-https://azuremarketplace.microsoft.com/nl-nl/marketplace/apps/microsoft-dsvm.dsvm-win2019?tab=Overview
-We would recommend going with DSVM’s if cost are not a constraint. Otherwise, develpoing locally is a good altertative if requirement allow for this.
-
-![An example of a pipeline for Infrastructure roll out](images/dsvm.png)
-
-### Training cluster
-AML offers different types of training clusters. The biggest difference between the compute instances
-and training cluster is, is that we can turn on and off training compute on demand, whereas the
-compute instances are always on.
-The following types are available in AML:
-
-![An example of a pipeline for Infrastructure roll out](images/comute1.png)
-
-As we can see DSVM’s and AML compute are the only compute targets that support all solutions.
-Therefore, I would recommend to use either of these computes.
-If you are already using DSVM’s for code development, it is very cost efficient to use the same compute
-for model training because you are already paying for that compute. However, certain model training
-might not fit on the VM compute. Moreover, certain jobs of the data science lifecycle might have better
-performance on certain types of compute and some models perform best on certain runtimes that are
-optimized for certain computes. In this case me might want to use Azure ML compute, that we only spin
-on to execute a certain job and then put it off until the next job. Let illustrate this with an example.
-
-For example, I use my DSVM for code development. To try if certain parts of my code work, I use my
-‘local’ compute to execute parts of the code with only a subset of the data. Once I am more advanced in
-my work, I want to apply my code on the full data set. My code contains several different steps that I
-can execute separately for different purposes. I have a data engineering script to perform some data
-transformations on the dataset. I am using pandas, so I am not able to distribute my executions over
-multiple nodes. But I do have a lot of data. Therefore, I will use a memory optimized CPU cluster with 1
-node for data engineering. In the experimentation phase I found that I wanted to use a neural network
-for training my model. However, I first need to figure out the hyperparameters that I want to use. In this
-case I want to use a subset of my data and perform 100 simultaneous runs with different
-hyperparameters to find the best. In this case I might use a cluster with less memory as the previous
-one, but with 20 or even 100 nodes in the cluster, so I can parallelize the jobs. Now that I have found my
-optimized hyperparameters, I want to train my model with the full dataset. As I am training a neural
-network with a lot of data I might want to opt for using a GPU cluster. As distributing a neural network
-across nodes is hard (but not impossible!), I will only use 1 node in my cluster again. This way, I have
-optimized my training process across different computes and then I only pay for the compute when I
-need it.
-
-### Inference cluster
-The inference cluster is being used for the deployment of models. For inferencing, we have the following
-compute options:
-
-![An example of a pipeline for Infrastructure roll out](images/compute2.png)
-
-At the time of writing, only ACI and AKS are in GA and since we are discussing enterprise solutions, I
-assume that only GA product can be used.
-
-As stated in the picture above, ACI is used for testing and development of machine learning models.
-With ACI you get one instance. AKS is the same as ACI, but with AKS you can create multiple instances
-and scale out and in when needed. Therefore, AKS is a recommended compute for model inferencing.
-
-### Attached compute
-You have option to bring your own compute to AML. I sometimes see that customers bring there own
-AKS clusters to the service, because they already have their own to reduce cost. But, I would
-recommend to use the clusters from Azure ML if you do not have them, as it is easier to let the service
-mange your clusters.
 
 ## Managing environments
 ![An example of a pipeline for Infrastructure roll out](images/acess3.PNG)

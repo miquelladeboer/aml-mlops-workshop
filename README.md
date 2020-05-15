@@ -1,4 +1,4 @@
-# Azure Machine Learning with MLops to build Machine Learning at Scale in the enterpise organization 
+# Azure Machine Learning with MLops to build Machine Learning at Scale in the enterprise organization 
 
 Full end-to-end solution of text classifciation with Pytorch on Azure Machine Learning using MLOps best practises, covering:
 
@@ -19,22 +19,21 @@ Full end-to-end solution of text classifciation with Pytorch on Azure Machine Le
 
 # Content 
 This repo is designed for three main purposes:
-* A full end-to-end demo with easy quickstart for demoing/examples, including powerpoints for story-telling
-* A detailed technical guide to build similar end-to-end solutions, including motivation for solutions
+* A full end-to-end demo with easy quickstart for demoing/examples
+* A detailed technical guide to build similar end-to-end solutions, including motivation
 * Documenting best practises of MLOps and impletenting it in real end-to-end scenario with incorparating enterprise requirements and challenges.
 
 The resportoty contains te foolowing material:
-* [Powerpoint slides with theory](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/Powerpoints) 
-* [Follow along labs to practise](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/labs)
-* [Final code for demo/ example](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/code)
+* [Step-by-step guidelines](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/labs)
+* [Code for demo/ example](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/code)
 * [Quickstart template](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/template)
 * [Best Practises Documentation](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/template)
 
 # motivation
 The motivation for developing this repo is from the experience with enterpise organization in many different industires when implementing Azure Machine Learning solutions at scale. During this time, it has been discovered that:
-* Most features/attributes/examples are made in silo's within Azure Machine Learning. There is good ducumentation for doing one specific requirement, but there has been a lack in connecting all the dots.
-* Most example are small and within a perfect situation, lacking to cover the challenges most people will struggle with in real scenario's.
-* There is no end-to-end example covering the full acpect of MLops. The focus of MLOps has been on model CI/CD an neglecting infrastructure, code testing, versioning, data quility ensurense and the management of DEV/TEST and PRD environments.
+* Most examples are made to demonstrate a specific part of AML, but there has been a oppertunity for an end-to-end example.
+* Most examples are small and within a perfect situation, lacking to cover the challenges most people will struggle with in real scenario's.
+* There is no end-to-end example covering the full acpect of MLops. The focus of MLOps has been on model CI/CD an neglecting infrastructure, code testing, versioning, data quility ensurense and the management of environments.
 * The examples that are available in the documentation of Azure Machine Learning are all Notebook based. As notebooks are good for demo'ing, they lack proper tools for developing Machine Learning at scale. Therefore there is a need to develop a solution that is not notebook based.
 * There is no good start template to start with Machine Learning at scale.
 
@@ -122,9 +121,8 @@ Throughout this document we have discussed different part of the ML lifecycle be
 
 ![An example of folder structure](images/pipelines.png)
 
-As discussed in previous topics, each of these steps need to be able to run with their own data and on their own compute and with their own conda environments. The tool to use here is AML pipelines. For more information on the concept of pipelines: https://docs.microsoft.com/en-us/azure/machine-learning/concept-ml-pipelines
-What I see at most customers, is that AML pipelines are not designed by the data scientist. The data scientists focus mostly on creating the scripts that need to be executed in the pipeline. Mostly, the development of pipelines is done by the ML engineers. I would also recommend if you have the capacity to divide the work in this way. The development of pipelines involves more software engineering skills.
-It is possible to create your ML models with azure machine learning pipelines. However, I would recommend to use the machine learning extension from Azure DevOps to create your machine learning pipelines.
+As discussed in previous topics, each of these steps need to be able to run with their own data and on their own compute and with their own conda environments. The tool to use here is AML pipelines. For more information on the concept of pipelines: https://docs.microsoft.com/en-us/azure/machine-learning/concept-ml-pipelines.
+
 
 ## Pipeline deployment
 
@@ -151,9 +149,8 @@ So what we propose, is a workshop, covering all the artifact of Azure Machine Le
 * Azure Machine Learning workspaces
 * Azure Machine Learning tools and interfaces
 
-[PPT Introduction to Azure Machine Learning](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/Powerpoints/Module%201%20-%20Introduction.pptx) 
-
-[Lab 1: Setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/01_setup.md)
+[Lab 0: Setup](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/00_setup.md)
+[Lab 1: Introduction](https://github.com/miquelladeboer/aml-mlops-workshop/blob/master/labs/00_setup.md)
 
 ## Infrastructure as a code
 * Automated roll out of infrastructure
