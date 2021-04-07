@@ -31,11 +31,11 @@ The repository contains the following material:
 
 # motivation
 The motivation for developing this repo is from the experience with enterpise organization in many different industires when implementing Azure Machine Learning solutions at scale. During this time, it has been discovered that:
-* Most examples are made to demonstrate a specific part of AML, but there has been a oppertunity for an end-to-end example.
-* Most examples are small and within a perfect situation, lacking to cover the challenges most people will struggle with in real scenario's.
-* There is no end-to-end example covering the full acpect of MLops. The focus of MLOps has been on model CI/CD an neglecting infrastructure, code testing, versioning, data quility ensurense and the management of environments.
-* The examples that are available in the documentation of Azure Machine Learning are all Notebook based. As notebooks are good for demo'ing, they lack proper tools for developing Machine Learning at scale. Therefore there is a need to develop a solution that is not notebook based.
-* There is no good start template to start with Machine Learning at scale.
+* Most examples are made to demonstrate a specific part of AML, so there is an opportunity for an end-to-end example.
+* Most examples are small and within a perfect situation, and don't cover the challenges most people will struggle with in real scenarios.
+* There is no end-to-end example covering the full acpect of MLops. The focus of MLOps has been on model CI/CD and neglects infrastructure, code testing, versioning, data quality and environement management.
+* The examples that are available in the documentation of Azure Machine Learning are all Notebook based. As notebooks are good for demo'ing, they lack proper tools for developing Machine Learning at scale. Therefore, there is a need to develop a solution that is not notebook based.
+* There is no good start template for Machine Learning at scale.
 
 # what are we building
 In this repo, we will be building a text classification model, using deep learning with Pytorch. The data that we are using is from the `sklearn 20newsgroups`, so the repo is reproducable. In this repo, we build a AML pipeline covering an end-to-end scenario of all steps in the Data Science lifecycle. We will start with the roll out of the infrastructure, then we will perform data exploration, next we will build a porfile of our dataset that we can use for data validation, we will then use the validated data to perform data engineering. Next we will try out different sklearn models or our data. We will start with trying a random forest and then try many different models and compare them with the tracking capabilities of AML. To get better results, we will use deep learning. We will first perform hyper parameter tuning and use the best hyper parameters to train the final model. We will then deploy the model and the pipeline using CI/CD pipelines over our DEV, TEST and PRD evironments and set up model monitoring in Application Insights for active monitoring and automated retraining. We will also build a Power BI report for monitoring data quality and model quality.
