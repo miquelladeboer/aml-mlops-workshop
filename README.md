@@ -1,6 +1,6 @@
 # Azure Machine Learning with MLops to build Machine Learning at Scale in the enterprise organization 
 
-Full end-to-end solution of text classifciation with Pytorch on Azure Machine Learning using MLOps best practises, covering:
+Full end-to-end solution of text classification with Pytorch on Azure Machine Learning using MLOps best practices, covering:
 
 * Automated roll out of infrastructure
 * Data exploration
@@ -15,32 +15,32 @@ Full end-to-end solution of text classifciation with Pytorch on Azure Machine Le
 * Feedback Loop with Active Learning based on Model Drift
 * Power BI for model and data reporting
 
-* Best pratices on aplying MLOps in the Enterprise organization
+* Best practices on applying MLOps in the Enterprise organization
 
 # Content 
 This repo is designed for three main purposes:
 * A full end-to-end demo with easy quickstart for demoing/examples
 * A detailed technical guide to build similar end-to-end solutions, including motivation
-* Documenting best practises of MLOps and impletenting it in real end-to-end scenario with incorparating enterprise requirements and challenges.
+* Documenting best practices of MLOps and implementing it in real end-to-end scenario with incorporating enterprise requirements and challenges.
 
-The resportoty contains te foolowing material:
+The repository contains te following material:
 * [Step-by-step guidelines](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/labs)
 * [Code for demo/ example](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/code)
 * [Quickstart template](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/template)
-* [Best Practises Documentation](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/template)
+* [Best Practices Documentation](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/template)
 
 # motivation
-The motivation for developing this repo is from the experience with enterpise organization in many different industires when implementing Azure Machine Learning solutions at scale. During this time, it has been discovered that:
-* Most examples are made to demonstrate a specific part of AML, but there has been a oppertunity for an end-to-end example.
+The motivation for developing this repo is from the experience with enterprise organization in many different industries when implementing Azure Machine Learning solutions at scale. During this time, it has been discovered that:
+* Most examples are made to demonstrate a specific part of AML, but there has been a opportunity for an end-to-end example.
 * Most examples are small and within a perfect situation, lacking to cover the challenges most people will struggle with in real scenario's.
-* There is no end-to-end example covering the full acpect of MLops. The focus of MLOps has been on model CI/CD an neglecting infrastructure, code testing, versioning, data quility ensurense and the management of environments.
+* There is no end-to-end example covering the full aspect of MLops. The focus of MLOps has been on model CI/CD an neglecting infrastructure, code testing, versioning, data quality assurance and the management of environments.
 * The examples that are available in the documentation of Azure Machine Learning are all Notebook based. As notebooks are good for demo'ing, they lack proper tools for developing Machine Learning at scale. Therefore there is a need to develop a solution that is not notebook based.
 * There is no good start template to start with Machine Learning at scale.
 
 # what are we building
-In this repo, we will be building a text classification model, using deep learning with Pytorch. The data that we are using is from the `sklearn 20newsgroups`, so the repo is reproducable. In this repo, we build a AML pipeline covering an end-to-end scenario of all steps in the Data Science lifecycle. We will start with the roll out of the infrastructure, then we will perform data exploration, next we will build a porfile of our dataset that we can use for data validation, we will then use the validated data to perform data engineering. Next we will try out different sklearn models or our data. We will start with trying a random forest and then try many different models and compare them with the tracking capabilities of AML. To get better results, we will use deep learning. We will first perform hyper parameter tuning and use the best hyper parameters to train the final model. We will then deploy the model and the pipeline using CI/CD pipelines over our DEV, TEST and PRD evironments and set up model monitoring in Application Insights for active monitoring and automated retraining. We will also build a Power BI report for monitoring data quality and model quality.
+In this repo, we will be building a text classification model, using deep learning with Pytorch. The data that we are using is from the `sklearn 20newsgroups`, so the repo is reproducible. In this repo, we build a AML pipeline covering an end-to-end scenario of all steps in the Data Science lifecycle. We will start with the roll out of the infrastructure, then we will perform data exploration, next we will build a profile of our dataset that we can use for data validation, we will then use the validated data to perform data engineering. Next we will try out different sklearn models or our data. We will start with trying a random forest and then try many different models and compare them with the tracking capabilities of AML. To get better results, we will use deep learning. We will first perform hyper parameter tuning and use the best hyper parameters to train the final model. We will then deploy the model and the pipeline using CI/CD pipelines over our DEV, TEST and PRD environments and set up model monitoring in Application Insights for active monitoring and automated retraining. We will also build a Power BI report for monitoring data quality and model quality.
 
-For every script in the pipeline, we will use different compute that is optimized for that specific task. For different types of model training, we will also use different types of data as some training is so heavy, we consider only using a subset to accelerate the training process. Every step in the pipeline will also have its own evnironment file, this environment file contains specific conda dependecies that are specific to the task it needs to perform. For example, data engineering will be done using packages like Dask or Numpy, where for modeling sklearn models we need of course SKlearn environment. For performing deep learning we even need a PyTorch Frameworl. For the use and nessecety of using different environment I would refer to the `environments/README.md` file in this repo. A High level overview of the steps we are going to take and the different data/compute and conda environments is shown in this picture:
+For every script in the pipeline, we will use different compute that is optimized for that specific task. For different types of model training, we will also use different types of data as some training is so heavy, we consider only using a subset to accelerate the training process. Every step in the pipeline will also have its own environment file, this environment file contains specific conda dependencies that are specific to the task it needs to perform. For example, data engineering will be done using packages like Dask or Numpy, where for modeling sklearn models we need of course SKlearn environment. For performing deep learning we even need a PyTorch Framework. For the use and necessity of using different environment I would refer to the `environments/README.md` file in this repo. A High level overview of the steps we are going to take and the different data/compute and conda environments is shown in this picture:
 
 ![An example of folder structure](images/pipelinehigh.PNG)
 
@@ -49,7 +49,7 @@ A more detailed version of what we are going to do is the following:
 * data preparation of the four different datasets
 * explore different sklearn models on subset of the data
 * perform hyperparameter tuning on subset of the data
-* use the hyperparamters from tuning to train the full neural network on the entire dataset
+* use the hyperparameters from tuning to train the full neural network on the entire dataset
 * create a profile with statistics of the entire dataset to track data over time.
 
 These steps are shown in the following diagram:
@@ -57,7 +57,7 @@ These steps are shown in the following diagram:
 ![An example of folder structure](images/pipelinedetailed.PNG)
 
 
-In this folder we have created a pipeline including all the steps that we have discussed in this example. If we incorporate the dataset creation and all the different environment files from the explenation above, we will end up with the following pipeline in Azure ML:
+In this folder we have created a pipeline including all the steps that we have discussed in this example. If we incorporate the dataset creation and all the different environment files from the explanation above, we will end up with the following pipeline in Azure ML:
 
 ![An example of folder structure](images/pipelinefinifhed.PNG)
 
@@ -71,9 +71,9 @@ When new data came in, the pipeline was triggered. Now we want to create a new v
 
 ## Data validation
 
-The second step is to validate the data. We do this for the train and test dataset and for the subsets of both. So in total we will validate 4 different datasets. We validate our data against a baseline profile. The baseline profile is a profile with statistics of our dataset that we manage manualy. The profile resites in the blob storage, so we can use that as a pipeline data input too. The basline we can visualize in our Power Bi report for monitoring, togerther with the historic profil and model management data. The baseline data wil look similar to:
+The second step is to validate the data. We do this for the train and test dataset and for the subsets of both. So in total we will validate 4 different datasets. We validate our data against a baseline profile. The baseline profile is a profile with statistics of our dataset that we manage manually. The profile resets in the blob storage, so we can use that as a pipeline data input too. The baseline we can visualize in our Power Bi report for monitoring, together with the historic profile and model management data. The baseline data wil look similar to:
 
-The output of the data validation can be two things. There was either something wrong with the data that created an error, like unexpected data types or non values or if the language of the data is still English or the data validation passed and it created a summary report that indicates that their might be some data drifting. In this example we looked at the bias of classes and some basic text statistics like average sentiment or average lenght of words. The summary report will look similar to:
+The output of the data validation can be two things. There was either something wrong with the data that created an error, like unexpected data types or non values or if the language of the data is still English or the data validation passed and it created a summary report that indicates that their might be some data drifting. In this example we looked at the bias of classes and some basic text statistics like average sentiment or average length of words. The summary report will look similar to:
 
 ![An example of folder structure](images/datadrift.PNG)    
 
@@ -82,18 +82,18 @@ This data is also outputted to the blob storage, so can also be used later for r
 
 ## Data engineering
 
-The thrid step is the transformation of data. In this step we will clean the text data and perform steps like making text lower case, remove punctuation, numbers and special characters. We will also remove any stop words. The output of this step is a clean dataset that is ready for training.
+The third step is the transformation of data. In this step we will clean the text data and perform steps like making text lower case, remove punctuation, numbers and special characters. We will also remove any stop words. The output of this step is a clean dataset that is ready for training.
 
 ## SKlearn models
 
-In the fourth step, we will peform 15 different sklearn models on the data from the sklearn packages, including randomforeser, naive bayes and Ridge classifier. A full overview of the models being trained, can be founs in the `class Model_choice` on the `sklearn.py` package under `packages`. Comparing different algorithms is possible is different ways. We could submit a new experiment for every algorithm that we try. However, Azure ML offers a better, easier way to manage the exploration of multiple models. This concept is called child runs.  We are going to make use of these child runs. For every of the 15 algoritms that we have we want to create a sub run and log the metrics seprately. Whihin the child run we are going to log the performane and the model .pkl files. This way we can easily track and compare our experiment in Azure ML. If we run this file, the output will look like the following:
+In the fourth step, we will perform 15 different sklearn models on the data from the sklearn packages, including randomforeser, naive bayes and Ridge classifier. A full overview of the models being trained, can be found in the `class Model_choice` on the `sklearn.py` package under `packages`. Comparing different algorithms is possible is different ways. We could submit a new experiment for every algorithm that we try. However, Azure ML offers a better, easier way to manage the exploration of multiple models. This concept is called child runs.  We are going to make use of these child runs. For every of the 15 algorithms that we have we want to create a sub run and log the metrics separately. Within the child run we are going to log the performance and the model .pkl files. This way we can easily track and compare our experiment in Azure ML. If we run this file, the output will look like the following:
 
 ![An example of folder structure](images/sklearn.PNG)    
 ![An example of folder structure](images/sklearn2.PNG)    
 
 ## Hyperparameter tuning
 
-In the fith step we will perform the hyperparameter tuning. We will perform this step only on a subset of the data, as hypertuning is a very heavy job. We will try maybe 100 different hyperparamter pairs. To save time, we therefore only use a subset for training and use a cluster with many nodes, so we can perform part of the job simultaniously. The output of this step will me the hyperparameters of the best model. We will use these hyper parameters in the next step, to train the full model. Some output of the hyperparameter steps are:
+In the fifth step we will perform the hyperparameter tuning. We will perform this step only on a subset of the data, as hypertuning is a very heavy job. We will try maybe 100 different hyperparameter pairs. To save time, we therefore only use a subset for training and use a cluster with many nodes, so we can perform part of the job simultaneously. The output of this step will me the hyperparameters of the best model. We will use these hyper parameters in the next step, to train the full model. Some output of the hyperparameter steps are:
 
 ![An example of folder structure](images/hyper.PNG)    
 ![An example of folder structure](images/hyper2.PNG)       
@@ -102,13 +102,13 @@ All hyperparameters from all child runs are also saved to blob for reporting pur
 
 ## full model
 
-In the sixt step, we are going to train the full model with the hyperparamters from the previous step. This we will do on a GPU that is memory optimized. This step will output the final model in onnx format, that will be registered to Azure Machine Learning. We have already created the scoring app that corresponds to this model, si after this step, the model is ready for deployment. The output of this step will look like:
+In the sixth step, we are going to train the full model with the hyperparameters from the previous step. This we will do on a GPU that is memory optimized. This step will output the final model in onnx format, that will be registered to Azure Machine Learning. We have already created the scoring app that corresponds to this model, si after this step, the model is ready for deployment. The output of this step will look like:
 
 ![An example of folder structure](images/deeplearning.PNG)    
 
 ## historic profile of data
 
-For reporting purposes, detecting data drift and for a better understanding of our data, we keep a historic profile of our data every time we retrain our model. This histroric profile is created from the full dataset and stored in bobstorage for reporting purposes in Power BI. Note to not confuse this profile with the baseline profile. The baseline profile is manually designed and picked to validate the data. The historic profile is part of a autonomized process that is only used for looking back. The output from this step will look like:
+For reporting purposes, detecting data drift and for a better understanding of our data, we keep a historic profile of our data every time we retrain our model. This historic profile is created from the full dataset and stored in blobstorage for reporting purposes in Power BI. Note to not confuse this profile with the baseline profile. The baseline profile is manually designed and picked to validate the data. The historic profile is part of a automated process that is only used for looking back. The output from this step will look like:
 
 ![An example of folder structure](images/profile.PNG)   
 ![An example of folder structure](images/profile1.PNG)   
@@ -141,7 +141,7 @@ To quickstart the solution, follow the [quickstart template](https://github.com/
 # workshop
 In this workshop, you learn about Azure Machine Learning, a cloud-based environment you can use to train, deploy, automate, manage, and track ML models. Azure Machine Learning can be used for any kind of machine learning, from classical ml to deep learning, supervised, and unsupervised learning. Whether you prefer to write Python or R code or zero-code/low-code options such as the designer, you can build, train, and track highly accurate machine learning and deep-learning models in an Azure Machine Learning Workspace.
 
-So what we propose, is a workshop, covering all the artifact of Azure Machine Learning Service for advanced Data Scientist that want to get to know the Azure Machine Learning Service  and MLops best practises on a deeply technical level, covering the following subjects:
+So what we propose, is a workshop, covering all the artifact of Azure Machine Learning Service for advanced Data Scientist that want to get to know the Azure Machine Learning Service  and MLops best practices on a deeply technical level, covering the following subjects:
  
 ## Introduction
 * AI Platform
@@ -204,7 +204,7 @@ So what we propose, is a workshop, covering all the artifact of Azure Machine Le
 * Governance
 * RBAC
 * Custom Roles
-* Best practises to organize your workspaces 
+* Best practices to organize your workspaces 
 * Data configuration. Which data can be used by the workspace?
 * Managed Compute Configuration
 * Shared resources across workspaces
