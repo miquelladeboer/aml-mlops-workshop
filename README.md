@@ -23,7 +23,7 @@ This repo is designed for three main purposes:
 * A detailed technical guide to build similar end-to-end solutions, including motivation
 * Documenting best practises of MLOps and impletenting it in real end-to-end scenario with incorparating enterprise requirements and challenges.
 
-The resportoty contains te foolowing material:
+The repository contains the following material:
 * [Step-by-step guidelines](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/labs)
 * [Code for demo/ example](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/code)
 * [Quickstart template](https://github.com/miquelladeboer/aml-mlops-workshop/tree/master/template)
